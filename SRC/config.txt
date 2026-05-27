@@ -1,0 +1,33 @@
+; --- CONFIG AND MISSION PARAMETERS  --- comentar con ; o #
+
+
+Delta_V                   = 1000.0 ; [km/s]
+payload_mass              = 1905.0 ; [kg]
+number_of_stages          = 1
+
+; --- PROPELLANT AND OXIDIZER SETUP ----
+first_stage_propellant_and_oxidizer    = 3
+second_stage_propellant_and_oxidizer   = 0
+third_stage_propellant_and_oxidizer    = 2 
+
+; 1 - LIQUID HIDROGEN / LIQUID OXIGEN (LH2/LOX)
+; 2 - LIQUID KEROSENE / LIQUID OXIGEN (RP1/LOX)
+; 3 - LIQUID METHANE  / LIQUID OXIGNE (CH4/LOX)
+; 4 - UDMH/LOX
+; 5 - UDMH/AK271 
+; 6 - UDMH/N2O4
+; 7 - AEROZINE50/N2O4 
+; 8 - MH/NITRIC ACID(WFNA)
+
+; --- COMBUSTION CYCLE SETUP -----------
+first_stage_combustion_cycle           = 5
+second_stage_combustion_cycle          = 0
+third_stage_combustion_cycle           = 0
+
+; 0 - Aproximates engine perfermoance only base on propellant/oxidizer 
+; 1 - STAGED COMBUSTION 
+; 2 - GAS GENERATOR 
+; 3 - CLOSED CYCLE 
+; 4 - EXPANDER
+; 5 - ELECTRIC PUMP 
+; 6 - PRESSURE  
