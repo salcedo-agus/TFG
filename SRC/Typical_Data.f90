@@ -1,3 +1,9 @@
+module constants
+    implicit none 
+    real(8), parameter :: pi  = dacos(-1.d0) 
+    real(8), parameter :: g_0 = 9.80665d0 ![m/s] standard acceleration of gravity          
+end module constants
+
 module typical_data
     implicit none
     !====== OPCIÓN 2: ENTRADA DE DATOS EN TXT ====================
@@ -43,9 +49,15 @@ subroutine data_entry(Rocket)
     use rocket_types
     implicit none
     type(Rocket_t) Rocket 
+    real(8) ISP_vector(3)   !These vectors always store the values of ISP and k_s 
+    real(8) k_s_vector(3)   
+    integer i
 
     call load_config("src/config.txt")
-    
+
+    Rocket%number_of_stages = number_of_stages
+    allocate(Rocket%rocket_stages(number_of_stages))
+
     select case (first_stage_propellant_and_oxidizer)
     case(1) ! 1 - LIQUID HIDROGEN / LIQUID OXIGEN (LH2/LOX)
         select case (first_stage_combustion_cycle)
@@ -1518,7 +1530,12 @@ subroutine data_entry(Rocket)
     case default
         print*, "WARNING: unknown Third stage propellant and oxidizer"
     end select 
-  
+    
+    do i=1, Rocket%number_of_stages
+        Rocket%rocket_stages(i)%ISP = ISP_vector(i)
+        Rocket%rocket_stages(i)%k_s = k_s_vector(i)
+    end do
+
 end subroutine data_entry
 
 subroutine load_config(fname)
