@@ -1,6 +1,7 @@
 subroutine STAGING(Rocket)
     use typical_data 
     use rocket_types
+    use constants
     implicit none
     type(Rocket_t), intent(inout) :: Rocket 
     real(8) L                     ! Lagrange multiplier
@@ -9,8 +10,11 @@ subroutine STAGING(Rocket)
 
     integer i 
 
+    do i=1, Rocket%number_of_stages
+        Rocket%stage(i)%nu_e = Rocket%stage(i)%ISP * g_0 !Eq 3
+    end do
 
-    !===== L is solve using eq 19 ========================================
+    !===== L is solved using eq 19 =======================================
     L = 0.5d0
     i = 0
     h = 1.e-3 
@@ -23,11 +27,18 @@ subroutine STAGING(Rocket)
     end do
     !=====================================================================
 
-    !===== The mass ratios for each stage are solve using eq 18 ==========
-        Rocket%rocket_stages(:)%k_m = (1.d0 + L*Rocket%rocket_stages(:)%nu_e) &
-            /(L*Rocket%rocket_stages(:)%nu_e*Rocket%rocket_stages(:)%k_s)    
+    !===== The mass ratios for each stage are solved using eq 18 =========
+        Rocket%stage(:)%k_m = (1.d0 + L*Rocket%stage(:)%nu_e) &
+            /(L*Rocket%stage(:)%nu_e*Rocket%stage(:)%k_s)    
     !=====================================================================
 
+    do i=1, Rocket%number_of_stages
+        Rocket%stage(i)%m_p = Rocket%stage(i)%m_0 - (Rocket%stage(i)%m_0)/(Rocket%stage(i)%k_m) 
+        if (i < Rocket%number_of_stages) then
+            Rocket%stage(i+1)%m_0 = Rocket%stage(i)%m_0 - &
+                Rocket%stage(i)%m_p - Rocket%stage(i)%m_s 
+        end if 
+    end do
 
 end subroutine
 
@@ -43,8 +54,8 @@ function g(L, Rocket)
 
     sum = 0.d0
     do i=1, Rocket%number_of_stages
-        sum = sum + Rocket%rocket_stages(i)%nu_e * log((1.d0+L*Rocket%rocket_stages(i)%nu_e) & 
-            /(L*Rocket%rocket_stages(i)%nu_e*Rocket%rocket_stages(i)%k_s)) 
+        sum = sum + Rocket%stage(i)%nu_e * log((1.d0+L*Rocket%stage(i)%nu_e) & 
+            /(L*Rocket%stage(i)%nu_e*Rocket%stage(i)%k_s)) 
     end do
 
     g = delta_V - sum 

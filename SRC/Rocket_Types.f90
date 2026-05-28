@@ -17,7 +17,7 @@ module rocket_types
 
     type Rocket_t
         integer number_of_stages
-        type(Stage_t), allocatable :: rocket_stages(:)
+        type(Stage_t), allocatable :: stage(:)
         real(8) rm_0  ! Initial mass of the Rocket                
         real(8) rm_f  ! Final or Empty mass of the Rokcet
         real(8) rm_L  ! Payload mass of the Rocket
@@ -27,6 +27,5 @@ module rocket_types
         real(8) rk_m  ! Mass ratio
         real(8) rk_s  ! Structural ratio
         real(8) rk_L  ! Payload ratio
-    end type Rocket_t
-    
+    end type Rocket_t  
 end module 

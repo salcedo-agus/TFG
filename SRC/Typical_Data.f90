@@ -56,7 +56,7 @@ subroutine data_entry(Rocket)
     call load_config("src/config.txt")
 
     Rocket%number_of_stages = number_of_stages
-    allocate(Rocket%rocket_stages(number_of_stages))
+    allocate(Rocket%stage(number_of_stages))
 
     select case (first_stage_propellant_and_oxidizer)
     case(1) ! 1 - LIQUID HIDROGEN / LIQUID OXIGEN (LH2/LOX)
@@ -85,7 +85,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -93,17 +93,9 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
-
-            First_stage_ks_lower = 0.d0 
-            First_stage_ks_upper = 0.d0
-            First_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
+        case (4) ! 4 - ELECTRIC PUMP
             print*, "WARNING este no es valido"
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -140,7 +132,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -148,7 +140,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -156,15 +148,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
-
-            First_stage_ks_lower = 0.d0 
-            First_stage_ks_upper = 0.d0
-            First_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -201,7 +185,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -209,7 +193,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -217,15 +201,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
-
-            First_stage_ks_lower = 0.d0 
-            First_stage_ks_upper = 0.d0
-            First_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -262,7 +238,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -270,7 +246,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -278,15 +254,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
-
-            First_stage_ks_lower = 0.d0 
-            First_stage_ks_upper = 0.d0
-            First_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -323,7 +291,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -331,7 +299,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -339,15 +307,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
-
-            First_stage_ks_lower = 0.d0 
-            First_stage_ks_upper = 0.d0
-            First_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -384,7 +344,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -392,7 +352,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -400,15 +360,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
-
-            First_stage_ks_lower = 0.d0 
-            First_stage_ks_upper = 0.d0
-            First_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -445,7 +397,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -453,7 +405,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -461,15 +413,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
-
-            First_stage_ks_lower = 0.d0 
-            First_stage_ks_upper = 0.d0
-            First_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -506,7 +450,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -514,7 +458,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -522,15 +466,7 @@ subroutine data_entry(Rocket)
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
-
-            First_stage_ks_lower = 0.d0 
-            First_stage_ks_upper = 0.d0
-            First_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             First_stage_ISP_lower = 0.d0
             First_stage_ISP_upper = 0.d0
             First_stage_ISP_mean  = 0.d0
@@ -572,7 +508,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -580,7 +516,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -588,15 +524,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            Second_stage_ISP_lower = 0.d0
-            Second_stage_ISP_upper = 0.d0
-            Second_stage_ISP_mean  = 0.d0
-
-            Second_stage_ks_lower = 0.d0 
-            Second_stage_ks_upper = 0.d0
-            Second_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -633,7 +561,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -641,7 +569,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -649,15 +577,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            Second_stage_ISP_lower = 0.d0
-            Second_stage_ISP_upper = 0.d0
-            Second_stage_ISP_mean  = 0.d0
-
-            Second_stage_ks_lower = 0.d0 
-            Second_stage_ks_upper = 0.d0
-            Second_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -694,7 +614,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -702,7 +622,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -710,15 +630,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            Second_stage_ISP_lower = 0.d0
-            Second_stage_ISP_upper = 0.d0
-            Second_stage_ISP_mean  = 0.d0
-
-            Second_stage_ks_lower = 0.d0 
-            Second_stage_ks_upper = 0.d0
-            Second_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -755,7 +667,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -763,7 +675,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -771,15 +683,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            Second_stage_ISP_lower = 0.d0
-            Second_stage_ISP_upper = 0.d0
-            Second_stage_ISP_mean  = 0.d0
-
-            Second_stage_ks_lower = 0.d0 
-            Second_stage_ks_upper = 0.d0
-            Second_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -816,7 +720,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -824,7 +728,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -832,15 +736,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            Second_stage_ISP_lower = 0.d0
-            Second_stage_ISP_upper = 0.d0
-            Second_stage_ISP_mean  = 0.d0
-
-            Second_stage_ks_lower = 0.d0 
-            Second_stage_ks_upper = 0.d0
-            Second_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -877,7 +773,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -885,7 +781,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -893,15 +789,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            Second_stage_ISP_lower = 0.d0
-            Second_stage_ISP_upper = 0.d0
-            Second_stage_ISP_mean  = 0.d0
-
-            Second_stage_ks_lower = 0.d0 
-            Second_stage_ks_upper = 0.d0
-            Second_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -938,7 +826,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -946,7 +834,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -954,15 +842,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            Second_stage_ISP_lower = 0.d0
-            Second_stage_ISP_upper = 0.d0
-            Second_stage_ISP_mean  = 0.d0
-
-            Second_stage_ks_lower = 0.d0 
-            Second_stage_ks_upper = 0.d0
-            Second_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -999,7 +879,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -1007,7 +887,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -1015,15 +895,7 @@ subroutine data_entry(Rocket)
             Second_stage_ks_lower = 0.d0 
             Second_stage_ks_upper = 0.d0
             Second_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            Second_stage_ISP_lower = 0.d0
-            Second_stage_ISP_upper = 0.d0
-            Second_stage_ISP_mean  = 0.d0
-
-            Second_stage_ks_lower = 0.d0 
-            Second_stage_ks_upper = 0.d0
-            Second_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             Second_stage_ISP_lower = 0.d0
             Second_stage_ISP_upper = 0.d0
             Second_stage_ISP_mean  = 0.d0
@@ -1065,7 +937,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1073,7 +945,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1081,15 +953,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            Third_stage_ISP_lower = 0.d0
-            Third_stage_ISP_upper = 0.d0
-            Third_stage_ISP_mean  = 0.d0
-
-            Third_stage_ks_lower = 0.d0 
-            Third_stage_ks_upper = 0.d0
-            Third_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1126,7 +990,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1134,7 +998,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1142,15 +1006,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            Third_stage_ISP_lower = 0.d0
-            Third_stage_ISP_upper = 0.d0
-            Third_stage_ISP_mean  = 0.d0
-
-            Third_stage_ks_lower = 0.d0 
-            Third_stage_ks_upper = 0.d0
-            Third_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1187,7 +1043,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1195,7 +1051,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1203,15 +1059,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            Third_stage_ISP_lower = 0.d0
-            Third_stage_ISP_upper = 0.d0
-            Third_stage_ISP_mean  = 0.d0
-
-            Third_stage_ks_lower = 0.d0 
-            Third_stage_ks_upper = 0.d0
-            Third_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1248,7 +1096,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1256,7 +1104,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1264,15 +1112,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            Third_stage_ISP_lower = 0.d0
-            Third_stage_ISP_upper = 0.d0
-            Third_stage_ISP_mean  = 0.d0
-
-            Third_stage_ks_lower = 0.d0 
-            Third_stage_ks_upper = 0.d0
-            Third_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1309,7 +1149,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1317,7 +1157,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1325,15 +1165,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            Third_stage_ISP_lower = 0.d0
-            Third_stage_ISP_upper = 0.d0
-            Third_stage_ISP_mean  = 0.d0
-
-            Third_stage_ks_lower = 0.d0 
-            Third_stage_ks_upper = 0.d0
-            Third_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1370,7 +1202,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1378,7 +1210,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1386,15 +1218,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            Third_stage_ISP_lower = 0.d0
-            Third_stage_ISP_upper = 0.d0
-            Third_stage_ISP_mean  = 0.d0
-
-            Third_stage_ks_lower = 0.d0 
-            Third_stage_ks_upper = 0.d0
-            Third_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1431,7 +1255,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1439,7 +1263,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1447,15 +1271,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            Third_stage_ISP_lower = 0.d0
-            Third_stage_ISP_upper = 0.d0
-            Third_stage_ISP_mean  = 0.d0
-
-            Third_stage_ks_lower = 0.d0 
-            Third_stage_ks_upper = 0.d0
-            Third_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1492,7 +1308,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (3) ! 3 - CLOSED CYCLE 
+        case (3) ! 3 - EXPANDER
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1500,7 +1316,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (4) ! 4 - EXPANDER
+        case (4) ! 4 - ELECTRIC PUMP
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1508,15 +1324,7 @@ subroutine data_entry(Rocket)
             Third_stage_ks_lower = 0.d0 
             Third_stage_ks_upper = 0.d0
             Third_stage_ks_mean  = 0.d0
-        case (5) ! 5 - ELECTRIC PUMP
-            Third_stage_ISP_lower = 0.d0
-            Third_stage_ISP_upper = 0.d0
-            Third_stage_ISP_mean  = 0.d0
-
-            Third_stage_ks_lower = 0.d0 
-            Third_stage_ks_upper = 0.d0
-            Third_stage_ks_mean  = 0.d0
-        case (6) ! 6 - PRESSURE
+        case (5) ! 5 - PRESSURE
             Third_stage_ISP_lower = 0.d0
             Third_stage_ISP_upper = 0.d0
             Third_stage_ISP_mean  = 0.d0
@@ -1532,8 +1340,8 @@ subroutine data_entry(Rocket)
     end select 
     
     do i=1, Rocket%number_of_stages
-        Rocket%rocket_stages(i)%ISP = ISP_vector(i)
-        Rocket%rocket_stages(i)%k_s = k_s_vector(i)
+        Rocket%stage(i)%ISP = ISP_vector(i)
+        Rocket%stage(i)%k_s = k_s_vector(i)
     end do
 
 end subroutine data_entry
