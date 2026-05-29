@@ -53,7 +53,7 @@ subroutine data_entry(Rocket)
     real(8) k_s_vector(3)   
     integer i
 
-    call load_config("src/config.txt")
+    call load_config("config.txt")
 
     Rocket%number_of_stages = number_of_stages
     allocate(Rocket%stage(number_of_stages))
@@ -70,25 +70,25 @@ subroutine data_entry(Rocket)
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
         case (1) ! 1 - STAGED COMBUSTION 
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
+            First_stage_ISP_lower = 445.6d0
+            First_stage_ISP_upper = 454.5d0
+            First_stage_ISP_mean  = 451.5d0
 
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
         case (2) ! 2 - GAS GENERATOR    
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
+            First_stage_ISP_lower = 405.d0
+            First_stage_ISP_upper = 428.1d0
+            First_stage_ISP_mean  = 414.367d0
 
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
         case (3) ! 3 - EXPANDER
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
+            First_stage_ISP_lower = 425.d0
+            First_stage_ISP_upper = 425.d0
+            First_stage_ISP_mean  = 425.d0
 
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
@@ -117,17 +117,17 @@ subroutine data_entry(Rocket)
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
         case (1) ! 1 - STAGED COMBUSTION 
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
+            First_stage_ISP_lower = 337.2d0
+            First_stage_ISP_upper = 338.4d0
+            First_stage_ISP_mean  = 337.625d0
 
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
         case (2) ! 2 - GAS GENERATOR    
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
+            First_stage_ISP_lower = 283.9d0
+            First_stage_ISP_upper = 320.2d0
+            First_stage_ISP_mean  = 302.625d0
 
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
@@ -178,9 +178,9 @@ subroutine data_entry(Rocket)
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
         case (2) ! 2 - GAS GENERATOR    
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
+            First_stage_ISP_lower = 350.d0
+            First_stage_ISP_upper = 365.d0
+            First_stage_ISP_mean  = 357.5d0
 
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
@@ -284,9 +284,9 @@ subroutine data_entry(Rocket)
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
         case (2) ! 2 - GAS GENERATOR    
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
+            First_stage_ISP_lower = 289.d0
+            First_stage_ISP_upper = 289.d0
+            First_stage_ISP_mean  = 289.d0
 
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
@@ -329,9 +329,9 @@ subroutine data_entry(Rocket)
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
         case (1) ! 1 - STAGED COMBUSTION 
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
+            First_stage_ISP_lower = 315.8d0
+            First_stage_ISP_upper = 315.8d0
+            First_stage_ISP_mean  = 315.8d0
 
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
@@ -390,9 +390,9 @@ subroutine data_entry(Rocket)
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
         case (2) ! 2 - GAS GENERATOR    
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
+            First_stage_ISP_lower = 296.d0
+            First_stage_ISP_upper = 303.9d0
+            First_stage_ISP_mean  = 299.95d0
 
             First_stage_ks_lower = 0.d0 
             First_stage_ks_upper = 0.d0
@@ -1339,6 +1339,7 @@ subroutine data_entry(Rocket)
         print*, "WARNING: unknown Third stage propellant and oxidizer"
     end select 
     
+
     do i=1, Rocket%number_of_stages
         Rocket%stage(i)%ISP = ISP_vector(i)
         Rocket%stage(i)%k_s = k_s_vector(i)
