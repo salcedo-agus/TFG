@@ -1,14 +1,12 @@
 ; --- CONFIG AND MISSION PARAMETERS  --- comentar con ; o #
-
-
-Delta_V                   = 1000.0 ; [km/s]
-payload_mass              = 1905.0 ; [kg]
-number_of_stages          = 1
+delta_v                   = 10.0 ; [km/s]
+payload_mass              = 5000.0 ; [kg]
+number_of_stages          = 3
 
 ; --- PROPELLANT AND OXIDIZER SETUP ----
-first_stage_propellant_and_oxidizer    = 3
-second_stage_propellant_and_oxidizer   = 0
-third_stage_propellant_and_oxidizer    = 2 
+first_stage_propellant_and_oxidizer    = 1
+second_stage_propellant_and_oxidizer   = 1
+third_stage_propellant_and_oxidizer    = 3
 
 ; 1 - LIQUID HIDROGEN / LIQUID OXIGEN (LH2/LOX)
 ; 2 - LIQUID KEROSENE / LIQUID OXIGEN (RP1/LOX)
@@ -20,7 +18,7 @@ third_stage_propellant_and_oxidizer    = 2
 ; 8 - MH/NITRIC ACID(WFNA)
 
 ; --- COMBUSTION CYCLE SETUP -----------
-first_stage_combustion_cycle           = 5
+first_stage_combustion_cycle           = 0
 second_stage_combustion_cycle          = 0
 third_stage_combustion_cycle           = 0
 
