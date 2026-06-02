@@ -13,14 +13,16 @@ Program optimalStagedRocket
   res= 0.5d0
   do i=1, 50
      res = res - get_optimal_mass(res)*2*h/(get_optimal_mass(res+h)-get_optimal_mass(res-h))
+     print*, "iter: ", i, "RES=", res, "f(res)=", get_optimal_mass(res) 
   end do
   print*, res
   ! equation 11.87 Orbital mechanic Howard Curtis
   n1=(c1*res-1)/(c1*e1*res)
   n2=(c2*res-1)/(c2*e2*res)
   n3=(c3*res-1)/(c3*e3*res)
-  !print*, n1, n2, n3
-
+  print*, "Mass ratio for Stage 1:", n1 
+  print*, "Mass ratio for Stage 2:", n2
+  print*, "Mass ratio for Stage 3:", n3 
   ! Referring to Equations 11.75, we next obtain the step masses of each stage, 
   ! beginning with stage N and working our way down the stack to stage 1.
 
