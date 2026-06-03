@@ -7,6 +7,8 @@ subroutine STAGING(Rocket)
     real(8) L                     ! Lagrange multiplier
     !real(8) Ln                    ! Previous L value 
     real(8) h, res, g, a, b, c    ! Root finding variables
+    real(8) check                 ! used for minimum check
+    integer check_count
 
     integer i 
 
@@ -37,10 +39,11 @@ subroutine STAGING(Rocket)
     !    print*, "====================================="
     !end do
     
-    a = -0.8d0
-    b = -0.1d0 
+    a = 0.1d0
+    b = 0.8d0 
 
-    do while (res > 1.e-3 .and. i < 100)
+    ! Bolzano's bisection method 
+    do while (res > 1.e-5 .and. i < 100)               
         c = (a+b)/2
         if (g(a, Rocket)*g(c, Rocket) < 0) then 
             b = c
@@ -67,7 +70,7 @@ subroutine STAGING(Rocket)
 
     !===== The mass ratios for each stage are solved using eq 18 =========
     do i=1, Rocket%number_of_stages
-        Rocket%stage(i)%k_m = (1.d0 + L*Rocket%stage(i)%nu_e)/(L*Rocket%stage(i)%nu_e*Rocket%stage(i)%k_s)    
+        Rocket%stage(i)%k_m = (L*Rocket%stage(i)%nu_e - 1.d0)/(L*Rocket%stage(i)%nu_e*Rocket%stage(i)%k_s)    
     end do
     !=====================================================================
 
@@ -102,6 +105,34 @@ subroutine STAGING(Rocket)
     end do
     !===================================================================== 
 
+    !===== Payload ratio of each stage is solved using eq 1c =============
+    do i=1, Rocket%number_of_stages
+        Rocket%stage(i)%k_L = Rocket%stage(i)%m_L / Rocket%stage(i)%m_0 
+    end do   
+    !=====================================================================
+
+    !===== Final mass of each stage ======================================
+    do i=1, Rocket%number_of_stages
+        Rocket%stage(i)%m_f = Rocket%stage(i)%m_0 - Rocket%stage(i)%m_p     
+    end do
+    !=====================================================================
+
+    Rocket%rm_L = payload_mass
+    Rocket%rm_0 = Rocket%stage(1)%m_0
+
+    !===== Minimum Check according to eq 26 ==============================
+    check_count = 0
+    do i=1, Rocket%number_of_stages
+        check = L*Rocket%stage(i)%nu_e *(1.d0 - Rocket%stage(i)%k_s * Rocket%stage(i)%k_m)**2 &
+            - 1.d0 + 2.d0 * Rocket%stage(i)%k_s * Rocket%stage(i)%k_m
+        if (check > 0) check_count = check_count + 1 
+    end do 
+    if (check_count == Rocket%number_of_stages) then
+        print*, "Minimum found :)"
+    else 
+        print*, "Minimum not found :("    
+    end if 
+    !=====================================================================
     
 end subroutine
 
@@ -112,24 +143,32 @@ function g(L, Rocket)
     type(Rocket_t), intent(in) :: Rocket
     real(8), intent(in) :: L 
     real(8) g 
-    !real(8) sum
-    real(8) c1, c2, c3
-    real(8) e1, e2, e3
-    !integer i
+    real(8) sum
+    !real(8) c1, c2, c3
+    !real(8) e1, e2, e3
+    integer i
 
-    c1 = Rocket%stage(1)%nu_e
-    c2 = Rocket%stage(2)%nu_e
-    c3 = Rocket%stage(3)%nu_e
+    !c1 = Rocket%stage(1)%nu_e
+    !c2 = Rocket%stage(2)%nu_e
+    !c3 = Rocket%stage(3)%nu_e
     
-    e1 = Rocket%stage(1)%k_s
-    e2 = Rocket%stage(2)%k_s
-    e3 = Rocket%stage(3)%k_s
+    !e1 = Rocket%stage(1)%k_s
+    !e2 = Rocket%stage(2)%k_s
+    !e3 = Rocket%stage(3)%k_s
 
-    g = delta_v - (c1*log((L*c1+1)/(c1*e1*L)) + c2*log((L*c2+1)/(c2*e2*L)) + c3*log((L*c3+1)/(c3*e3*L)))
+   ! g = delta_v - (c1*log((L*c1-1)/(c1*e1*L)) + c2*log((L*c2-1)/(c2*e2*L)) + c3*log((L*c3-1)/(c3*e3*L)))
 
+   ! Signo como Don Edberg 
    ! sum = 0.d0
    ! do i=1, Rocket%number_of_stages
    !     sum = sum + Rocket%stage(i)%nu_e * log((1.d0+L*Rocket%stage(i)%nu_e) /(L*Rocket%stage(i)%nu_e*Rocket%stage(i)%k_s))
    ! end do
    ! g = delta_v - sum 
+
+   ! Signo como en Orbital Mechanics  
+    sum = 0.d0
+    do i=1, Rocket%number_of_stages
+        sum = sum + Rocket%stage(i)%nu_e * log((L*Rocket%stage(i)%nu_e-1.d0) /(L*Rocket%stage(i)%nu_e*Rocket%stage(i)%k_s))
+    end do
+    g = delta_v - sum
 end function
