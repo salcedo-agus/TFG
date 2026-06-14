@@ -224,6 +224,48 @@ QDoubleSpinBox, QSpinBox {{
 QDoubleSpinBox:focus, QSpinBox:focus {{
     border-color: {ACCENT};
 }}
+QDoubleSpinBox::up-button, QSpinBox::up-button {{
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    width: 20px;
+    border-left: 1px solid {BORDER};
+    border-bottom: 1px solid {BORDER};
+    border-top-right-radius: 6px;
+    background-color: {BG_INPUT};
+}}
+QDoubleSpinBox::up-button:hover, QSpinBox::up-button:hover {{
+    background-color: {ACCENT};
+}}
+QDoubleSpinBox::up-button:pressed, QSpinBox::up-button:pressed {{
+    background-color: #388bfd;
+}}
+QDoubleSpinBox::down-button, QSpinBox::down-button {{
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    width: 20px;
+    border-left: 1px solid {BORDER};
+    border-top: 1px solid {BORDER};
+    border-bottom-right-radius: 6px;
+    background-color: {BG_INPUT};
+}}
+QDoubleSpinBox::down-button:hover, QSpinBox::down-button:hover {{
+    background-color: {ACCENT};
+}}
+QDoubleSpinBox::down-button:pressed, QSpinBox::down-button:pressed {{
+    background-color: #388bfd;
+}}
+QDoubleSpinBox::up-arrow, QSpinBox::up-arrow {{
+    width: 7px; height: 7px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 6px solid {TEXT_PRI};
+}}
+QDoubleSpinBox::down-arrow, QSpinBox::down-arrow {{
+    width: 7px; height: 7px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid {TEXT_PRI};
+}}
 QComboBox {{
     background-color: {BG_INPUT};
     border: 1px solid {BORDER};
@@ -509,7 +551,7 @@ class MainWindow(QMainWindow):
 
         mg_layout.addWidget(QLabel("ΔV  (km/s)"), 0, 0)
         self.dv_spin = QDoubleSpinBox()
-        self.dv_spin.setRange(0.1, 50.0)
+        self.dv_spin.setRange(0.1, 100.0)
         self.dv_spin.setValue(10.0)
         self.dv_spin.setDecimals(2)
         self.dv_spin.setSingleStep(0.5)
@@ -525,7 +567,7 @@ class MainWindow(QMainWindow):
 
         mg_layout.addWidget(QLabel("Number of Stages"), 2, 0)
         self.n_stages_spin = QSpinBox()
-        self.n_stages_spin.setRange(1, 5)
+        self.n_stages_spin.setRange(1, 3)
         self.n_stages_spin.setValue(3)
         mg_layout.addWidget(self.n_stages_spin, 2, 1)
 
