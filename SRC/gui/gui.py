@@ -10,29 +10,34 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QGridLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox,
     QSlider, QPushButton, QScrollArea, QFrame, QSizePolicy,
-    QGroupBox, QMessageBox
+    QGroupBox, QMessageBox, QStackedWidget, QGraphicsOpacityEffect
 )
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPropertyAnimation, QEasingCurve
 from PyQt6.QtGui import QFont, QPalette, QColor
 
 # ── Fortran bridge ────────────────────────────────────────────────────────────
 import ctypes
 
-# Resolve the folder where gui.py lives, regardless of where it is launched from
-# (terminal, make, double-click, etc.)
-SRC_DIR = os.path.dirname(os.path.abspath(__file__))
+# gui.py lives in gui/  →  root SRC is one level up
+GUI_DIR  = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(GUI_DIR)
+# build/ sits one level above SRC/, so two levels above gui/
+BUILD_DIR = os.path.join(ROOT_DIR, "..", "build")
+
+# Make sure interface/ is on the path so rocket_lib can be imported if needed
+sys.path.insert(0, os.path.join(ROOT_DIR, "interface"))
 
 if sys.platform == "win32":
-    # Add project folder so Python finds librocket.dll
-    os.add_dll_directory(SRC_DIR)
-    # Add MinGW bin so Fortran runtime DLLs (libgfortran, libgcc, etc.) are found.
+    # Add build/ so Python finds librocket.dll
+    os.add_dll_directory(BUILD_DIR)
+    # Add MinGW bin so Fortran runtime DLLs are found.
     # Override by setting the MINGW_BIN environment variable if installed elsewhere.
     mingw_bin = os.environ.get("MINGW_BIN", r"C:\TDM-GCC-64\bin")
     if os.path.isdir(mingw_bin):
         os.add_dll_directory(mingw_bin)
-    _lib = ctypes.CDLL(os.path.join(SRC_DIR, "librocket.dll"))
+    _lib = ctypes.CDLL(os.path.join(BUILD_DIR, "librocket.dll"))
 else:
-    _lib = ctypes.CDLL(os.path.join(SRC_DIR, "librocket.so"))
+    _lib = ctypes.CDLL(os.path.join(BUILD_DIR, "librocket.so"))
 
 _lib.run_staging.restype = None
 _lib.run_staging.argtypes = [
@@ -300,6 +305,25 @@ QSlider::sub-page:horizontal {{
 }}
 QSlider:disabled::groove:horizontal {{ background: {TEXT_DIM}; }}
 QSlider:disabled::handle:horizontal {{ background: {TEXT_DIM}; }}
+QPushButton#launch_btn {{
+    background-color: transparent;
+    color: {ACCENT};
+    border: 2px solid {ACCENT};
+    border-radius: 10px;
+    padding: 14px 48px;
+    font-weight: 700;
+    font-size: 16px;
+    min-height: 48px;
+    letter-spacing: 2px;
+}}
+QPushButton#launch_btn:hover {{
+    background-color: {ACCENT};
+    color: {BG_DARK};
+}}
+QPushButton#launch_btn:pressed {{
+    background-color: #388bfd;
+    color: {BG_DARK};
+}}
 QPushButton#run_btn {{
     background-color: {ACCENT};
     color: {BG_DARK};
@@ -506,6 +530,129 @@ class ResultCard(QFrame):
         layout.addLayout(grid)
 
 
+
+# ── Splash / presentation screen ──────────────────────────────────────────────
+class SplashScreen(QWidget):
+    launch_requested = pyqtSignal()
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._build()
+
+    def _build(self):
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+
+        # Full-screen dark background
+        bg = QWidget()
+        bg.setStyleSheet(f"background-color: {BG_DARK};")
+        layout = QVBoxLayout(bg)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.setSpacing(24)
+
+        # ── Logo placeholder ──────────────────────────────────────────────────
+        logo_frame = QFrame()
+        logo_frame.setFixedSize(180, 180)
+        logo_frame.setStyleSheet(f"""
+            QFrame {{
+                background-color: {BG_PANEL};
+                border: 2px dashed {BORDER};
+                border-radius: 90px;
+            }}
+        """)
+        logo_layout = QVBoxLayout(logo_frame)
+        logo_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        logo_placeholder = QLabel("LOGO")
+        logo_placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        logo_placeholder.setStyleSheet(f"""
+            color: {TEXT_DIM};
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            border: none;
+            background: transparent;
+        """)
+        logo_layout.addWidget(logo_placeholder)
+
+        logo_wrapper = QHBoxLayout()
+        logo_wrapper.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        logo_wrapper.addWidget(logo_frame)
+
+        # ── Title ─────────────────────────────────────────────────────────────
+        title = QLabel("ROCKET DESIGN")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title.setStyleSheet(f"""
+            color: {TEXT_PRI};
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: 6px;
+            background: transparent;
+        """)
+
+        # ── Subtitle ──────────────────────────────────────────────────────────
+        subtitle = QLabel("Multi-Stage Propulsion Optimizer")
+        subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        subtitle.setStyleSheet(f"""
+            color: {ACCENT};
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            background: transparent;
+        """)
+
+        # ── Divider ───────────────────────────────────────────────────────────
+        div = QFrame()
+        div.setObjectName("divider")
+        div.setFixedWidth(320)
+        div_wrapper = QHBoxLayout()
+        div_wrapper.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        div_wrapper.addWidget(div)
+
+        # ── Description ───────────────────────────────────────────────────────
+        description = QLabel(
+            "Calculate optimal staging mass ratios for multi-stage rockets.\n"
+            "Select propellant combinations, combustion cycles, and mission\n"
+            "parameters to find the minimum initial mass configuration."
+        )
+        description.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        description.setStyleSheet(f"""
+            color: {TEXT_SEC};
+            font-size: 13px;
+            line-height: 1.6;
+            background: transparent;
+        """)
+
+        # ── Launch button ─────────────────────────────────────────────────────
+        launch_btn = QPushButton("LAUNCH")
+        launch_btn.setObjectName("launch_btn")
+        launch_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        launch_btn.clicked.connect(self.launch_requested.emit)
+        btn_wrapper = QHBoxLayout()
+        btn_wrapper.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        btn_wrapper.addWidget(launch_btn)
+
+        # ── Version label ─────────────────────────────────────────────────────
+        version = QLabel("v1.0")
+        version.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        version.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px; background: transparent;")
+
+        layout.addStretch(2)
+        layout.addLayout(logo_wrapper)
+        layout.addSpacing(16)
+        layout.addWidget(title)
+        layout.addWidget(subtitle)
+        layout.addLayout(div_wrapper)
+        layout.addSpacing(8)
+        layout.addWidget(description)
+        layout.addSpacing(24)
+        layout.addLayout(btn_wrapper)
+        layout.addSpacing(16)
+        layout.addWidget(version)
+        layout.addStretch(3)
+
+        outer.addWidget(bg)
+
+
 # ── Main window ───────────────────────────────────────────────────────────────
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -703,10 +850,44 @@ class MainWindow(QMainWindow):
         self.right_layout.addStretch()
 
 
+
+# ── App window (splash + main stacked) ───────────────────────────────────────
+class AppWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Rocket Design")
+        self.setMinimumSize(960, 700)
+
+        self._stack = QStackedWidget()
+        self.setCentralWidget(self._stack)
+
+        self._splash = SplashScreen()
+        self._main   = MainWindow()
+
+        self._stack.addWidget(self._splash)   # index 0
+        self._stack.addWidget(self._main)     # index 1
+        self._stack.setCurrentIndex(0)
+
+        self._splash.launch_requested.connect(self._launch)
+
+    def _launch(self):
+        """Fade the splash out then switch to the main GUI."""
+        effect = QGraphicsOpacityEffect(self._splash)
+        self._splash.setGraphicsEffect(effect)
+
+        self._anim = QPropertyAnimation(effect, b"opacity")
+        self._anim.setDuration(600)
+        self._anim.setStartValue(1.0)
+        self._anim.setEndValue(0.0)
+        self._anim.setEasingCurve(QEasingCurve.Type.InOutQuad)
+        self._anim.finished.connect(lambda: self._stack.setCurrentIndex(1))
+        self._anim.start()
+
+
 # ── Entry point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyleSheet(STYLE)
-    window = MainWindow()
+    window = AppWindow()
     window.show()
     sys.exit(app.exec())

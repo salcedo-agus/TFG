@@ -1,36 +1,47 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Rocket Staging — Makefile
+# Rocket Staging - Makefile
 # Targets:
-#   make all       — compile Fortran and build the shared library
-#   make fortran   — compile and run the Fortran standalone executable
-#   make gui       — build the shared library and launch the Python GUI
-#   make clean     — remove all compiled artefacts
+#   make all       - compile Fortran and build the shared library
+#   make fortran   - compile and run the Fortran standalone executable
+#   make gui       - build the shared library and launch the Python GUI
+#   make clean     - remove all compiled artefacts
 # ─────────────────────────────────────────────────────────────────────────────
 
-# ── Compiler ──────────────────────────────────────────────────────────────────
+# -- Compiler ------------------------------------------------------------------
 FC      := gfortran
 FFLAGS  := -O2 -Wall
 
-# ── Source files (order matters: dependencies first) ─────────────────────────
-SRCS    := Typical_Data.f90 \
-           Rocket_Types.f90 \
-           Staging.f90 \
-           C_Interface.f90
+# -- Folder layout -------------------------------------------------------------
+BUILD_DIR     := ../build
+INOUT_DIR     := inout
+STAGING_DIR   := staging
+INTERFACE_DIR := interface
+GUI_DIR       := gui
 
-# Main program source (for the standalone Fortran run)
-MAIN    := main.f90
+# -- Object files (compiled individually in dependency order) -----------------
+OBJS := \
+    $(BUILD_DIR)/Rocket_Types.o   \
+    $(BUILD_DIR)/Typical_Data.o   \
+    $(BUILD_DIR)/Staging.o        \
+    $(BUILD_DIR)/C_Interface.o
 
-# ── Platform detection ────────────────────────────────────────────────────────
+# -- Module search/output flags -----------------------------------------------
+MODFLAGS := -J$(BUILD_DIR) -I$(BUILD_DIR)
+
+# -- Main program object -------------------------------------------------------
+MAIN_OBJ := $(BUILD_DIR)/main.o
+
+# -- Platform detection --------------------------------------------------------
 ifeq ($(OS), Windows_NT)
-    # ── Windows ───────────────────────────────────────────────────────────────
-    PLATFORM    := windows
-    LIB         := librocket.dll
-    EXE         := rocket.exe
-    SHARED_FLAGS:= -shared -m64
-    PYTHON      := python
-    RM          := del /Q
-    # Runtime DLLs to copy from TDM-GCC into the project folder
-    MINGW_BIN   := C:/TDM-GCC-64/bin
+    PLATFORM     := windows
+    LIB          := $(BUILD_DIR)/librocket.dll
+    EXE          := $(BUILD_DIR)/rocket.exe
+    SHARED_FLAGS := -shared -m64
+    PYTHON       := python
+    MKDIR        := mkdir
+    RM           := del /Q
+    RMDIR        := rmdir /Q /S
+    MINGW_BIN    := C:/TDM-GCC-64/bin
     RUNTIME_DLLS := \
         $(MINGW_BIN)/libgfortran_64-5.dll \
         $(MINGW_BIN)/libgcc_s_seh_64-1.dll \
@@ -39,22 +50,24 @@ ifeq ($(OS), Windows_NT)
 else
     UNAME := $(shell uname -s)
     ifeq ($(UNAME), Darwin)
-        # ── macOS ─────────────────────────────────────────────────────────────
         PLATFORM     := macos
-        LIB          := librocket.dylib
-        EXE          := rocket
+        LIB          := $(BUILD_DIR)/librocket.dylib
+        EXE          := $(BUILD_DIR)/rocket
         SHARED_FLAGS := -shared -fPIC
         PYTHON       := python3
+        MKDIR        := mkdir -p
         RM           := rm -f
+        RMDIR        := rm -rf
         RUNTIME_DLLS :=
     else
-        # ── Linux ─────────────────────────────────────────────────────────────
         PLATFORM     := linux
-        LIB          := librocket.so
-        EXE          := rocket
+        LIB          := $(BUILD_DIR)/librocket.so
+        EXE          := $(BUILD_DIR)/rocket
         SHARED_FLAGS := -shared -fPIC
         PYTHON       := python3
+        MKDIR        := mkdir -p
         RM           := rm -f
+        RMDIR        := rm -rf
         RUNTIME_DLLS :=
     endif
 endif
@@ -63,7 +76,7 @@ endif
 # Default target
 # ─────────────────────────────────────────────────────────────────────────────
 .PHONY: all
-all: $(LIB)
+all: $(BUILD_DIR) $(LIB)
 	@echo ""
 	@echo "  Build complete - $(LIB) is ready."
 	@echo "  Run 'make fortran' to execute the Fortran program."
@@ -71,17 +84,55 @@ all: $(LIB)
 	@echo ""
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Build the shared library
+# Create build directory
 # ─────────────────────────────────────────────────────────────────────────────
-$(LIB): $(SRCS) C_Interface.f90
-	@echo "[$(PLATFORM)] Compiling shared library: $(LIB)"
-	$(FC) $(FFLAGS) $(SHARED_FLAGS) -o $(LIB) $(SRCS)
+$(BUILD_DIR):
 ifeq ($(PLATFORM), windows)
-	@echo "[windows] Copying MinGW runtime DLLs..."
-	@for %%D in ($(RUNTIME_DLLS)) do ( \
-		if exist "%%D" ( copy /Y "%%D" . > nul ) \
-		else ( echo   WARNING: %%D not found — skipping ) \
-	)
+	if not exist "$(BUILD_DIR)" $(MKDIR) "$(BUILD_DIR)"
+else
+	$(MKDIR) $(BUILD_DIR)
+endif
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Compile each source file individually (guaranteed dependency order)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# 1. Rocket_Types — no dependencies
+$(BUILD_DIR)/Rocket_Types.o: $(STAGING_DIR)/Rocket_Types.f90 | $(BUILD_DIR)
+	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
+
+# 2. Typical_Data — depends on Rocket_Types (data_entry subroutine uses rocket_types)
+$(BUILD_DIR)/Typical_Data.o: $(INOUT_DIR)/Typical_Data.f90 \
+    $(BUILD_DIR)/Rocket_Types.o
+	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
+
+# 3. Staging — depends on Typical_Data and Rocket_Types
+$(BUILD_DIR)/Staging.o: $(STAGING_DIR)/Staging.f90 \
+    $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
+	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
+
+# 4. C_Interface — depends on Typical_Data and Rocket_Types
+$(BUILD_DIR)/C_Interface.o: $(INTERFACE_DIR)/C_Interface.f90 \
+    $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
+	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
+
+# 5. main — depends on Rocket_Types and Typical_Data
+$(BUILD_DIR)/main.o: main.f90 \
+    $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
+	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Link shared library
+# ─────────────────────────────────────────────────────────────────────────────
+$(LIB): $(OBJS)
+	@echo "[$(PLATFORM)] Linking shared library: $(LIB)"
+	$(FC) $(FFLAGS) $(SHARED_FLAGS) -o $(LIB) $(OBJS)
+ifeq ($(PLATFORM), windows)
+	@echo "[windows] Copying MinGW runtime DLLs into $(BUILD_DIR)..."
+	-@if exist "$(MINGW_BIN)\libgfortran_64-5.dll"  copy /Y "$(MINGW_BIN)\libgfortran_64-5.dll"  "$(BUILD_DIR)\" > nul
+	-@if exist "$(MINGW_BIN)\libgcc_s_seh_64-1.dll" copy /Y "$(MINGW_BIN)\libgcc_s_seh_64-1.dll" "$(BUILD_DIR)\" > nul
+	-@if exist "$(MINGW_BIN)\libquadmath_64-0.dll"  copy /Y "$(MINGW_BIN)\libquadmath_64-0.dll"  "$(BUILD_DIR)\" > nul
+	-@if exist "$(MINGW_BIN)\libwinpthread_64-1.dll" copy /Y "$(MINGW_BIN)\libwinpthread_64-1.dll" "$(BUILD_DIR)\" > nul
 endif
 	@echo "[$(PLATFORM)] $(LIB) built successfully."
 
@@ -89,14 +140,14 @@ endif
 # Compile and run the standalone Fortran executable
 # ─────────────────────────────────────────────────────────────────────────────
 .PHONY: fortran
-fortran: $(EXE)
+fortran: $(BUILD_DIR) $(EXE)
 	@echo "[$(PLATFORM)] Running Fortran executable: $(EXE)"
-	@echo "─────────────────────────────────────────"
+	@echo "-----------------------------------------"
 	./$(EXE)
 
-$(EXE): $(SRCS) $(MAIN)
-	@echo "[$(PLATFORM)] Compiling Fortran executable: $(EXE)"
-	$(FC) $(FFLAGS) -o $(EXE) $(SRCS) $(MAIN)
+$(EXE): $(OBJS) $(MAIN_OBJ)
+	@echo "[$(PLATFORM)] Linking Fortran executable: $(EXE)"
+	$(FC) $(FFLAGS) -o $(EXE) $(OBJS) $(MAIN_OBJ)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Build the shared library and launch the Python GUI
@@ -104,7 +155,7 @@ $(EXE): $(SRCS) $(MAIN)
 .PHONY: gui
 gui: $(LIB)
 	@echo "[$(PLATFORM)] Launching Python GUI..."
-	$(PYTHON) gui.py
+	$(PYTHON) $(GUI_DIR)/gui.py
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Remove all compiled artefacts
@@ -112,12 +163,12 @@ gui: $(LIB)
 .PHONY: clean
 ifeq ($(PLATFORM), windows)
 clean:
-	@echo "[windows] Cleaning compiled artefacts..."
-	-$(RM) $(LIB) $(EXE) *.mod *.o 2>nul
+	@echo "[windows] Cleaning build folder..."
+	if exist "$(BUILD_DIR)" $(RMDIR) "$(BUILD_DIR)"
 	@echo "[windows] Clean complete."
 else
 clean:
-	@echo "[$(PLATFORM)] Cleaning compiled artefacts..."
-	$(RM) $(LIB) $(EXE) *.mod *.o
+	@echo "[$(PLATFORM)] Cleaning build folder..."
+	$(RMDIR) $(BUILD_DIR)
 	@echo "[$(PLATFORM)] Clean complete."
 endif
