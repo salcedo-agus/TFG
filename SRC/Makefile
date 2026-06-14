@@ -150,6 +150,14 @@ $(EXE): $(OBJS) $(MAIN_OBJ)
 	$(FC) $(FFLAGS) -o $(EXE) $(OBJS) $(MAIN_OBJ)
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Parse Typical_Data.f90 and regenerate typical_data_ranges.py
+# ─────────────────────────────────────────────────────────────────────────────
+.PHONY: parse
+parse:
+	@echo "[$(PLATFORM)] Parsing Typical_Data.f90 -> gui/typical_data_ranges.py"
+	$(PYTHON) $(INOUT_DIR)/parse_typical_data.py
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Build the shared library and launch the Python GUI
 # ─────────────────────────────────────────────────────────────────────────────
 .PHONY: gui

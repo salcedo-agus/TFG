@@ -181,13 +181,13 @@ subroutine data_entry(Rocket)
             First_stage_ks_upper = 0.d0
             First_stage_ks_mean  = 0.d0
         case (1) ! 1 - STAGED COMBUSTION 
-            First_stage_ISP_lower = 0.d0
-            First_stage_ISP_upper = 0.d0
-            First_stage_ISP_mean  = 0.d0
+            First_stage_ISP_lower = 350.d0
+            First_stage_ISP_upper = 365.d0
+            First_stage_ISP_mean  = 357.5d0
 
-            First_stage_ks_lower = 0.d0 
-            First_stage_ks_upper = 0.d0
-            First_stage_ks_mean  = 0.d0
+            First_stage_ks_lower = 0.0666d0 
+            First_stage_ks_upper = 0.0968d0
+            First_stage_ks_mean  = 0.079d0
         case (2) ! 2 - GAS GENERATOR    
             First_stage_ISP_lower = 350.d0
             First_stage_ISP_upper = 365.d0

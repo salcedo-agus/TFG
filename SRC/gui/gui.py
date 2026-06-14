@@ -29,12 +29,30 @@ sys.path.insert(0, os.path.join(ROOT_DIR, "interface"))
 
 if sys.platform == "win32":
     # Add build/ so Python finds librocket.dll
-    os.add_dll_directory(BUILD_DIR)
-    # Add MinGW bin so Fortran runtime DLLs are found.
-    # Override by setting the MINGW_BIN environment variable if installed elsewhere.
-    mingw_bin = os.environ.get("MINGW_BIN", r"C:\TDM-GCC-64\bin")
-    if os.path.isdir(mingw_bin):
-        os.add_dll_directory(mingw_bin)
+    os.add_dll_directory(os.path.abspath(BUILD_DIR))
+
+    # Find MinGW runtime DLLs. Priority:
+    #   1. MINGW_BIN environment variable (set this in your PowerShell profile)
+    #   2. Common installation locations as fallback
+    _MINGW_CANDIDATES = [
+        os.environ.get("MINGW_BIN", ""),   # user-set env var
+        r"C:\TDM-GCC-64\bin",              # TDM-GCC default
+        r"C:\msys64\mingw64\bin",          # MSYS2 default
+        r"C:\msys64\ucrt64\bin",           # MSYS2 UCRT variant
+        r"C:\mingw64\bin",                 # standalone MinGW
+        r"C:\mingw\bin",                   # standalone MinGW (alt)
+    ]
+    _mingw_found = False
+    for _candidate in _MINGW_CANDIDATES:
+        if _candidate and os.path.isdir(_candidate):
+            os.add_dll_directory(_candidate)
+            _mingw_found = True
+            break
+    if not _mingw_found:
+        print("WARNING: MinGW bin directory not found. Set the MINGW_BIN environment")
+        print("         variable to your MinGW bin path, e.g.:")
+        print(r"         $env:MINGW_BIN = 'C:\msys64\mingw64\bin'")
+
     _lib = ctypes.CDLL(os.path.join(BUILD_DIR, "librocket.dll"))
 else:
     _lib = ctypes.CDLL(os.path.join(BUILD_DIR, "librocket.so"))
@@ -90,87 +108,26 @@ def run_staging(n_stages, delta_v, payload_mass, isp_list, ks_list):
         ]
     }
 
-# ── ISP / k_s data table (mirrored from Typical_Data.f90) ────────────────────
-# Key: (propellant_index, cycle_index) → (isp_lower, isp_upper, isp_mean, ks_lower, ks_upper, ks_mean)
-# Edit values here to match Typical_Data.f90 — this is the single source of truth on the Python side.
-TYPICAL_DATA = {
-    # LH2/LOX
-    (1, 0): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (1, 1): (445.6, 454.5, 451.5,  0.0, 0.0, 0.0),
-    (1, 2): (405.0, 428.1, 414.367, 0.0, 0.0, 0.0),
-    (1, 3): (425.0, 425.0, 425.0,  0.0, 0.0, 0.0),
-    (1, 4): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),  # invalid per Fortran warning
-    (1, 5): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    # RP1/LOX
-    (2, 0): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (2, 1): (337.2, 338.4, 337.625, 0.0, 0.0, 0.0),
-    (2, 2): (283.9, 320.2, 302.625, 0.0, 0.0, 0.0),
-    (2, 3): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (2, 4): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (2, 5): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    # CH4/LOX
-    (3, 0): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (3, 1): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (3, 2): (350.0, 365.0, 357.5, 0.0, 0.0, 0.0),
-    (3, 3): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (3, 4): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (3, 5): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    # UDMH/LOX
-    (4, 0): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (4, 1): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (4, 2): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (4, 3): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (4, 4): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (4, 5): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    # UDMH/AK271
-    (5, 0): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (5, 1): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (5, 2): (289.0, 289.0, 289.0, 0.0, 0.0, 0.0),
-    (5, 3): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (5, 4): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (5, 5): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    # UDMH/N2O4
-    (6, 0): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (6, 1): (315.8, 315.8, 315.8, 0.0, 0.0, 0.0),
-    (6, 2): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (6, 3): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (6, 4): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (6, 5): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    # AEROZINE50/N2O4
-    (7, 0): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (7, 1): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (7, 2): (296.0, 303.9, 299.95, 0.0, 0.0, 0.0),
-    (7, 3): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (7, 4): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (7, 5): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    # MH/NITRIC ACID
-    (8, 0): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (8, 1): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (8, 2): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (8, 3): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (8, 4): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-    (8, 5): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
-}
+# ── ISP / k_s data (auto-generated from Typical_Data.f90) ───────────────────
+# Run parse_typical_data.py to regenerate this file after editing Typical_Data.f90
+import importlib, sys as _sys
 
-PROPELLANTS = [
-    "LH2 / LOX",
-    "RP-1 / LOX",
-    "CH4 / LOX",
-    "UDMH / LOX",
-    "UDMH / AK-271",
-    "UDMH / N2O4",
-    "Aerozine-50 / N2O4",
-    "MH / Nitric Acid (WFNA)",
-]
+def _load_data():
+    """Load typical_data_ranges from gui/ folder, next to gui.py."""
+    gui_dir = os.path.dirname(os.path.abspath(__file__))
+    if gui_dir not in _sys.path:
+        _sys.path.insert(0, gui_dir)
+    try:
+        import typical_data_ranges as _tdr
+        importlib.reload(_tdr)   # always get the latest version
+        return _tdr.TYPICAL_DATA, _tdr.PROPELLANTS, _tdr.CYCLES
+    except ImportError:
+        print("WARNING: typical_data_ranges.py not found.")
+        print("         Run parse_typical_data.py to generate it.")
+        return {}, [], []
 
-CYCLES = [
-    "Propellant-based estimate",
-    "Staged Combustion",
-    "Gas Generator",
-    "Expander",
-    "Electric Pump",
-    "Pressure Fed",
-]
+TYPICAL_DATA, PROPELLANTS, CYCLES = _load_data()
+
 
 # ── Colour palette ────────────────────────────────────────────────────────────
 BG_DARK    = "#0d1117"
@@ -407,12 +364,68 @@ class StageInputWidget(QGroupBox):
         layout.addWidget(ks_group)
 
         # Connect signals
-        self.prop_combo.currentIndexChanged.connect(self._update_ranges)
-        self.cycle_combo.currentIndexChanged.connect(self._update_ranges)
+        self.prop_combo.currentIndexChanged.connect(self._prop_changed)
+        self.cycle_combo.currentIndexChanged.connect(self._cycle_changed)
         self.isp_slider.valueChanged.connect(self._update_isp_label)
         self.ks_slider.valueChanged.connect(self._update_ks_label)
 
+        self._refresh_cycle_items()
         self._update_ranges()
+
+    # Connect signals — prop change updates cycle availability too
+        # (connected in _build after widgets exist)
+
+    def _prop_changed(self):
+        """When propellant changes: grey out invalid cycles, warn if current is now invalid."""
+        self._refresh_cycle_items()
+        prop  = self.prop_combo.currentIndex() + 1
+        cycle = self.cycle_combo.currentIndex()
+        d = TYPICAL_DATA.get((prop, cycle))
+        if d is None:
+            # Current cycle is explicitly invalid for this propellant — reset to first valid
+            for c_idx in range(self.cycle_combo.count()):
+                test = TYPICAL_DATA.get((prop, c_idx))
+                if test is not None:
+                    self.cycle_combo.setCurrentIndex(c_idx)
+                    break
+        self._update_ranges()
+
+    def _cycle_changed(self):
+        """When cycle changes: warn if the combination is explicitly invalid."""
+        prop  = self.prop_combo.currentIndex() + 1
+        cycle = self.cycle_combo.currentIndex()
+        d = TYPICAL_DATA.get((prop, cycle))
+        if d is None:
+            # Show warning in the range labels but don't block the user
+            self._set_invalid_state()
+        else:
+            self._update_ranges()
+
+    def _refresh_cycle_items(self):
+        """Grey out cycle entries that are None for the current propellant."""
+        prop = self.prop_combo.currentIndex() + 1
+        model = self.cycle_combo.model()
+        for c_idx in range(self.cycle_combo.count()):
+            item = model.item(c_idx)
+            d = TYPICAL_DATA.get((prop, c_idx))
+            if d is None:
+                # Visually dim but keep selectable so user sees the warning
+                item.setForeground(__import__('PyQt6.QtGui', fromlist=['QColor']).QColor(TEXT_DIM))
+            else:
+                item.setForeground(__import__('PyQt6.QtGui', fromlist=['QColor']).QColor(TEXT_PRI))
+
+    def _set_invalid_state(self):
+        """Show invalid combination message on both sliders."""
+        for slider, val_lbl, range_lbl, unit in [
+            (self.isp_slider, self.isp_value_label, self.isp_range_label, "s"),
+            (self.ks_slider,  self.ks_value_label,  self.ks_range_label,  ""),
+        ]:
+            slider.setEnabled(False)
+            slider.setRange(0, 1000)
+            slider.setValue(0)
+            val_lbl.setText(f"— {unit}".strip())
+            range_lbl.setText("Invalid combination for this propellant")
+            range_lbl.setStyleSheet(f"color: {ACCENT2}; font-size: 11px;")
 
     def _get_data(self):
         prop  = self.prop_combo.currentIndex() + 1   # 1-based
@@ -420,7 +433,15 @@ class StageInputWidget(QGroupBox):
         return TYPICAL_DATA.get((prop, cycle), (0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
 
     def _update_ranges(self):
-        d = self._get_data()
+        prop  = self.prop_combo.currentIndex() + 1
+        cycle = self.cycle_combo.currentIndex()
+        d = TYPICAL_DATA.get((prop, cycle))
+
+        # None means explicitly invalid combination
+        if d is None:
+            self._set_invalid_state()
+            return
+
         isp_lo, isp_hi, isp_mean = d[0], d[1], d[2]
         ks_lo,  ks_hi,  ks_mean  = d[3], d[4], d[5]
 
@@ -430,7 +451,6 @@ class StageInputWidget(QGroupBox):
         # ISP
         self.isp_slider.setEnabled(has_isp)
         if has_isp:
-            # slider works in tenths of a second for resolution
             self.isp_slider.setRange(int(isp_lo * 10), int(isp_hi * 10))
             self.isp_slider.setValue(int(isp_mean * 10))
             self.isp_range_label.setText(f"Range: {isp_lo:.1f} – {isp_hi:.1f} s   |   Mean: {isp_mean:.1f} s")
@@ -471,12 +491,19 @@ class StageInputWidget(QGroupBox):
 
     def get_values(self):
         """Return (isp, k_s, has_data) for this stage."""
-        d = self._get_data()
+        prop  = self.prop_combo.currentIndex() + 1
+        cycle = self.cycle_combo.currentIndex()
+        d = TYPICAL_DATA.get((prop, cycle))
+
+        # Explicitly invalid combination
+        if d is None:
+            return None, None, False
+
         isp_lo, isp_hi = d[0], d[1]
         ks_lo,  ks_hi  = d[3], d[4]
         has_isp = isp_hi > isp_lo or (isp_hi == isp_lo and isp_hi > 0)
         has_ks  = ks_hi  > ks_lo  or (ks_hi  == ks_lo  and ks_hi  > 0)
-        isp = self.isp_slider.value() / 10.0  if has_isp else None
+        isp = self.isp_slider.value() / 10.0    if has_isp else None
         ks  = self.ks_slider.value()  / 10000.0 if has_ks  else None
         return isp, ks, (has_isp and has_ks)
 
