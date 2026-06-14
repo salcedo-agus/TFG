@@ -1,0 +1,670 @@
+"""
+Rocket Staging GUI
+Reads ISP and k_s ranges from typical_data_ranges.py (mirrored from Typical_Data.f90).
+All range values should be edited there, not here.
+"""
+
+import sys
+import os
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+    QGridLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox,
+    QSlider, QPushButton, QScrollArea, QFrame, QSizePolicy,
+    QGroupBox, QMessageBox
+)
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtGui import QFont, QPalette, QColor
+
+# ── Fortran bridge ────────────────────────────────────────────────────────────
+import ctypes
+
+# Resolve the folder where gui.py lives, regardless of where it is launched from
+# (terminal, make, double-click, etc.)
+SRC_DIR = os.path.dirname(os.path.abspath(__file__))
+
+if sys.platform == "win32":
+    # Add project folder so Python finds librocket.dll
+    os.add_dll_directory(SRC_DIR)
+    # Add MinGW bin so Fortran runtime DLLs (libgfortran, libgcc, etc.) are found.
+    # Override by setting the MINGW_BIN environment variable if installed elsewhere.
+    mingw_bin = os.environ.get("MINGW_BIN", r"C:\TDM-GCC-64\bin")
+    if os.path.isdir(mingw_bin):
+        os.add_dll_directory(mingw_bin)
+    _lib = ctypes.CDLL(os.path.join(SRC_DIR, "librocket.dll"))
+else:
+    _lib = ctypes.CDLL(os.path.join(SRC_DIR, "librocket.so"))
+
+_lib.run_staging.restype = None
+_lib.run_staging.argtypes = [
+    ctypes.POINTER(ctypes.c_int),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_int),
+]
+
+def run_staging(n_stages, delta_v, payload_mass, isp_list, ks_list):
+    n  = ctypes.c_int(n_stages)
+    dv = ctypes.c_double(delta_v)
+    pl = ctypes.c_double(payload_mass)
+    isp  = (ctypes.c_double * n_stages)(*isp_list)
+    ks   = (ctypes.c_double * n_stages)(*ks_list)
+    m0   = (ctypes.c_double * n_stages)()
+    mf   = (ctypes.c_double * n_stages)()
+    mp   = (ctypes.c_double * n_stages)()
+    ms   = (ctypes.c_double * n_stages)()
+    km   = (ctypes.c_double * n_stages)()
+    ks_o = (ctypes.c_double * n_stages)()
+    kl   = (ctypes.c_double * n_stages)()
+    nu_e = (ctypes.c_double * n_stages)()
+    total_m0  = ctypes.c_double()
+    min_found = ctypes.c_int()
+    _lib.run_staging(
+        ctypes.byref(n), ctypes.byref(dv), ctypes.byref(pl),
+        isp, ks, m0, mf, mp, ms, km, ks_o, kl, nu_e,
+        ctypes.byref(total_m0), ctypes.byref(min_found)
+    )
+    return {
+        "total_initial_mass": total_m0.value,
+        "minimum_found": bool(min_found.value),
+        "stages": [
+            {"stage": i+1, "m0": m0[i], "mf": mf[i], "mp": mp[i],
+             "ms": ms[i], "k_m": km[i], "k_s": ks_o[i],
+             "k_L": kl[i], "nu_e": nu_e[i]}
+            for i in range(n_stages)
+        ]
+    }
+
+# ── ISP / k_s data table (mirrored from Typical_Data.f90) ────────────────────
+# Key: (propellant_index, cycle_index) → (isp_lower, isp_upper, isp_mean, ks_lower, ks_upper, ks_mean)
+# Edit values here to match Typical_Data.f90 — this is the single source of truth on the Python side.
+TYPICAL_DATA = {
+    # LH2/LOX
+    (1, 0): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (1, 1): (445.6, 454.5, 451.5,  0.0, 0.0, 0.0),
+    (1, 2): (405.0, 428.1, 414.367, 0.0, 0.0, 0.0),
+    (1, 3): (425.0, 425.0, 425.0,  0.0, 0.0, 0.0),
+    (1, 4): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),  # invalid per Fortran warning
+    (1, 5): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    # RP1/LOX
+    (2, 0): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (2, 1): (337.2, 338.4, 337.625, 0.0, 0.0, 0.0),
+    (2, 2): (283.9, 320.2, 302.625, 0.0, 0.0, 0.0),
+    (2, 3): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (2, 4): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (2, 5): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    # CH4/LOX
+    (3, 0): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (3, 1): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (3, 2): (350.0, 365.0, 357.5, 0.0, 0.0, 0.0),
+    (3, 3): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (3, 4): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (3, 5): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    # UDMH/LOX
+    (4, 0): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (4, 1): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (4, 2): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (4, 3): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (4, 4): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (4, 5): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    # UDMH/AK271
+    (5, 0): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (5, 1): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (5, 2): (289.0, 289.0, 289.0, 0.0, 0.0, 0.0),
+    (5, 3): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (5, 4): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (5, 5): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    # UDMH/N2O4
+    (6, 0): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (6, 1): (315.8, 315.8, 315.8, 0.0, 0.0, 0.0),
+    (6, 2): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (6, 3): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (6, 4): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (6, 5): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    # AEROZINE50/N2O4
+    (7, 0): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (7, 1): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (7, 2): (296.0, 303.9, 299.95, 0.0, 0.0, 0.0),
+    (7, 3): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (7, 4): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (7, 5): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    # MH/NITRIC ACID
+    (8, 0): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (8, 1): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (8, 2): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (8, 3): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (8, 4): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+    (8, 5): (0.0, 0.0, 0.0,     0.0, 0.0, 0.0),
+}
+
+PROPELLANTS = [
+    "LH2 / LOX",
+    "RP-1 / LOX",
+    "CH4 / LOX",
+    "UDMH / LOX",
+    "UDMH / AK-271",
+    "UDMH / N2O4",
+    "Aerozine-50 / N2O4",
+    "MH / Nitric Acid (WFNA)",
+]
+
+CYCLES = [
+    "Propellant-based estimate",
+    "Staged Combustion",
+    "Gas Generator",
+    "Expander",
+    "Electric Pump",
+    "Pressure Fed",
+]
+
+# ── Colour palette ────────────────────────────────────────────────────────────
+BG_DARK    = "#0d1117"
+BG_PANEL   = "#161b22"
+BG_CARD    = "#1c2128"
+BG_INPUT   = "#21262d"
+ACCENT     = "#58a6ff"
+ACCENT2    = "#f78166"
+TEXT_PRI   = "#e6edf3"
+TEXT_SEC   = "#8b949e"
+TEXT_DIM   = "#484f58"
+BORDER     = "#30363d"
+GREEN      = "#3fb950"
+ORANGE     = "#d29922"
+
+STYLE = f"""
+QMainWindow, QWidget {{
+    background-color: {BG_DARK};
+    color: {TEXT_PRI};
+    font-family: 'Segoe UI', 'Inter', sans-serif;
+    font-size: 13px;
+}}
+QScrollArea {{ border: none; background: {BG_DARK}; }}
+QScrollBar:vertical {{
+    background: {BG_PANEL}; width: 8px; border-radius: 4px;
+}}
+QScrollBar::handle:vertical {{
+    background: {BORDER}; border-radius: 4px; min-height: 20px;
+}}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; }}
+QGroupBox {{
+    background-color: {BG_PANEL};
+    border: 1px solid {BORDER};
+    border-radius: 8px;
+    margin-top: 12px;
+    padding: 10px;
+}}
+QGroupBox::title {{
+    subcontrol-origin: margin;
+    left: 12px;
+    color: {ACCENT};
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}}
+QLabel {{ color: {TEXT_PRI}; background: transparent; }}
+QDoubleSpinBox, QSpinBox {{
+    background-color: {BG_INPUT};
+    border: 1px solid {BORDER};
+    border-radius: 6px;
+    color: {TEXT_PRI};
+    padding: 4px 8px;
+    min-height: 28px;
+}}
+QDoubleSpinBox:focus, QSpinBox:focus {{
+    border-color: {ACCENT};
+}}
+QComboBox {{
+    background-color: {BG_INPUT};
+    border: 1px solid {BORDER};
+    border-radius: 6px;
+    color: {TEXT_PRI};
+    padding: 4px 8px;
+    min-height: 28px;
+}}
+QComboBox:focus {{ border-color: {ACCENT}; }}
+QComboBox::drop-down {{ border: none; width: 24px; }}
+QComboBox QAbstractItemView {{
+    background-color: {BG_INPUT};
+    border: 1px solid {BORDER};
+    color: {TEXT_PRI};
+    selection-background-color: {ACCENT};
+    selection-color: {BG_DARK};
+}}
+QSlider::groove:horizontal {{
+    height: 4px;
+    background: {BORDER};
+    border-radius: 2px;
+}}
+QSlider::handle:horizontal {{
+    background: {ACCENT};
+    width: 14px; height: 14px;
+    margin: -5px 0;
+    border-radius: 7px;
+}}
+QSlider::sub-page:horizontal {{
+    background: {ACCENT};
+    border-radius: 2px;
+}}
+QSlider:disabled::groove:horizontal {{ background: {TEXT_DIM}; }}
+QSlider:disabled::handle:horizontal {{ background: {TEXT_DIM}; }}
+QPushButton#run_btn {{
+    background-color: {ACCENT};
+    color: {BG_DARK};
+    border: none;
+    border-radius: 8px;
+    padding: 10px 32px;
+    font-weight: 700;
+    font-size: 14px;
+    min-height: 40px;
+}}
+QPushButton#run_btn:hover {{ background-color: #79b8ff; }}
+QPushButton#run_btn:pressed {{ background-color: #388bfd; }}
+QFrame#divider {{
+    background: {BORDER};
+    max-height: 1px;
+    min-height: 1px;
+}}
+"""
+
+# ── Stage input widget ────────────────────────────────────────────────────────
+class StageInputWidget(QGroupBox):
+    def __init__(self, stage_num, parent=None):
+        super().__init__(f"Stage {stage_num}", parent)
+        self.stage_num = stage_num
+        self._build()
+
+    def _build(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(10)
+
+        # Propellant / Oxidizer
+        row1 = QHBoxLayout()
+        row1.addWidget(QLabel("Propellant / Oxidizer"))
+        self.prop_combo = QComboBox()
+        self.prop_combo.addItems(PROPELLANTS)
+        self.prop_combo.setMinimumWidth(220)
+        row1.addWidget(self.prop_combo)
+        layout.addLayout(row1)
+
+        # Combustion Cycle
+        row2 = QHBoxLayout()
+        row2.addWidget(QLabel("Combustion Cycle"))
+        self.cycle_combo = QComboBox()
+        self.cycle_combo.addItems(CYCLES)
+        self.cycle_combo.setMinimumWidth(220)
+        row2.addWidget(self.cycle_combo)
+        layout.addLayout(row2)
+
+        # ISP slider
+        isp_group = QGroupBox("Specific Impulse — ISP (s)")
+        isp_layout = QVBoxLayout(isp_group)
+        self.isp_slider = QSlider(Qt.Orientation.Horizontal)
+        self.isp_slider.setRange(0, 1000)
+        self.isp_slider.setValue(500)
+        self.isp_value_label = QLabel("— s")
+        self.isp_value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.isp_value_label.setStyleSheet(f"color: {ACCENT}; font-weight: 700; font-size: 15px;")
+        self.isp_range_label = QLabel("No data for this combination")
+        self.isp_range_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.isp_range_label.setStyleSheet(f"color: {TEXT_SEC}; font-size: 11px;")
+        isp_layout.addWidget(self.isp_value_label)
+        isp_layout.addWidget(self.isp_slider)
+        isp_layout.addWidget(self.isp_range_label)
+        layout.addWidget(isp_group)
+
+        # k_s slider
+        ks_group = QGroupBox("Structural Coefficient — k_s")
+        ks_layout = QVBoxLayout(ks_group)
+        self.ks_slider = QSlider(Qt.Orientation.Horizontal)
+        self.ks_slider.setRange(0, 1000)
+        self.ks_slider.setValue(500)
+        self.ks_value_label = QLabel("—")
+        self.ks_value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.ks_value_label.setStyleSheet(f"color: {ACCENT}; font-weight: 700; font-size: 15px;")
+        self.ks_range_label = QLabel("No data for this combination")
+        self.ks_range_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.ks_range_label.setStyleSheet(f"color: {TEXT_SEC}; font-size: 11px;")
+        ks_layout.addWidget(self.ks_value_label)
+        ks_layout.addWidget(self.ks_slider)
+        ks_layout.addWidget(self.ks_range_label)
+        layout.addWidget(ks_group)
+
+        # Connect signals
+        self.prop_combo.currentIndexChanged.connect(self._update_ranges)
+        self.cycle_combo.currentIndexChanged.connect(self._update_ranges)
+        self.isp_slider.valueChanged.connect(self._update_isp_label)
+        self.ks_slider.valueChanged.connect(self._update_ks_label)
+
+        self._update_ranges()
+
+    def _get_data(self):
+        prop  = self.prop_combo.currentIndex() + 1   # 1-based
+        cycle = self.cycle_combo.currentIndex()       # 0-based
+        return TYPICAL_DATA.get((prop, cycle), (0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
+
+    def _update_ranges(self):
+        d = self._get_data()
+        isp_lo, isp_hi, isp_mean = d[0], d[1], d[2]
+        ks_lo,  ks_hi,  ks_mean  = d[3], d[4], d[5]
+
+        has_isp = isp_hi > isp_lo or (isp_hi == isp_lo and isp_hi > 0)
+        has_ks  = ks_hi  > ks_lo  or (ks_hi  == ks_lo  and ks_hi  > 0)
+
+        # ISP
+        self.isp_slider.setEnabled(has_isp)
+        if has_isp:
+            # slider works in tenths of a second for resolution
+            self.isp_slider.setRange(int(isp_lo * 10), int(isp_hi * 10))
+            self.isp_slider.setValue(int(isp_mean * 10))
+            self.isp_range_label.setText(f"Range: {isp_lo:.1f} – {isp_hi:.1f} s   |   Mean: {isp_mean:.1f} s")
+            self.isp_range_label.setStyleSheet(f"color: {TEXT_SEC}; font-size: 11px;")
+        else:
+            self.isp_slider.setRange(0, 1000)
+            self.isp_slider.setValue(0)
+            self.isp_range_label.setText("No data for this combination yet")
+            self.isp_range_label.setStyleSheet(f"color: {ORANGE}; font-size: 11px;")
+            self.isp_value_label.setText("— s")
+
+        # k_s
+        self.ks_slider.setEnabled(has_ks)
+        if has_ks:
+            self.ks_slider.setRange(int(ks_lo * 10000), int(ks_hi * 10000))
+            self.ks_slider.setValue(int(ks_mean * 10000))
+            self.ks_range_label.setText(f"Range: {ks_lo:.4f} – {ks_hi:.4f}   |   Mean: {ks_mean:.4f}")
+            self.ks_range_label.setStyleSheet(f"color: {TEXT_SEC}; font-size: 11px;")
+        else:
+            self.ks_slider.setRange(0, 1000)
+            self.ks_slider.setValue(0)
+            self.ks_range_label.setText("No data for this combination yet")
+            self.ks_range_label.setStyleSheet(f"color: {ORANGE}; font-size: 11px;")
+            self.ks_value_label.setText("—")
+
+        self._update_isp_label()
+        self._update_ks_label()
+
+    def _update_isp_label(self):
+        if self.isp_slider.isEnabled():
+            val = self.isp_slider.value() / 10.0
+            self.isp_value_label.setText(f"{val:.1f} s")
+
+    def _update_ks_label(self):
+        if self.ks_slider.isEnabled():
+            val = self.ks_slider.value() / 10000.0
+            self.ks_value_label.setText(f"{val:.4f}")
+
+    def get_values(self):
+        """Return (isp, k_s, has_data) for this stage."""
+        d = self._get_data()
+        isp_lo, isp_hi = d[0], d[1]
+        ks_lo,  ks_hi  = d[3], d[4]
+        has_isp = isp_hi > isp_lo or (isp_hi == isp_lo and isp_hi > 0)
+        has_ks  = ks_hi  > ks_lo  or (ks_hi  == ks_lo  and ks_hi  > 0)
+        isp = self.isp_slider.value() / 10.0  if has_isp else None
+        ks  = self.ks_slider.value()  / 10000.0 if has_ks  else None
+        return isp, ks, (has_isp and has_ks)
+
+
+# ── Result card widget ────────────────────────────────────────────────────────
+class ResultCard(QFrame):
+    def __init__(self, stage_num, data, parent=None):
+        super().__init__(parent)
+        self.setStyleSheet(f"""
+            QFrame {{
+                background-color: {BG_CARD};
+                border: 1px solid {BORDER};
+                border-radius: 10px;
+            }}
+        """)
+        layout = QVBoxLayout(self)
+        layout.setSpacing(8)
+        layout.setContentsMargins(16, 14, 16, 14)
+
+        # Header
+        header = QLabel(f"Stage {stage_num}")
+        header.setStyleSheet(f"color: {ACCENT}; font-size: 16px; font-weight: 700; border: none;")
+        layout.addWidget(header)
+
+        div = QFrame()
+        div.setObjectName("divider")
+        layout.addWidget(div)
+
+        # Metrics grid
+        grid = QGridLayout()
+        grid.setHorizontalSpacing(24)
+        grid.setVerticalSpacing(6)
+
+        def add_metric(row, col, label, value, unit="", color=TEXT_PRI):
+            lbl = QLabel(label)
+            lbl.setStyleSheet(f"color: {TEXT_SEC}; font-size: 11px; border: none;")
+            val = QLabel(f"{value:,.1f} {unit}".strip())
+            val.setStyleSheet(f"color: {color}; font-size: 14px; font-weight: 600; border: none;")
+            grid.addWidget(lbl, row*2,   col)
+            grid.addWidget(val, row*2+1, col)
+
+        add_metric(0, 0, "Initial Mass (m₀)",    data["m0"],  "kg", TEXT_PRI)
+        add_metric(0, 1, "Final Mass (m_f)",      data["mf"],  "kg", TEXT_PRI)
+        add_metric(1, 0, "Propellant Mass (m_p)", data["mp"],  "kg", ACCENT2)
+        add_metric(1, 1, "Structure Mass (m_s)",  data["ms"],  "kg", TEXT_PRI)
+        add_metric(2, 0, "Mass Ratio (k_m)",      data["k_m"], "",   ACCENT)
+        add_metric(2, 1, "Payload Ratio (k_L)",   data["k_L"], "",   ACCENT)
+        add_metric(3, 0, "Struct. Coeff. (k_s)",  data["k_s"], "",   TEXT_PRI)
+        add_metric(3, 1, "Exhaust Vel. (ν_e)",    data["nu_e"],"km/s",TEXT_PRI)
+
+        layout.addLayout(grid)
+
+
+# ── Main window ───────────────────────────────────────────────────────────────
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Rocket Staging Optimizer")
+        self.setMinimumSize(960, 700)
+        self.stage_widgets = []
+        self._build_ui()
+
+    def _build_ui(self):
+        root = QWidget()
+        self.setCentralWidget(root)
+        root_layout = QHBoxLayout(root)
+        root_layout.setContentsMargins(0, 0, 0, 0)
+        root_layout.setSpacing(0)
+
+        # ── Left panel (inputs) ───────────────────────────────────────────────
+        left_scroll = QScrollArea()
+        left_scroll.setWidgetResizable(True)
+        left_scroll.setFixedWidth(420)
+        left_scroll.setStyleSheet(f"background: {BG_PANEL}; border-right: 1px solid {BORDER};")
+
+        left_inner = QWidget()
+        left_inner.setStyleSheet(f"background: {BG_PANEL};")
+        self.left_layout = QVBoxLayout(left_inner)
+        self.left_layout.setContentsMargins(16, 20, 16, 20)
+        self.left_layout.setSpacing(14)
+
+        # Title
+        title = QLabel("ROCKET STAGING")
+        title.setStyleSheet(f"color: {TEXT_PRI}; font-size: 20px; font-weight: 800; letter-spacing: 2px;")
+        subtitle = QLabel("Multi-stage propulsion optimizer")
+        subtitle.setStyleSheet(f"color: {TEXT_SEC}; font-size: 12px;")
+        self.left_layout.addWidget(title)
+        self.left_layout.addWidget(subtitle)
+
+        div = QFrame(); div.setObjectName("divider"); self.left_layout.addWidget(div)
+
+        # Mission parameters
+        mission_group = QGroupBox("MISSION PARAMETERS")
+        mg_layout = QGridLayout(mission_group)
+        mg_layout.setSpacing(8)
+
+        mg_layout.addWidget(QLabel("ΔV  (km/s)"), 0, 0)
+        self.dv_spin = QDoubleSpinBox()
+        self.dv_spin.setRange(0.1, 50.0)
+        self.dv_spin.setValue(10.0)
+        self.dv_spin.setDecimals(2)
+        self.dv_spin.setSingleStep(0.5)
+        mg_layout.addWidget(self.dv_spin, 0, 1)
+
+        mg_layout.addWidget(QLabel("Payload Mass  (kg)"), 1, 0)
+        self.pl_spin = QDoubleSpinBox()
+        self.pl_spin.setRange(1.0, 1_000_000.0)
+        self.pl_spin.setValue(5000.0)
+        self.pl_spin.setDecimals(1)
+        self.pl_spin.setSingleStep(100.0)
+        mg_layout.addWidget(self.pl_spin, 1, 1)
+
+        mg_layout.addWidget(QLabel("Number of Stages"), 2, 0)
+        self.n_stages_spin = QSpinBox()
+        self.n_stages_spin.setRange(1, 5)
+        self.n_stages_spin.setValue(3)
+        mg_layout.addWidget(self.n_stages_spin, 2, 1)
+
+        self.left_layout.addWidget(mission_group)
+        self.n_stages_spin.valueChanged.connect(self._rebuild_stage_inputs)
+
+        # Stage inputs container
+        self.stages_container = QWidget()
+        self.stages_container.setStyleSheet(f"background: {BG_PANEL};")
+        self.stages_layout = QVBoxLayout(self.stages_container)
+        self.stages_layout.setContentsMargins(0, 0, 0, 0)
+        self.stages_layout.setSpacing(10)
+        self.left_layout.addWidget(self.stages_container)
+
+        # Run button
+        self.run_btn = QPushButton("▶  Run Staging Analysis")
+        self.run_btn.setObjectName("run_btn")
+        self.run_btn.clicked.connect(self._run)
+        self.left_layout.addWidget(self.run_btn)
+        self.left_layout.addStretch()
+
+        left_scroll.setWidget(left_inner)
+        root_layout.addWidget(left_scroll)
+
+        # ── Right panel (results) ─────────────────────────────────────────────
+        right_scroll = QScrollArea()
+        right_scroll.setWidgetResizable(True)
+        right_scroll.setStyleSheet(f"background: {BG_DARK};")
+
+        self.right_inner = QWidget()
+        self.right_inner.setStyleSheet(f"background: {BG_DARK};")
+        self.right_layout = QVBoxLayout(self.right_inner)
+        self.right_layout.setContentsMargins(24, 24, 24, 24)
+        self.right_layout.setSpacing(14)
+        self.right_layout.addStretch()
+
+        right_scroll.setWidget(self.right_inner)
+        root_layout.addWidget(right_scroll, 1)
+
+        # Build initial stage inputs
+        self._rebuild_stage_inputs(self.n_stages_spin.value())
+        self._show_empty_state()
+
+    def _rebuild_stage_inputs(self, n):
+        # Remove old stage widgets
+        for w in self.stage_widgets:
+            self.stages_layout.removeWidget(w)
+            w.deleteLater()
+        self.stage_widgets.clear()
+
+        for i in range(n):
+            sw = StageInputWidget(i + 1)
+            self.stages_layout.addWidget(sw)
+            self.stage_widgets.append(sw)
+
+    def _show_empty_state(self):
+        placeholder = QLabel("Run the analysis to see results here.")
+        placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        placeholder.setObjectName("placeholder")
+        placeholder.setStyleSheet(f"color: {TEXT_DIM}; font-size: 15px;")
+        self.right_layout.insertWidget(0, placeholder)
+
+    def _clear_results(self):
+        while self.right_layout.count():
+            item = self.right_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+    def _run(self):
+        n = self.n_stages_spin.value()
+        isp_list = []
+        ks_list  = []
+
+        # Validate all stages have data
+        missing = []
+        for i, sw in enumerate(self.stage_widgets):
+            isp, ks, ok = sw.get_values()
+            if not ok:
+                missing.append(i + 1)
+            else:
+                isp_list.append(isp)
+                ks_list.append(ks)
+
+        if missing:
+            QMessageBox.warning(
+                self, "Missing Data",
+                f"Stage(s) {missing} have no ISP or k_s data for the selected\n"
+                "propellant / combustion cycle combination.\n\n"
+                "Please select a different combination or add data to Typical_Data.f90."
+            )
+            return
+
+        try:
+            results = run_staging(
+                n_stages=n,
+                delta_v=self.dv_spin.value(),
+                payload_mass=self.pl_spin.value(),
+                isp_list=isp_list,
+                ks_list=ks_list,
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "Fortran Error", str(e))
+            return
+
+        self._clear_results()
+
+        # Summary header
+        summary = QLabel(
+            f"Total Initial Mass:  "
+            f"<span style='color:{ACCENT}; font-size:22px; font-weight:700;'>"
+            f"{results['total_initial_mass']:,.1f} kg</span>"
+        )
+        summary.setTextFormat(Qt.TextFormat.RichText)
+        summary.setStyleSheet(f"color: {TEXT_PRI}; font-size: 14px;")
+        self.right_layout.addWidget(summary)
+
+        min_label = QLabel(
+            "✔  Minimum confirmed" if results["minimum_found"]
+            else "✘  Minimum not confirmed — check your inputs"
+        )
+        color = GREEN if results["minimum_found"] else ACCENT2
+        min_label.setStyleSheet(f"color: {color}; font-size: 12px; font-weight: 600;")
+        self.right_layout.addWidget(min_label)
+
+        div = QFrame(); div.setObjectName("divider")
+        self.right_layout.addWidget(div)
+
+        # Stage cards
+        for stage in results["stages"]:
+            card = ResultCard(stage["stage"], stage)
+            self.right_layout.addWidget(card)
+
+        self.right_layout.addStretch()
+
+
+# ── Entry point ───────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    app.setStyleSheet(STYLE)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
