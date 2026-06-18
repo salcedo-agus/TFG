@@ -64,7 +64,7 @@ subroutine STAGING(Rocket)
         print*, "res=   ", res
         print*, "====================================="
     end do 
-    L = a 
+    L = c 
     print*, "FINAL L VALUE: ", L 
     !=====================================================================
 
