@@ -785,6 +785,10 @@ class MainWindow(QMainWindow):
         right_scroll.setWidget(self.right_inner)
         root_layout.addWidget(right_scroll, 1)
 
+        self.dv_spin.valueChanged.connect(self._on_inputs_changed)
+        self.pl_spin.valueChanged.connect(self._on_inputs_changed)
+        self.n_stages_spin.valueChanged.connect(self._on_inputs_changed) 
+
         # Build initial stage inputs
         self._rebuild_stage_inputs(self.n_stages_spin.value())
         self._show_empty_state()
@@ -798,6 +802,7 @@ class MainWindow(QMainWindow):
         for i in range(n):
             sw = StageInputWidget(i + 1)
             sw.validity_changed.connect(self._update_run_button)
+            sw.validity_changed.connect(self._on_inputs_changed)
             self.stages_layout.addWidget(sw)
             self.stage_widgets.append(sw)
 
@@ -821,6 +826,10 @@ class MainWindow(QMainWindow):
         self.run_btn.setProperty("ready", all_valid)
         self.run_btn.style().unpolish(self.run_btn)
         self.run_btn.style().polish(self.run_btn)
+
+    def _on_inputs_changed(self):
+        self._clear_results()
+        self._show_empty_state()
 
     def _run(self):
         n = self.n_stages_spin.value()
