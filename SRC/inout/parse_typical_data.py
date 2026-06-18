@@ -26,7 +26,7 @@ OUTPUT_FILE  = os.path.join(ROOT_DIR,   "gui", "typical_data_ranges.py")
 # ── Regex patterns ─────────────────────────────────────────────────────────────
 # Matches:  case(1) ! 1 - LIQUID HYDROGEN / LIQUID OXYGEN (LH2/LOX)
 RE_PROP_CASE  = re.compile(
-    r'select case \((?:first|second|third)_stage_propellant_and_oxidizer\)',
+    r'select case \((first|second|third)_stage_propellant_and_oxidizer\)',
     re.IGNORECASE
 )
 RE_PROP_LINE  = re.compile(
@@ -70,9 +70,10 @@ def parse_fortran(path):
     data        = {}   # {(prop, cycle): (isp_lo, isp_hi, isp_mean, ks_lo, ks_hi, ks_mean)}
 
     # ── State machine ──────────────────────────────────────────────────────────
-    in_first_prop_select  = False   # inside the first select case (propellant)
-    in_first_cycle_select = False   # inside the inner select case (cycle)
-    past_first_prop       = False   # stop after first prop block is fully parsed
+    in_prop_select        = False   # inside a select case (propellant)
+    in_cycle_select       = False   # inside the inner select case (cycle)
+    stage_blocks_parsed   = 0       # counts completed stage blocks (stop at 3)
+    current_stage         = None    # 1, 2, or 3
 
     current_prop  = None
     current_cycle = None
@@ -86,12 +87,15 @@ def parse_fortran(path):
         stripped = line.strip().lower()
 
         # ── Detect start of first propellant select block ──────────────────
-        if not past_first_prop and RE_PROP_CASE.search(line):
-            in_first_prop_select = True
+        m_stage = RE_PROP_CASE.search(line)
+        if stage_blocks_parsed < 3 and m_stage:
+            in_prop_select  = True
             prop_select_depth = 1
+            stage_word = m_stage.group(1).lower()
+            current_stage = {"first": 1, "second": 2, "third": 3}[stage_word]
             continue
 
-        if not in_first_prop_select:
+        if not in_prop_select:
             continue
 
         # ── Track nesting depth of the propellant select block ─────────────
@@ -100,12 +104,14 @@ def parse_fortran(path):
         if re.search(r'\bend\s+select\b', stripped):
             prop_select_depth -= 1
             if prop_select_depth == 0:
-                # Flush last (prop, cycle) pair
                 if current_prop is not None and current_cycle is not None:
-                    _flush(data, current_prop, current_cycle, values, is_invalid)
-                past_first_prop = True
-                in_first_prop_select = False
-                break
+                    _flush(data, current_stage, current_prop, current_cycle, values, is_invalid)
+                stage_blocks_parsed += 1
+                in_prop_select = False
+                current_prop   = None
+                current_cycle  = None
+                values         = {}
+                is_invalid     = False
 
         # ── Propellant case line ────────────────────────────────────────────
         if prop_select_depth == 1:
@@ -122,32 +128,30 @@ def parse_fortran(path):
 
         # ── Detect inner cycle select block ────────────────────────────────
         if prop_select_depth >= 2 and RE_CYCLE_CASE.search(line):
-            in_first_cycle_select = True
+            in_cycle_select = True
             cycle_select_depth = 1
             continue
 
-        if not in_first_cycle_select:
+        if not in_cycle_select:
             continue
 
         # ── Track nesting of cycle select block ────────────────────────────
         if re.search(r'\bend\s+select\b', stripped):
             cycle_select_depth -= 1
             if cycle_select_depth == 0:
-                # Flush last cycle entry before leaving this inner block
                 if current_prop is not None and current_cycle is not None:
-                    _flush(data, current_prop, current_cycle, values, is_invalid)
-                in_first_cycle_select = False
-                current_cycle = None
-                values = {}
-                is_invalid = False
+                    _flush(data, current_stage, current_prop, current_cycle, values, is_invalid)
+                in_cycle_select = False
+                current_cycle   = None
+                values          = {}
+                is_invalid      = False
             continue
 
         # ── Cycle case line ────────────────────────────────────────────────
         m = RE_CYCLE_LINE.match(line.strip())
-        if m and in_first_cycle_select:
-            # Flush previous cycle before starting new one
+        if m and in_cycle_select:
             if current_cycle is not None:
-                _flush(data, current_prop, current_cycle, values, is_invalid)
+                _flush(data, current_stage, current_prop, current_cycle, values, is_invalid)
             idx  = int(m.group(1))
             name = _clean_name(m.group(2))
             if idx not in cycles:
@@ -173,11 +177,10 @@ def parse_fortran(path):
     return propellants, cycles, data
 
 
-def _flush(data, prop, cycle, values, is_invalid):
-    """Store the accumulated values for (prop, cycle) into data dict."""
+def _flush(data, stage, prop, cycle, values, is_invalid):
+    """Store the accumulated values for (stage, prop, cycle) into data dict."""
     if is_invalid:
-        # Mark as explicitly invalid (None) so GUI can show a specific message
-        data[(prop, cycle)] = None
+        data[(stage, prop, cycle)] = None
         return
     isp_lo   = values.get("isp_lower", 0.0)
     isp_hi   = values.get("isp_upper", 0.0)
@@ -185,7 +188,7 @@ def _flush(data, prop, cycle, values, is_invalid):
     ks_lo    = values.get("ks_lower",  0.0)
     ks_hi    = values.get("ks_upper",  0.0)
     ks_mean  = values.get("ks_mean",   0.0)
-    data[(prop, cycle)] = (isp_lo, isp_hi, isp_mean, ks_lo, ks_hi, ks_mean)
+    data[(stage, prop, cycle)] = (isp_lo, isp_hi, isp_mean, ks_lo, ks_hi, ks_mean)
 
 
 def _clean_name(raw):
@@ -234,28 +237,31 @@ def write_output(path, propellants, cycles, data):
     lines.append(']')
     lines.append('')
 
-    # TYPICAL_DATA dict
+    # Per-stage TYPICAL_DATA dicts
     lines.append('# Key: (propellant_index, cycle_index)')
     lines.append('# Value: (isp_lower, isp_upper, isp_mean, ks_lower, ks_upper, ks_mean)')
     lines.append('# Value is None for explicitly invalid combinations.')
-    lines.append('TYPICAL_DATA = {')
-    for prop_idx in sorted(propellants):
-        lines.append(f'    # {propellants[prop_idx]}')
-        for cycle_idx in sorted(cycles):
-            val = data.get((prop_idx, cycle_idx))
-            if val is None:
-                lines.append(f'    ({prop_idx}, {cycle_idx}): None,  # invalid combination')
-            elif val == (0.0, 0.0, 0.0, 0.0, 0.0, 0.0):
-                lines.append(f'    ({prop_idx}, {cycle_idx}): (0.0, 0.0, 0.0,  0.0, 0.0, 0.0),  # no data yet')
-            else:
-                isp_lo, isp_hi, isp_mean, ks_lo, ks_hi, ks_mean = val
-                lines.append(
-                    f'    ({prop_idx}, {cycle_idx}): '
-                    f'({isp_lo}, {isp_hi}, {isp_mean},  '
-                    f'{ks_lo}, {ks_hi}, {ks_mean}),'
-                )
+    for stage_idx in (1, 2, 3):
+        lines.append(f'TYPICAL_DATA_STAGE_{stage_idx} = {{')
+        for prop_idx in sorted(propellants):
+            lines.append(f'    # {propellants[prop_idx]}')
+            for cycle_idx in sorted(cycles):
+                val = data.get((stage_idx, prop_idx, cycle_idx))
+                if val is None:
+                    lines.append(f'    ({prop_idx}, {cycle_idx}): None,  # invalid combination')
+                elif val == (0.0, 0.0, 0.0, 0.0, 0.0, 0.0):
+                    lines.append(f'    ({prop_idx}, {cycle_idx}): (0.0, 0.0, 0.0,  0.0, 0.0, 0.0),  # no data yet')
+                else:
+                    isp_lo, isp_hi, isp_mean, ks_lo, ks_hi, ks_mean = val
+                    lines.append(
+                        f'    ({prop_idx}, {cycle_idx}): '
+                        f'({isp_lo}, {isp_hi}, {isp_mean},  '
+                        f'{ks_lo}, {ks_hi}, {ks_mean}),'
+                    )
+            lines.append('')
+        lines.append('}')
         lines.append('')
-    lines.append('}')
+    lines.append('TYPICAL_DATA_BY_STAGE = [None, TYPICAL_DATA_STAGE_1, TYPICAL_DATA_STAGE_2, TYPICAL_DATA_STAGE_3]')
     lines.append('')
 
     with open(path, "w", encoding="utf-8") as f:

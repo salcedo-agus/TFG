@@ -120,13 +120,13 @@ def _load_data():
     try:
         import typical_data_ranges as _tdr
         importlib.reload(_tdr)   # always get the latest version
-        return _tdr.TYPICAL_DATA, _tdr.PROPELLANTS, _tdr.CYCLES
+        return _tdr.TYPICAL_DATA_BY_STAGE, _tdr.PROPELLANTS, _tdr.CYCLES
     except ImportError:
         print("WARNING: typical_data_ranges.py not found.")
         print("         Run parse_typical_data.py to generate it.")
-        return {}, [], []
+        return [None, {}, {}, {}], [], []
 
-TYPICAL_DATA, PROPELLANTS, CYCLES = _load_data()
+TYPICAL_DATA_BY_STAGE, PROPELLANTS, CYCLES = _load_data()
 
 
 # ── Colour palette ────────────────────────────────────────────────────────────
@@ -281,18 +281,6 @@ QPushButton#launch_btn:pressed {{
     background-color: #388bfd;
     color: {BG_DARK};
 }}
-QPushButton#run_btn {{
-    background-color: {ACCENT};
-    color: {BG_DARK};
-    border: none;
-    border-radius: 8px;
-    padding: 10px 32px;
-    font-weight: 700;
-    font-size: 14px;
-    min-height: 40px;
-}}
-QPushButton#run_btn:hover {{ background-color: #79b8ff; }}
-QPushButton#run_btn:pressed {{ background-color: #388bfd; }}
 QFrame#divider {{
     background: {BORDER};
     max-height: 1px;
@@ -301,7 +289,13 @@ QFrame#divider {{
 """
 
 # ── Stage input widget ────────────────────────────────────────────────────────
+class NoScrollComboBox(QComboBox):
+    def wheelEvent(self, event):
+        event.ignore()
+
 class StageInputWidget(QGroupBox):
+    validity_changed = pyqtSignal()
+
     def __init__(self, stage_num, parent=None):
         super().__init__(f"Stage {stage_num}", parent)
         self.stage_num = stage_num
@@ -314,7 +308,7 @@ class StageInputWidget(QGroupBox):
         # Propellant / Oxidizer
         row1 = QHBoxLayout()
         row1.addWidget(QLabel("Propellant / Oxidizer"))
-        self.prop_combo = QComboBox()
+        self.prop_combo = NoScrollComboBox()
         self.prop_combo.addItems(PROPELLANTS)
         self.prop_combo.setMinimumWidth(220)
         row1.addWidget(self.prop_combo)
@@ -323,7 +317,7 @@ class StageInputWidget(QGroupBox):
         # Combustion Cycle
         row2 = QHBoxLayout()
         row2.addWidget(QLabel("Combustion Cycle"))
-        self.cycle_combo = QComboBox()
+        self.cycle_combo = NoScrollComboBox()
         self.cycle_combo.addItems(CYCLES)
         self.cycle_combo.setMinimumWidth(220)
         row2.addWidget(self.cycle_combo)
@@ -365,7 +359,9 @@ class StageInputWidget(QGroupBox):
 
         # Connect signals
         self.prop_combo.currentIndexChanged.connect(self._prop_changed)
+        self.prop_combo.currentIndexChanged.connect(self.validity_changed)
         self.cycle_combo.currentIndexChanged.connect(self._cycle_changed)
+        self.cycle_combo.currentIndexChanged.connect(self.validity_changed)
         self.isp_slider.valueChanged.connect(self._update_isp_label)
         self.ks_slider.valueChanged.connect(self._update_ks_label)
 
@@ -380,11 +376,11 @@ class StageInputWidget(QGroupBox):
         self._refresh_cycle_items()
         prop  = self.prop_combo.currentIndex() + 1
         cycle = self.cycle_combo.currentIndex()
-        d = TYPICAL_DATA.get((prop, cycle))
+        d = TYPICAL_DATA_BY_STAGE[self.stage_num].get((prop, cycle))
         if d is None:
             # Current cycle is explicitly invalid for this propellant — reset to first valid
             for c_idx in range(self.cycle_combo.count()):
-                test = TYPICAL_DATA.get((prop, c_idx))
+                test = TYPICAL_DATA_BY_STAGE[self.stage_num].get((prop, c_idx))
                 if test is not None:
                     self.cycle_combo.setCurrentIndex(c_idx)
                     break
@@ -394,7 +390,7 @@ class StageInputWidget(QGroupBox):
         """When cycle changes: warn if the combination is explicitly invalid."""
         prop  = self.prop_combo.currentIndex() + 1
         cycle = self.cycle_combo.currentIndex()
-        d = TYPICAL_DATA.get((prop, cycle))
+        d = TYPICAL_DATA_BY_STAGE[self.stage_num].get((prop, cycle))
         if d is None:
             # Show warning in the range labels but don't block the user
             self._set_invalid_state()
@@ -407,7 +403,7 @@ class StageInputWidget(QGroupBox):
         model = self.cycle_combo.model()
         for c_idx in range(self.cycle_combo.count()):
             item = model.item(c_idx)
-            d = TYPICAL_DATA.get((prop, c_idx))
+            d = TYPICAL_DATA_BY_STAGE[self.stage_num].get((prop, c_idx))
             if d is None:
                 # Visually dim but keep selectable so user sees the warning
                 item.setForeground(__import__('PyQt6.QtGui', fromlist=['QColor']).QColor(TEXT_DIM))
@@ -429,13 +425,14 @@ class StageInputWidget(QGroupBox):
 
     def _get_data(self):
         prop  = self.prop_combo.currentIndex() + 1   # 1-based
-        cycle = self.cycle_combo.currentIndex()       # 0-based
-        return TYPICAL_DATA.get((prop, cycle), (0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
+        cycle = self.cycle_combo.currentIndex()      # 0-based
+        stage_data = TYPICAL_DATA_BY_STAGE[self.stage_num]
+        return stage_data.get((prop, cycle), (0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
 
     def _update_ranges(self):
         prop  = self.prop_combo.currentIndex() + 1
         cycle = self.cycle_combo.currentIndex()
-        d = TYPICAL_DATA.get((prop, cycle))
+        d = TYPICAL_DATA_BY_STAGE[self.stage_num].get((prop, cycle))
 
         # None means explicitly invalid combination
         if d is None:
@@ -493,7 +490,7 @@ class StageInputWidget(QGroupBox):
         """Return (isp, k_s, has_data) for this stage."""
         prop  = self.prop_combo.currentIndex() + 1
         cycle = self.cycle_combo.currentIndex()
-        d = TYPICAL_DATA.get((prop, cycle))
+        d = TYPICAL_DATA_BY_STAGE[self.stage_num].get((prop, cycle))
 
         # Explicitly invalid combination
         if d is None:
@@ -759,6 +756,13 @@ class MainWindow(QMainWindow):
         # Run button
         self.run_btn = QPushButton("▶  Run Staging Analysis")
         self.run_btn.setObjectName("run_btn")
+        self.run_btn.setProperty("ready", False)
+        self.run_btn.setStyleSheet(f"""
+            QPushButton {{ background-color: {BG_INPUT}; color: {TEXT_DIM}; border: 1px solid {BORDER}; border-radius: 8px; padding: 10px 32px; font-weight: 700; font-size: 14px; min-height: 40px; }}
+            QPushButton[ready=true] {{ background-color: {GREEN}; color: {BG_DARK}; border: none; }}
+            QPushButton[ready=true]:hover {{ background-color: #56d364; color: {BG_DARK}; }}
+            QPushButton[ready=true]:pressed {{ background-color: #3fb950; color: {BG_DARK}; }}
+        """)
         self.run_btn.clicked.connect(self._run)
         self.left_layout.addWidget(self.run_btn)
         self.left_layout.addStretch()
@@ -786,7 +790,6 @@ class MainWindow(QMainWindow):
         self._show_empty_state()
 
     def _rebuild_stage_inputs(self, n):
-        # Remove old stage widgets
         for w in self.stage_widgets:
             self.stages_layout.removeWidget(w)
             w.deleteLater()
@@ -794,8 +797,11 @@ class MainWindow(QMainWindow):
 
         for i in range(n):
             sw = StageInputWidget(i + 1)
+            sw.validity_changed.connect(self._update_run_button)
             self.stages_layout.addWidget(sw)
             self.stage_widgets.append(sw)
+
+        self._update_run_button()
 
     def _show_empty_state(self):
         placeholder = QLabel("Run the analysis to see results here.")
@@ -809,6 +815,12 @@ class MainWindow(QMainWindow):
             item = self.right_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
+
+    def _update_run_button(self):
+        all_valid = all(sw.get_values()[2] for sw in self.stage_widgets)
+        self.run_btn.setProperty("ready", all_valid)
+        self.run_btn.style().unpolish(self.run_btn)
+        self.run_btn.style().polish(self.run_btn)
 
     def _run(self):
         n = self.n_stages_spin.value()
