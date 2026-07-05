@@ -7,7 +7,8 @@ program TFG
 
     call data_entry(Rocket)
     call STAGING(Rocket) 
-    
+    call stage_Thrust_calculator(Rocket)
+
     do i=1, Rocket%number_of_stages
         print*, "==========================================="
         print*, "Stage N", i 
