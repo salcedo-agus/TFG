@@ -12,11 +12,13 @@ FC      := gfortran
 FFLAGS  := -O2 -Wall
 
 # -- Folder layout -------------------------------------------------------------
-BUILD_DIR     := ../build
-INOUT_DIR     := inout
-STAGING_DIR   := staging
-INTERFACE_DIR := interface
-GUI_DIR       := gui
+BUILD_DIR          := ../build
+INOUT_DIR          := inout
+STAGING_DIR        := staging
+INTERFACE_DIR      := interface
+GUI_DIR            := gui
+PRE_STAGING_DIR    := pre-staging-calcs
+PRE_SIMULATION_DIR := pre-simulation-calcs
 
 # -- Object files (compiled individually in dependency order) -----------------
 OBJS := \
@@ -116,7 +118,27 @@ $(BUILD_DIR)/C_Interface.o: $(INTERFACE_DIR)/C_Interface.f90 \
     $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
 
-# 5. main — depends on Rocket_Types and Typical_Data
+# 5. Stage_Optimization_Loop.f90 — depends on Typical_Data and Rocket_Types
+$(BUILD_DIR)/Stage_Optimization_Loop.o: $(STAGING_DIR)/C_Interface.f90 \
+    $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
+	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
+
+# 6. Orbit_calc.f90 — depends on Typical_Data
+$(BUILD_DIR)/Orbit_calc.o: $(PRE_STAGING_DIR)/Orbit_calc.f90 \
+    $(BUILD_DIR)/Typical_Data.o 
+	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
+
+# 7. Payload_Mass_calc.f90 — depends on Typical_Data and Rocket_Types
+$(BUILD_DIR)/Payload_Mass_calc.o: $(PRE_STAGING_DIR)/Payload_Mass_calc.f90 \
+    $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
+	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
+
+# 8. Thrust_calc.f90 — depends on Typical_Data and Rocket_Types
+$(BUILD_DIR)/Thrust_calc.o: $(PRE_SIMULATION_DIR)/Thrust_calc.f90 \
+    $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
+	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
+
+# 9. main — depends on Rocket_Types and Typical_Data
 $(BUILD_DIR)/main.o: main.f90 \
     $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@

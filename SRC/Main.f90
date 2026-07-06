@@ -6,6 +6,9 @@ program TFG
     integer i 
 
     call data_entry(Rocket)
+
+    call orbit_speed_calculator 
+
     call STAGING(Rocket) 
     call stage_Thrust_calculator(Rocket)
 

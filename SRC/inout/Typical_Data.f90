@@ -1,7 +1,8 @@
 module constants
     implicit none 
     real(8), parameter :: pi  = dacos(-1.d0) 
-    real(8), parameter :: g_0 = 9.80665d0 ![m/s] standard acceleration of gravity          
+    real(8), parameter :: g_0 = 9.80665d0 ![m/s] standard acceleration of gravity     
+    real(8), parameter :: Radius = 6.378  ![km] Earths radius     
 end module constants
 
 module typical_data
@@ -33,6 +34,7 @@ module typical_data
     !=============================================================
 
     real(8) delta_v
+    real(8) orbit_height
     real(8) payload_mass
     integer number_of_stages
 
@@ -57,7 +59,7 @@ subroutine data_entry(Rocket)
 
     print*, "============= DATA ENTRY =========="
     print*, "Number of stages= ", number_of_stages
-    print*, "delta_v=          ", delta_v 
+    print*, "orbit_height=     ", orbit_height 
     print*, "payload_mass=     ", payload_mass
     print*, "first_stage_propellant_and_oxidizer= ", first_stage_propellant_and_oxidizer
     print*, "second_stage_propellant_and_oxidizer=", second_stage_propellant_and_oxidizer
@@ -858,9 +860,9 @@ subroutine load_config(fname)
 
         select case (key)
 
-        case ("delta_v")
-            read(value, *, iostat=ios) delta_v
-            if (ios /= 0) print *, "WARNING: delta_v invalid:", value
+        case ("orbit_height")
+            read(value, *, iostat=ios) orbit_height
+            if (ios /= 0) print *, "WARNING: orbit_height invalid:", value
         
         case ("payload_mass")
             read(value, *, iostat=ios) payload_mass

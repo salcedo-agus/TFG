@@ -134,6 +134,11 @@ subroutine STAGING(Rocket)
     end if 
     !=====================================================================
     
+    !===== Stage Dv calculation with the rocket equation =================
+    do i=1, rocket%number_of_stages 
+        rocket%stage(i)%D_v = rocket%stage(i)%nu_e * log(rocket%stage(i)%m_0/rocket%stage(i)%m_f) 
+    end do
+    !=====================================================================
 end subroutine
 
 function g(L, Rocket)
