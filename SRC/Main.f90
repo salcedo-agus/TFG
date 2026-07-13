@@ -7,9 +7,14 @@ program TFG
 
     call data_entry(Rocket)
 
+    !#### PRE-STAGING ###########################
+    call Payload_Mass_calculator(Rocket)
     call orbit_speed_calculator 
 
+    !#### STAGING ###############################
     call STAGING(Rocket) 
+
+    !#### PRE-SIMULATION ########################
     call stage_Thrust_calculator(Rocket)
 
     do i=1, Rocket%number_of_stages
