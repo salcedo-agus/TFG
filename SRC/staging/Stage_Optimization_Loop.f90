@@ -10,6 +10,11 @@ subroutine STAGING_LOOP(Rocket)
     real(8) V_ast, V_circ           !V* en LaunchMethodology
     real(8) Ta                     !Tiempo de ascenso directo
 
+    Ta = 0.d0
+    do i=1, Rocket%number_of_stages
+        Ta = Ta + Rocket%stage(i)%t_burn
+    end do
+
     V_circ = delta_v
     V_ast = sqrt(V_circ**2.d0 + 2.d0*g_0*orbit_height*(Radius/(Radius+orbit_height))**2.d0)
     DV_old = V_ast + 1.5e-3*Ta**2.d0 + 8.82e-2*Ta + 1036.d0
