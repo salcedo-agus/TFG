@@ -2,7 +2,7 @@ module constants
     implicit none 
     real(8), parameter :: pi  = dacos(-1.d0) 
     real(8), parameter :: g_0 = 9.80665d0 ![m/s] standard acceleration of gravity     
-    real(8), parameter :: Radius = 6.378  ![km] Earths radius     
+    real(8), parameter :: Radius = 6378  ![km] Earths radius     
 end module constants
 
 module typical_data
@@ -795,22 +795,22 @@ subroutine data_entry(Rocket)
     end select 
     
     !============= TEST CASE =============
-    !ISP_vector(1) = 400.d0
-    !ISP_vector(2) = 350.d0
-    !ISP_vector(3) = 300.d0
+    ISP_vector(1) = 400.d0
+    ISP_vector(2) = 350.d0
+    ISP_vector(3) = 300.d0
 
-    !k_s_vector(1) = 0.10d0
-    !k_s_vector(2) = 0.15d0
-    !k_s_vector(3) = 0.20d0
+    k_s_vector(1) = 0.10d0
+    k_s_vector(2) = 0.15d0
+    k_s_vector(3) = 0.20d0
     !=====================================
 
-    ISP_vector(1) = First_stage_ISP_mean
-    ISP_vector(2) = Second_stage_ISP_mean
-    ISP_vector(3) = Third_stage_ISP_mean
+    !ISP_vector(1) = First_stage_ISP_mean
+    !ISP_vector(2) = Second_stage_ISP_mean
+    !ISP_vector(3) = Third_stage_ISP_mean
 
-    k_s_vector(1) = First_stage_ks_mean
-    k_s_vector(2) = Second_stage_ks_mean
-    k_s_vector(3) = Third_stage_ks_mean
+    !k_s_vector(1) = First_stage_ks_mean
+    !k_s_vector(2) = Second_stage_ks_mean
+    !k_s_vector(3) = Third_stage_ks_mean
 
     do i=1, Rocket%number_of_stages
         Rocket%stage(i)%ISP = ISP_vector(i)
