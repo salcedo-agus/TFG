@@ -15,7 +15,7 @@ subroutine STAGING_LOOP(Rocket)
     delta_v = DV_old
 
     err = 1.d0
-    do while(err < 1e-3)
+    do while(err > 1e-3)
 
         call STAGING(Rocket)    
 
