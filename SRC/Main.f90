@@ -11,11 +11,8 @@ program TFG
     call Payload_Mass_calculator(Rocket)
     call orbit_speed_calculator 
 
-    !#### STAGING ###############################
-    call STAGING(Rocket) 
-
-    !#### PRE-SIMULATION ########################
-    call stage_Thrust_calculator(Rocket)
+    call STAGING_LOOP(Rocket) 
+    
 
     do i=1, Rocket%number_of_stages
         print*, "==========================================="

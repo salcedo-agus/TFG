@@ -31,5 +31,7 @@ module rocket_types
         real(8) rk_m  ! Mass ratio
         real(8) rk_s  ! Structural ratio
         real(8) rk_L  ! Payload ratio
+
+        real(8) rt_burn  !Rocket burn time (ascent time)
     end type Rocket_t  
 end module 
