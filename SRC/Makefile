@@ -25,8 +25,12 @@ OBJS := \
     $(BUILD_DIR)/Rocket_Types.o   \
     $(BUILD_DIR)/Typical_Data.o   \
     $(BUILD_DIR)/Staging.o        \
-    $(BUILD_DIR)/C_Interface.o
-
+    $(BUILD_DIR)/Payload_Mass_calc.o \
+    $(BUILD_DIR)/Stage_Optimization_Loop.o \
+    $(BUILD_DIR)/C_Interface.o    \
+    $(BUILD_DIR)/Orbit_calc.o     \
+    $(BUILD_DIR)/Thrust_calc.o        
+    
 # -- Module search/output flags -----------------------------------------------
 MODFLAGS := -J$(BUILD_DIR) -I$(BUILD_DIR)
 
@@ -119,7 +123,7 @@ $(BUILD_DIR)/C_Interface.o: $(INTERFACE_DIR)/C_Interface.f90 \
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
 
 # 5. Stage_Optimization_Loop.f90 — depends on Typical_Data and Rocket_Types
-$(BUILD_DIR)/Stage_Optimization_Loop.o: $(STAGING_DIR)/C_Interface.f90 \
+$(BUILD_DIR)/Stage_Optimization_Loop.o: $(STAGING_DIR)/Stage_Optimization_Loop.f90 \
     $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
 
