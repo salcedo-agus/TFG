@@ -24,4 +24,8 @@ subroutine stage_Thrust_calculator(Rocket)
         rocket%stage(i)%t_burn = rocket%stage(i)%m_p/rocket%stage(i)%m_dot
     end do
 
+    Rocket%rt_burn = 0.d0
+    do i=1, Rocket%number_of_stages
+        Rocket%rt_burn = Rocket%rt_burn + Rocket%stage(i)%t_burn
+    end do
 end subroutine stage_Thrust_calculator

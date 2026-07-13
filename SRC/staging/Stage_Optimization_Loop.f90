@@ -9,20 +9,19 @@ subroutine STAGING_LOOP(Rocket)
     real(8) err            !difference between 2 iterations of Delta_v
     real(8) V_ast, V_circ           !V* en LaunchMethodology
 
-    Rocket%rt_burn = 0.d0
-    do i=1, Rocket%number_of_stages
-        Rocket%rt_burn = Rocket%rt_burn + Rocket%stage(i)%t_burn
-    end do
-
     V_circ = delta_v
     V_ast = sqrt(V_circ**2.d0 + 2.d0*g_0*orbit_height*(Radius/(Radius+orbit_height))**2.d0)
     DV_old = V_ast + 1.5e-3*Rocket%rt_burn**2.d0 + 8.82e-2*Rocket%rt_burn + 1036.d0
+    delta_v = DV_old
 
+    err = 1.d0
     do while(err < 1e-3)
 
         call STAGING(Rocket)    
 
-        call DV_loss(Rocket,DV_new)   
+        call stage_Thrust_calculator(Rocket)
+
+        call DV_loss(Rocket, DV_new)   
         
         err = abs(DV_old - DV_new)
 
@@ -63,8 +62,8 @@ subroutine DV_loss(Rocket,DV_new)
 
     expo = -0.333d0*DV_loss2/(g_0*ISP)
 
-    A0=stage_thrust(1)/stage_initial_mass(1)
-
+    A0=rocket%stage(1)%T/rocket%rm_0  
+    
     T_3s = 3*(1-exp(expo))*g_0*ISP/A0
 
     T_mix = 0.405d0*Rocket%rt_burn + 0.595d0*T_3s

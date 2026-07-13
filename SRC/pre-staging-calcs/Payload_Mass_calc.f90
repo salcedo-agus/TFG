@@ -15,4 +15,6 @@ subroutine Payload_Mass_calculator(Rocket)
     !===== Fairing considerations ========================================
         
     !=====================================================================
+
+    Rocket%rm_L = payload_mass + m_adapter !+ Fairing mass 
 end subroutine

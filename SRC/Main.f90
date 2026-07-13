@@ -9,8 +9,8 @@ program TFG
 
     call orbit_speed_calculator 
 
-    call STAGING(Rocket) 
-    call stage_Thrust_calculator(Rocket)
+    call STAGING_LOOP(Rocket) 
+    
 
     do i=1, Rocket%number_of_stages
         print*, "==========================================="
