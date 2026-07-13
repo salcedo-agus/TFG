@@ -48,7 +48,9 @@ subroutine DV_loss(Rocket,Ta,DV_new)
     real(8) Ta, DV_old, DV_new, V_rot, V_circ       !VARIABLES COMUNES PARA AMBOS CALCULOS
     real(8) err            !difference between 2 iterations of Delta_v
 
-    V_circ=delta_v
+    V_circ = delta_v
+
+    V_rot = 0.d0
 
   !  K1 = 662.1d0 + 1.602d0*orbit_height + 1.224e-3*orbit_height**2.d0
     
@@ -59,9 +61,10 @@ subroutine DV_loss(Rocket,Ta,DV_new)
     K3 = 429.9d0 + 1.602d0*orbit_height + 1.224e-3*orbit_height**2.d0
 
     K4 = 2.328d0 - 9.687e-4*orbit_height
-   
 
     expo = -0.333d0*DV_loss2/(g_0*ISP)
+
+    A0=stage_thrust(1)/stage_initial_mass(1)
 
     T_3s = 3*(1-exp(expo))*g_0*ISP/A0
 
