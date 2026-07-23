@@ -33,5 +33,9 @@ module rocket_types
         real(8) rk_L  ! Payload ratio
 
         real(8) rt_burn  !Rocket burn time (ascent time)
+        real(8) ISP_mean    !Rocket mean ISP
+        real(8) delta_v
+        real(8) DV_loss
+        
     end type Rocket_t  
 end module 

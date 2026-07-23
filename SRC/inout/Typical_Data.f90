@@ -33,7 +33,7 @@ module typical_data
     real(8) Third_stage_ks_mean  
     !=============================================================
 
-    real(8) delta_v
+    real(8) V_circ
     real(8) orbit_height
     real(8) payload_mass
     integer number_of_stages
@@ -795,27 +795,33 @@ subroutine data_entry(Rocket)
     end select 
     
     !============= TEST CASE =============
-    !ISP_vector(1) = 400.d0
-    !ISP_vector(2) = 350.d0
-    !ISP_vector(3) = 300.d0
+    ISP_vector(1) = 400.d0
+    ISP_vector(2) = 350.d0
+    ISP_vector(3) = 300.d0
 
-    !k_s_vector(1) = 0.10d0
-    !k_s_vector(2) = 0.15d0
-    !k_s_vector(3) = 0.20d0
+    k_s_vector(1) = 0.10d0
+    k_s_vector(2) = 0.15d0
+    k_s_vector(3) = 0.20d0
     !=====================================
 
-    ISP_vector(1) = First_stage_ISP_mean
-    ISP_vector(2) = Second_stage_ISP_mean
-    ISP_vector(3) = Third_stage_ISP_mean
+!    ISP_vector(1) = First_stage_ISP_mean
+ !   ISP_vector(2) = Second_stage_ISP_mean
+  !  ISP_vector(3) = Third_stage_ISP_mean
 
-    k_s_vector(1) = First_stage_ks_mean
-    k_s_vector(2) = Second_stage_ks_mean
-    k_s_vector(3) = Third_stage_ks_mean
+   ! k_s_vector(1) = First_stage_ks_mean
+  !  k_s_vector(2) = Second_stage_ks_mean
+   ! k_s_vector(3) = Third_stage_ks_mean
 
     do i=1, Rocket%number_of_stages
         Rocket%stage(i)%ISP = ISP_vector(i)
         Rocket%stage(i)%k_s = k_s_vector(i)
     end do
+
+    Rocket%ISP_mean = 0.d0
+    do i = 1, Rocket%number_of_stages
+        Rocket%ISP_mean = Rocket%ISP_mean + Rocket%stage(i)%ISP
+    end do
+    Rocket%ISP_mean = Rocket%ISP_mean / Rocket%number_of_stages
 
 end subroutine data_entry
 

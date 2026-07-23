@@ -39,22 +39,32 @@ subroutine STAGING(Rocket)
     !    print*, "====================================="
     !end do
     
-    a = 0.1d0
+    a = 0.4d0
     b = 0.8d0 
 
     ! Bolzano's bisection method 
     do while (res > 1.e-5 .and. i < 100)               
         c = (a+b)/2
+    !    print*, c
         if (g(a, Rocket)*g(c, Rocket) < 0) then 
             b = c
         else if (g(b, Rocket)*g(c, Rocket) < 0) then
             a = c
         else 
-            print*, "Raiz fuera del rango"
+    !        print*, "Raiz fuera del rango"
         end if 
     !    res = abs(a - b)
         res = abs(g(c, Rocket))     
         i = i + 1
+!        print*, "====================================="
+ !       print*, "iter:  ", i
+  !      print*, "a=     ", a
+   !     print*, "g(a)=  ", g(a, Rocket)
+    !    print*, "b=     ", b
+     !   print*, "g(b)=  ", g(b, Rocket)
+      !  print*, "res=   ", res
+       ! print*, "====================================="
+    end do 
         print*, "====================================="
         print*, "iter:  ", i
         print*, "a=     ", a
@@ -63,7 +73,6 @@ subroutine STAGING(Rocket)
         print*, "g(b)=  ", g(b, Rocket)
         print*, "res=   ", res
         print*, "====================================="
-    end do 
     L = c 
     print*, "FINAL L VALUE: ", L 
     !=====================================================================
@@ -175,5 +184,5 @@ function g(L, Rocket)
     do i=1, Rocket%number_of_stages
         sum = sum + Rocket%stage(i)%nu_e * log((L*Rocket%stage(i)%nu_e-1.d0) /(L*Rocket%stage(i)%nu_e*Rocket%stage(i)%k_s))
     end do
-    g = delta_v - sum
+    g = Rocket%delta_v - sum
 end function

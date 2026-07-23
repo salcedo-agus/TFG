@@ -7,5 +7,5 @@ subroutine orbit_speed_calculator
     real(8) r  ! Circular orbit radius
 
     r = Radius + orbit_height
-    delta_v = sqrt(g_0*Radius**2 / r)
+    V_circ = sqrt(g_0*Radius**2 / r)
 end subroutine orbit_speed_calculator
