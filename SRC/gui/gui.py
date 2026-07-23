@@ -10,7 +10,8 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QGridLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox,
     QSlider, QPushButton, QScrollArea, QFrame, QSizePolicy,
-    QGroupBox, QMessageBox, QStackedWidget, QGraphicsOpacityEffect
+    QGroupBox, QMessageBox, QStackedWidget, QGraphicsOpacityEffect,
+    QFileDialog
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPropertyAnimation, QEasingCurve
 from PyQt6.QtGui import QFont, QPalette, QColor
@@ -280,6 +281,28 @@ QPushButton#launch_btn:hover {{
 QPushButton#launch_btn:pressed {{
     background-color: #388bfd;
     color: {BG_DARK};
+}}
+QPushButton#print_btn {{
+    background-color: transparent;
+    color: {TEXT_SEC};
+    border: 1px solid {BORDER};
+    border-radius: 8px;
+    padding: 10px 32px;
+    font-weight: 600;
+    font-size: 14px;
+    min-height: 40px;
+}}
+QPushButton#print_btn:hover {{
+    border-color: {ACCENT};
+    color: {ACCENT};
+}}
+QPushButton#print_btn:pressed {{
+    color: #388bfd;
+    border-color: #388bfd;
+}}
+QPushButton#print_btn:disabled {{
+    color: {TEXT_DIM};
+    border-color: {TEXT_DIM};
 }}
 QFrame#divider {{
     background: {BORDER};
@@ -756,6 +779,11 @@ class MainWindow(QMainWindow):
         # Run button
         self.run_btn = QPushButton("▶  Run Staging Analysis")
         self.run_btn.setObjectName("run_btn")
+
+        self.print_btn = QPushButton("⬇  Save Results")
+        self.print_btn.setObjectName("print_btn")
+        self.print_btn.clicked.connect(self._print_results)
+        self.print_btn.setEnabled(False)
         self.run_btn.setProperty("ready", False)
         self.run_btn.setStyleSheet(f"""
             QPushButton {{ background-color: {BG_INPUT}; color: {TEXT_DIM}; border: 1px solid {BORDER}; border-radius: 8px; padding: 10px 32px; font-weight: 700; font-size: 14px; min-height: 40px; }}
@@ -765,6 +793,7 @@ class MainWindow(QMainWindow):
         """)
         self.run_btn.clicked.connect(self._run)
         self.left_layout.addWidget(self.run_btn)
+        self.left_layout.addWidget(self.print_btn)
         self.left_layout.addStretch()
 
         left_scroll.setWidget(left_inner)
@@ -830,6 +859,52 @@ class MainWindow(QMainWindow):
     def _on_inputs_changed(self):
         self._clear_results()
         self._show_empty_state()
+        self.print_btn.setEnabled(False)
+
+    def _print_results(self):
+        if not hasattr(self, '_last_results'):
+            QMessageBox.warning(self, "No Results", "Run the staging analysis first.")
+            return
+
+        dv  = self.dv_spin.value()
+        pl  = int(self.pl_spin.value())
+        n   = self.n_stages_spin.value()
+        default_name = f"staging_{n}stage_dv{dv:.1f}_pl{pl}kg.txt"
+
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Save Results", default_name, "Text Files (*.txt)"
+        )
+        if not path:
+            return
+
+        r = self._last_results
+        lines = []
+        lines.append("=" * 48)
+        lines.append("  ROCKET STAGING RESULTS")
+        lines.append("=" * 48)
+        lines.append(f"  Delta-V:       {self.dv_spin.value():.2f} km/s")
+        lines.append(f"  Payload mass:  {self.pl_spin.value():.1f} kg")
+        lines.append(f"  Stages:        {self.n_stages_spin.value()}")
+        lines.append(f"  Total initial mass: {r['total_initial_mass']:,.1f} kg")
+        lines.append(f"  Minimum found: {'Yes' if r['minimum_found'] else 'No'}")
+        lines.append("")
+        for s, cfg in zip(r["stages"], self._last_configs):
+            lines.append(f"  Stage {s['stage']}")
+            lines.append(f"    Propellant:        {cfg['propellant']}")
+            lines.append(f"    Combustion cycle:  {cfg['cycle']}")
+            lines.append(f"    Initial mass (m0): {s['m0']:>12,.1f} kg")
+            lines.append(f"    Final mass   (mf): {s['mf']:>12,.1f} kg")
+            lines.append(f"    Propellant   (mp): {s['mp']:>12,.1f} kg")
+            lines.append(f"    Structure    (ms): {s['ms']:>12,.1f} kg")
+            lines.append(f"    Mass ratio  (k_m): {s['k_m']:>12.4f}")
+            lines.append(f"    Struct coef (k_s): {s['k_s']:>12.4f}")
+            lines.append(f"    Payload rat (k_L): {s['k_L']:>12.4f}")
+            lines.append(f"    Exhaust vel (v_e): {s['nu_e']:>12.4f} km/s")
+            lines.append("")
+        lines.append("=" * 48)
+
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines))
 
     def _run(self):
         n = self.n_stages_spin.value()
@@ -894,6 +969,18 @@ class MainWindow(QMainWindow):
         for stage in results["stages"]:
             card = ResultCard(stage["stage"], stage)
             self.right_layout.addWidget(card)
+        
+        self._last_configs = [
+            {
+                "propellant": sw.prop_combo.currentText(),
+                "cycle":      sw.cycle_combo.currentText(),
+            }
+            for sw in self.stage_widgets
+        ]
+        self._last_results = results
+        self.print_btn.setEnabled(True)
+
+        self._last_results = results
 
         self.right_layout.addStretch()
 

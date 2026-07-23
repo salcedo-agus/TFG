@@ -12,12 +12,13 @@ subroutine STAGING(Rocket)
 
     integer i 
 
+    print*, "DELTA V for staging:", Delta_v
     do i=1, Rocket%number_of_stages
         Rocket%stage(i)%nu_e = Rocket%stage(i)%ISP * g_0/1000.d0 ![km/s] Eq 3
     end do
 
     !===== L is solved using eq 19 =======================================
-    L = -0.1d0
+    L = 0.1d0
     i = 0
     h = 1.e-2
     res = 1905.d0
@@ -53,7 +54,7 @@ subroutine STAGING(Rocket)
         else 
     !        print*, "Raiz fuera del rango"
         end if 
-    !    res = abs(a - b)
+        res = abs(a - b)
         res = abs(g(c, Rocket))     
         i = i + 1
 !        print*, "====================================="
@@ -89,7 +90,7 @@ subroutine STAGING(Rocket)
         Rocket%stage(1)%m_0 = Rocket%stage(1)%m_0 * (Rocket%stage(i)%k_m*(1.d0-Rocket%stage(i)%k_s))&
             /(1.d0 - Rocket%stage(i)%k_m*Rocket%stage(i)%k_s) 
     end do 
-    Rocket%stage(1)%m_0 = payload_mass * Rocket%stage(1)%m_0
+    Rocket%stage(1)%m_0 = Rocket%rm_L * Rocket%stage(1)%m_0
     !=====================================================================
 
     !=== Propellant and structure masses are solved using eq 21 and 22 ===
@@ -109,7 +110,7 @@ subroutine STAGING(Rocket)
         if (i < Rocket%number_of_stages) then
             Rocket%stage(i)%m_L = Rocket%stage(i+1)%m_0
         else
-            Rocket%stage(i)%m_L = payload_mass
+            Rocket%stage(i)%m_L = Rocket%rm_L
         end if
     end do
     !===================================================================== 
@@ -126,7 +127,6 @@ subroutine STAGING(Rocket)
     end do
     !=====================================================================
 
-    Rocket%rm_L = payload_mass
     Rocket%rm_0 = Rocket%stage(1)%m_0
 
     !===== Minimum Check according to eq 26 ==============================

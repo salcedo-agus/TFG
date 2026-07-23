@@ -7,6 +7,8 @@ program TFG
 
     call data_entry(Rocket)
 
+    !#### PRE-STAGING ###########################
+    call Payload_Mass_calculator(Rocket)
     call orbit_speed_calculator 
 
     call STAGING_LOOP(Rocket) 

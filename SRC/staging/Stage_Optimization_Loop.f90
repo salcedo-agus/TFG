@@ -4,7 +4,6 @@ subroutine STAGING_LOOP(Rocket)
     use constants
     implicit none
     type(Rocket_t), intent(inout) :: Rocket
-    integer i
     real(8) DV_old, DV_new !old and new Delta_v iterations
     real(8) err            !difference between 2 iterations of Delta_v
     real(8) V_ast, T_a           !V* en LaunchMethodology

@@ -2,7 +2,7 @@ module constants
     implicit none 
     real(8), parameter :: pi  = dacos(-1.d0) 
     real(8), parameter :: g_0 = 9.80665d0 ![m/s] standard acceleration of gravity     
-    real(8), parameter :: Radius = 6.378  ![km] Earths radius     
+    real(8), parameter :: Radius = 6378  ![km] Earths radius     
 end module constants
 
 module typical_data
