@@ -7,6 +7,7 @@ subroutine STAGING_LOOP(Rocket)
     real(8) DV_old, DV_new !old and new Delta_v iterations
     real(8) err            !difference between 2 iterations of Delta_v
     real(8) V_ast, T_a           !V* en LaunchMethodology
+    integer i
 
     if (number_of_stages == 1) then 
         T_a = 180.d0
@@ -20,9 +21,11 @@ subroutine STAGING_LOOP(Rocket)
     end if
 
     Rocket%DV_loss = 0.d0
-
+    t_a=400.d0
     V_ast = sqrt(V_circ**2.d0 + 2.d0*g_0*orbit_height*(Radius/(Radius+orbit_height))**2.d0)
     DV_old = V_ast + 1.5e-3*T_a**2.d0 + 8.82e-2*T_a + 1036.d0
+    print*, "DV INICIAL", DV_old 
+    stop
     Rocket%delta_v = DV_old
     !delta_v = 10.d0
 
