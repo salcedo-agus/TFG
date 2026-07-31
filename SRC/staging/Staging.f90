@@ -12,13 +12,14 @@ subroutine STAGING(Rocket)
 
     integer i 
 
-    print*, "DELTA V for staging:", Delta_v
+    print*, "DELTA V for staging:", Rocket%delta_v
     do i=1, Rocket%number_of_stages
-        Rocket%stage(i)%nu_e = Rocket%stage(i)%ISP * g_0/1000.d0 ![km/s] Eq 3
+        Rocket%stage(i)%nu_e = Rocket%stage(i)%ISP * g_0 / 1000.d0 ![km/s] Eq 3
+      !  print*, Rocket%stage(i)%nu_e
     end do
 
     !===== L is solved using eq 19 =======================================
-    L = 0.1d0
+  !  L = 0.1d0
     i = 0
     h = 1.e-2
     res = 1905.d0
@@ -40,21 +41,21 @@ subroutine STAGING(Rocket)
     !    print*, "====================================="
     !end do
     
-    a = 0.4d0
+    a = 0.2d0
     b = 0.8d0 
-
+   
     ! Bolzano's bisection method 
     do while (res > 1.e-5 .and. i < 100)               
-        c = (a+b)/2
+        c = (a+b)/2.d0
     !    print*, c
         if (g(a, Rocket)*g(c, Rocket) < 0) then 
             b = c
         else if (g(b, Rocket)*g(c, Rocket) < 0) then
             a = c
         else 
-    !        print*, "Raiz fuera del rango"
+            print*, "Raiz fuera del rango"
         end if 
-        res = abs(a - b)
+       ! res = abs(a - b)
         res = abs(g(c, Rocket))     
         i = i + 1
 !        print*, "====================================="
@@ -77,7 +78,7 @@ subroutine STAGING(Rocket)
     L = c 
     print*, "FINAL L VALUE: ", L 
     !=====================================================================
-
+   
     !===== The mass ratios for each stage are solved using eq 18 =========
     do i=1, Rocket%number_of_stages
         Rocket%stage(i)%k_m = (L*Rocket%stage(i)%nu_e - 1.d0)/(L*Rocket%stage(i)%nu_e*Rocket%stage(i)%k_s)    
@@ -123,7 +124,7 @@ subroutine STAGING(Rocket)
 
     !===== Final mass of each stage ======================================
     do i=1, Rocket%number_of_stages
-        Rocket%stage(i)%m_f = Rocket%stage(i)%m_0 - Rocket%stage(i)%m_p     
+        Rocket%stage(i)%m_f = Rocket%stage(i)%m_0 - Rocket%stage(i)%m_p    
     end do
     !=====================================================================
 
@@ -132,9 +133,9 @@ subroutine STAGING(Rocket)
     !===== Minimum Check according to eq 26 ==============================
     check_count = 0
     do i=1, Rocket%number_of_stages
-        check = L*Rocket%stage(i)%nu_e *(1.d0 - Rocket%stage(i)%k_s * Rocket%stage(i)%k_m)**2 &
+        check = L*Rocket%stage(i)%nu_e *(1.d0 - Rocket%stage(i)%k_s * Rocket%stage(i)%k_m)**2.d0 &
             - 1.d0 + 2.d0 * Rocket%stage(i)%k_s * Rocket%stage(i)%k_m
-        if (check > 0) check_count = check_count + 1 
+            if (check > 0) check_count = check_count + 1 
     end do 
     if (check_count == Rocket%number_of_stages) then
         print*, "Minimum found :)"

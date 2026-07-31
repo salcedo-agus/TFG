@@ -36,6 +36,7 @@ module rocket_types
         real(8) ISP_mean    !Rocket mean ISP
         real(8) delta_v
         real(8) DV_loss
-        
+        real(8) nu_e_mean   !Rocket mean exhaust velocity
+
     end type Rocket_t  
 end module 
