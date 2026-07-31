@@ -20,22 +20,19 @@ subroutine STAGING_LOOP(Rocket)
         print*, 'Ascent time 0'
     end if
 
-    Rocket%DV_loss = 0.d0
-    t_a=400.d0
-    V_ast = sqrt(V_circ**2.d0 + 2.d0*g_0*orbit_height*(Radius/(Radius+orbit_height))**2.d0)
-    DV_old = V_ast + 1.5e-3*T_a**2.d0 + 8.82e-2*T_a + 1036.d0
-    print*, "DV INICIAL", DV_old 
+    T_a=400.d0
+    V_ast = sqrt((V_circ*1000.d0)**2.d0 + 2.d0*g_0 * orbit_height * (Radius/(Radius+orbit_height))**2.d0)
+    DV_old = (V_ast + 1.5e-3*T_a**2.d0 + 8.82e-2*T_a + 1036.d0) / 1000.d0
     Rocket%delta_v = DV_old
-    !delta_v = 10.d0
-
+    
     err = 1.d0
     i = 0
-    do while(err > 1e-3 .and. i<50)
+    do while(err > 1e-6 .and. i<50)
         i=i+1
       !  print*, delta_v
 
         call STAGING(Rocket)    
-
+        
         call stage_Thrust_calculator(Rocket)
 
         call DV_loss(Rocket, DV_new)   
@@ -44,8 +41,9 @@ subroutine STAGING_LOOP(Rocket)
 
         DV_old = DV_new
         print*, 'Delta_V = ', DV_new
-        Rocket%delta_v = DV_new
+        Rocket%Delta_v = DV_new
     end do
+    print*, i
 
 end subroutine STAGING_LOOP
 
@@ -71,22 +69,22 @@ subroutine DV_loss(Rocket,DV_new)
     
  !   K2 = 1.7871 - 9.687e-4*orbit_height
  
-  !  DV_loss1 = K1 + K2*Rocket%rt_burn
+!    Rocket%DV_loss = K1 + K2*Rocket%rt_burn
     
     K3 = 429.9d0 + 1.602d0*orbit_height + 1.224e-3*orbit_height**2.d0
     
     K4 = 2.328d0 - 9.687e-4*orbit_height
 
-    expo = -0.333d0*V_circ / (g_0*Rocket%ISP_mean)
+    expo = -0.333d0 * V_circ * 1000.d0 / (g_0*Rocket%stage(1)%ISP)
 
     A0 = rocket%stage(1)%T / rocket%rm_0  
 
-    T_3s = 3*(1-exp(expo)) * g_0*Rocket%ISP_mean / A0
+    T_3s = 3.d0*(1.d0-exp(expo)) * g_0*Rocket%stage(1)%ISP / A0
     
     T_mix = 0.405d0*Rocket%rt_burn + 0.595d0*T_3s
     
     Rocket%DV_loss = K3 + K4*T_mix
 
-    DV_new = V_circ + Rocket%DV_loss - V_rot      !V_circ + DV_loss1 - V_rot si usamos el metodo sin refinar
+    DV_new = V_circ + Rocket%DV_loss / 1000.d0 - V_rot      !V_circ + DV_loss1 - V_rot si usamos el metodo sin refinar
 
 end subroutine DV_loss

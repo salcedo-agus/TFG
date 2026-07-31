@@ -41,7 +41,7 @@ subroutine STAGING(Rocket)
     !    print*, "====================================="
     !end do
     
-    a = 0.2d0
+    a = 0.4d0
     b = 0.8d0 
    
     ! Bolzano's bisection method 
