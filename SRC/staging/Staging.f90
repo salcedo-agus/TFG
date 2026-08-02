@@ -1,16 +1,58 @@
+module rocket_functions
+    implicit none
+contains
+function g(L, Rocket)
+    use typical_data
+    use rocket_types 
+    implicit none
+    type(Rocket_t), intent(in) :: Rocket
+    real(8), intent(in) :: L 
+    real(8) sum
+    real(8) g 
+    !real(8) c1, c2, c3
+    !real(8) e1, e2, e3
+    integer i
+
+    !c1 = Rocket%stage(1)%nu_e
+    !c2 = Rocket%stage(2)%nu_e
+    !c3 = Rocket%stage(3)%nu_e
+    
+    !e1 = Rocket%stage(1)%k_s
+    !e2 = Rocket%stage(2)%k_s
+    !e3 = Rocket%stage(3)%k_s
+
+   ! g = delta_v - (c1*log((L*c1-1)/(c1*e1*L)) + c2*log((L*c2-1)/(c2*e2*L)) + c3*log((L*c3-1)/(c3*e3*L)))
+
+   ! Signo como Don Edberg 
+   ! sum = 0.d0
+   ! do i=1, Rocket%number_of_stages
+   !     sum = sum + Rocket%stage(i)%nu_e * log((1.d0+L*Rocket%stage(i)%nu_e) /(L*Rocket%stage(i)%nu_e*Rocket%stage(i)%k_s))
+   ! end do
+   ! g = delta_v - sum 
+
+   ! Signo como en Orbital Mechanics  
+    sum = 0.d0
+    do i=1, Rocket%number_of_stages
+        sum = sum + Rocket%stage(i)%nu_e * log((L*Rocket%stage(i)%nu_e-1.d0) /(L*Rocket%stage(i)%nu_e*Rocket%stage(i)%k_s))
+    end do
+    g = Rocket%delta_v - sum
+end function
+end module
+
 subroutine STAGING(Rocket)
     use typical_data 
     use rocket_types
     use constants
+    use Root_Finding_Methods
+    use rocket_functions
     implicit none
     type(Rocket_t), intent(inout) :: Rocket 
-    real(8) L                     ! Lagrange multiplier
-    !real(8) Ln                    ! Previous L value 
-    real(8) h, res, g, a, b, c    ! Root finding variables
+    procedure(func_interface), pointer :: function_pointer
+    real(8) a, b, tol             ! Bisection variables 
+    real(8) L
     real(8) check                 ! used for minimum check
     integer check_count
-
-    integer i 
+    integer i, iterations
 
     print*, "DELTA V for staging:", Rocket%delta_v
     do i=1, Rocket%number_of_stages
@@ -19,64 +61,14 @@ subroutine STAGING(Rocket)
     end do
 
     !===== L is solved using eq 19 =======================================
-  !  L = 0.1d0
-    i = 0
-    h = 1.e-2
-    res = 1905.d0
-    !Newton-Raphson method
-    !do while (res > 1.e-3 .and. i < 100)
-    !    Ln = L
-    !    L  = L - g(L, Rocket)*2*h/(g(L+h, Rocket) - g(L-h, Rocket)) 
-
-    !    i = i + 1
-    !    res = abs(L - Ln)
-    !    print*, "====================================="
-    !    print*, "iter:  ", i
-    !    print*, "Ln=    ", Ln 
-    !    print*, "g(L)=  ", g(Ln, Rocket)
-    !    print*, "g(L+h)=", g(Ln+h, Rocket) 
-    !    print*, "g(L-h)=", g(Ln-h, Rocket)
-    !    print*, "L=     ", L
-    !    print*, "res=   ", res
-    !    print*, "====================================="
-    !end do
+  ! L = 0.1d0
+    function_pointer => g
+    tol = 1e-5
+    a = Bolzano_Interval_Start(function_pointer, Rocket)
+    b = 1.d0 
     
-    a = 0.4d0
-    b = 0.8d0 
-   
-    ! Bolzano's bisection method 
-    do while (res > 1.e-5 .and. i < 100)               
-        c = (a+b)/2.d0
-    !    print*, c
-        if (g(a, Rocket)*g(c, Rocket) < 0) then 
-            b = c
-        else if (g(b, Rocket)*g(c, Rocket) < 0) then
-            a = c
-        else 
-            print*, "Raiz fuera del rango"
-        end if 
-       ! res = abs(a - b)
-        res = abs(g(c, Rocket))     
-        i = i + 1
-!        print*, "====================================="
- !       print*, "iter:  ", i
-  !      print*, "a=     ", a
-   !     print*, "g(a)=  ", g(a, Rocket)
-    !    print*, "b=     ", b
-     !   print*, "g(b)=  ", g(b, Rocket)
-      !  print*, "res=   ", res
-       ! print*, "====================================="
-    end do 
-        print*, "====================================="
-        print*, "iter:  ", i
-        print*, "a=     ", a
-        print*, "g(a)=  ", g(a, Rocket)
-        print*, "b=     ", b
-        print*, "g(b)=  ", g(b, Rocket)
-        print*, "res=   ", res
-        print*, "====================================="
-    L = c 
-    print*, "FINAL L VALUE: ", L 
+    call Bolzano_Bisection(function_pointer, Rocket, a, b, tol, L, iterations)
+    !call Newton_Raphson(f, Rocket)
     !=====================================================================
    
     !===== The mass ratios for each stage are solved using eq 18 =========
@@ -151,39 +143,4 @@ subroutine STAGING(Rocket)
     !=====================================================================
 end subroutine
 
-function g(L, Rocket)
-    use typical_data
-    use rocket_types 
-    implicit none
-    type(Rocket_t), intent(in) :: Rocket
-    real(8), intent(in) :: L 
-    real(8) g 
-    real(8) sum
-    !real(8) c1, c2, c3
-    !real(8) e1, e2, e3
-    integer i
-
-    !c1 = Rocket%stage(1)%nu_e
-    !c2 = Rocket%stage(2)%nu_e
-    !c3 = Rocket%stage(3)%nu_e
-    
-    !e1 = Rocket%stage(1)%k_s
-    !e2 = Rocket%stage(2)%k_s
-    !e3 = Rocket%stage(3)%k_s
-
-   ! g = delta_v - (c1*log((L*c1-1)/(c1*e1*L)) + c2*log((L*c2-1)/(c2*e2*L)) + c3*log((L*c3-1)/(c3*e3*L)))
-
-   ! Signo como Don Edberg 
-   ! sum = 0.d0
-   ! do i=1, Rocket%number_of_stages
-   !     sum = sum + Rocket%stage(i)%nu_e * log((1.d0+L*Rocket%stage(i)%nu_e) /(L*Rocket%stage(i)%nu_e*Rocket%stage(i)%k_s))
-   ! end do
-   ! g = delta_v - sum 
-
-   ! Signo como en Orbital Mechanics  
-    sum = 0.d0
-    do i=1, Rocket%number_of_stages
-        sum = sum + Rocket%stage(i)%nu_e * log((L*Rocket%stage(i)%nu_e-1.d0) /(L*Rocket%stage(i)%nu_e*Rocket%stage(i)%k_s))
-    end do
-    g = Rocket%delta_v - sum
-end function
+ 
