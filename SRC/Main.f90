@@ -13,6 +13,8 @@ program TFG
 
     call STAGING_LOOP(Rocket) 
     
+    !#### PRE-SIMULATION ########################
+    call rocket_geometry_calculation(Rocket)
 
     do i=1, Rocket%number_of_stages
         print*, "==========================================="
