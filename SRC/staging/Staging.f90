@@ -141,6 +141,12 @@ subroutine STAGING(Rocket)
         rocket%stage(i)%D_v = rocket%stage(i)%nu_e * log(rocket%stage(i)%m_0/rocket%stage(i)%m_f) 
     end do
     !=====================================================================
+
+    !===Initial mass of the stage calculation=============================
+    do i=1, rocket%number_of_stages
+        rocket%stage(i)%m_i = rocket%stage(i)%m_0 - rocket%stage(i)%m_L  
+    end do
+    !=====================================================================
 end subroutine
 
  

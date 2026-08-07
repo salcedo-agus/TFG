@@ -2,6 +2,7 @@ module rocket_types
     implicit none
     type Stage_t
         real(8) m_0    ! Initial mass of the partial rocket
+        real(8) m_i    ! Initial mass of the stage
         real(8) m_f    ! Final or Empty mass of the partial rocket 
         real(8) m_L    ! Payload mass of the stage 
         real(8) m_s    ! Structure mass of the stage
