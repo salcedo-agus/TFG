@@ -795,13 +795,21 @@ subroutine data_entry(Rocket)
     end select 
     
     !============= TEST CASE =============
-    ISP_vector(1) = 400.d0
-    ISP_vector(2) = 350.d0
-    ISP_vector(3) = 300.d0
+    !ISP_vector(1) = 400.d0
+    !ISP_vector(2) = 350.d0
+    !ISP_vector(3) = 300.d0
 
-    k_s_vector(1) = 0.10d0
-    k_s_vector(2) = 0.15d0
-    k_s_vector(3) = 0.20d0
+    !k_s_vector(1) = 0.10d0
+    !k_s_vector(2) = 0.15d0
+    !k_s_vector(3) = 0.20d0
+    !============= Soyuz 2-1v ============
+    ISP_vector(1) = 297.d0
+    ISP_vector(2) = 359.d0
+    ISP_vector(3) = 0.d0
+
+    k_s_vector(1) = 0.0791d0
+    k_s_vector(2) = 0.0938d0
+    k_s_vector(3) = 0.d0
     !=====================================
 
 !    ISP_vector(1) = First_stage_ISP_mean
