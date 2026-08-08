@@ -9,6 +9,7 @@ subroutine rocket_geometry_calculation(Rocket)
     real(8), dimension(3) :: Volume_vector 
     real(8), dimension(3) :: Mass_vector 
     integer i 
+    real(8) check_diameter
 
     Mass_vector(:) = 0.d0
     do i=1, rocket%number_of_stages
@@ -88,6 +89,18 @@ subroutine rocket_geometry_calculation(Rocket)
         print*, "WARNING: unknown Third stage propellant and oxidizer"
     end select 
 
+    select case (Diameter_setup)
+    case(1) ! 1 - Statistically determined
+        if (number_of_stages > 1) then
+            do i=1,number_of_stages-1
+                check_diameter = Diameter_vector(i+1) - Diameter_vector(i)
+                if (check_diameter > 0.d0) Diameter_vector(i) = Diameter_vector(i+1)
+            end do
+        end if
+    case(2) ! 2 - Constant 
+        Diameter_vector = maxval(Diameter_vector)
+    case(3) ! 3 - Fairing requirement   
+        Diameter_vector = User_defined_diameter
+    end select
     Longitud_vector = Volume_vector * 4.d0 / (pi * Diameter_vector**2.d0)
-
 end subroutine rocket_geometry_calculation
