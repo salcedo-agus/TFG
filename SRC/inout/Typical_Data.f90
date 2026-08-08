@@ -45,6 +45,9 @@ module typical_data
     integer first_stage_combustion_cycle
     integer second_stage_combustion_cycle
     integer third_stage_combustion_cycle
+
+    integer Diameter_setup
+    real(8) User_defined_diameter
 contains
 
 subroutine data_entry(Rocket)
@@ -67,6 +70,7 @@ subroutine data_entry(Rocket)
     print*, "first_stage_combustion_cycle= ", first_stage_combustion_cycle
     print*, "second_stage_combustion_cycle=", second_stage_combustion_cycle
     print*, "third_stage_combustion_cycle= ", third_stage_combustion_cycle
+    print*, "Diameter_setup = ", Diameter_setup
 
     Rocket%number_of_stages = number_of_stages
     allocate(Rocket%stage(number_of_stages))
