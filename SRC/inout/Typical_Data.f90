@@ -70,7 +70,8 @@ subroutine data_entry(Rocket)
     print*, "first_stage_combustion_cycle= ", first_stage_combustion_cycle
     print*, "second_stage_combustion_cycle=", second_stage_combustion_cycle
     print*, "third_stage_combustion_cycle= ", third_stage_combustion_cycle
-    print*, "Diameter_setup = ", Diameter_setup
+    print*, "diameter_setup = ", diameter_setup
+    print*, "user_defined_diameter", user_defined_diameter
 
     Rocket%number_of_stages = number_of_stages
     allocate(Rocket%stage(number_of_stages))
@@ -798,6 +799,20 @@ subroutine data_entry(Rocket)
         print*, "WARNING: unknown Third stage propellant and oxidizer"
     end select 
     
+    !===== DIAMETER CONFIG CHECK =========
+    select case (diameter_setup)
+    case(1) 
+        print*, "Diameter setup: Statistically Determined"
+    case(2)
+        print*, "Diameter setup: Constant"
+    case(3)
+        print*, "Diameter setup: Fairing Requirement"
+    case default
+        print*, "WARNING: unknown Diameter setup"
+        stop
+    end select 
+    !=====================================
+
     !============= TEST CASE =============
     !ISP_vector(1) = 400.d0
     !ISP_vector(2) = 350.d0
@@ -816,12 +831,12 @@ subroutine data_entry(Rocket)
     k_s_vector(3) = 0.d0
     !=====================================
 
- !    ISP_vector(1) = First_stage_ISP_mean
- !   ISP_vector(2) = Second_stage_ISP_mean
-  !  ISP_vector(3) = Third_stage_ISP_mean
+   ! ISP_vector(1) = First_stage_ISP_mean
+   ! ISP_vector(2) = Second_stage_ISP_mean
+   ! ISP_vector(3) = Third_stage_ISP_mean
 
    ! k_s_vector(1) = First_stage_ks_mean
-  !  k_s_vector(2) = Second_stage_ks_mean
+   ! k_s_vector(2) = Second_stage_ks_mean
    ! k_s_vector(3) = Third_stage_ks_mean
 
     do i=1, Rocket%number_of_stages
