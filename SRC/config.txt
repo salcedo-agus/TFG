@@ -30,9 +30,9 @@ third_stage_combustion_cycle           = 0
 ; 5 - PRESSURE  
 
 ; --- DIAMETER SETUP -----------
-Diameter_setup = 0
+diameter_setup = 0
 ; 1 - Statistically determined
 ; 2 - Constant 
 ; 3 - Fairing requirement
 
-User_defined_diameter = 2.d0
+user_defined_diameter = 2.d0

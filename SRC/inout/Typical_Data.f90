@@ -46,8 +46,8 @@ module typical_data
     integer second_stage_combustion_cycle
     integer third_stage_combustion_cycle
 
-    integer Diameter_setup
-    real(8) User_defined_diameter
+    integer diameter_setup
+    real(8) user_defined_diameter
 contains
 
 subroutine data_entry(Rocket)
@@ -816,7 +816,7 @@ subroutine data_entry(Rocket)
     k_s_vector(3) = 0.d0
     !=====================================
 
-!    ISP_vector(1) = First_stage_ISP_mean
+ !    ISP_vector(1) = First_stage_ISP_mean
  !   ISP_vector(2) = Second_stage_ISP_mean
   !  ISP_vector(3) = Third_stage_ISP_mean
 
@@ -913,7 +913,15 @@ subroutine load_config(fname)
         case ("third_stage_combustion_cycle")
             read(value, *, iostat=ios) first_stage_combustion_cycle 
             if (ios /= 0) print *, "WARNING: first_stage_combustion_cycle invalid:", value
+
+        case ("diameter_setup")
+            read(value, *, iostat=ios) diameter_setup
+            if (ios /= 0) print *, "WARNING: diameter_setup invalid:", value    
         
+        case ("user_defined_diameter")
+            read(value, *, iostat=ios) user_defined_diameter
+            if (ios /= 0) print *, "WARNING: user_defined_diameter invalid:", value
+
         case default
             print *, "WARNING: unknown key:", trim(key)
 
