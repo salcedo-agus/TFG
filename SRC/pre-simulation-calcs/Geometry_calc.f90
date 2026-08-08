@@ -12,16 +12,16 @@ subroutine rocket_geometry_calculation(Rocket)
 
     Mass_vector(:) = 0.d0
     do i=1, rocket%number_of_stages
-        Mass_vector(i) = rocket%stage(i)%m_i
+        Mass_vector(i) = rocket%stage(i)%m_i / 1000.d0 ! Mass_vector in metric tons [t]
     end do 
 
     select case (first_stage_propellant_and_oxidizer)
     case(1) ! 1 - LIQUID HIDROGEN / LIQUID OXIGEN (LH2/LOX)    
-        Diameter_vector(1) = 1.8548d0 * log(Rocket%stage(1)%m_i) - 4.5511d0
-        Volume_vector(1) = -0.0018d0 * Rocket%stage(1)%m_i**2.d0 + 5.3556 * Rocket%stage(1)%m_i - 201.43d0
+        Diameter_vector(1) = 1.8548d0 * log(Mass_vector(1)) - 4.5511d0
+        Volume_vector(1) = -0.0018d0 * Mass_vector(1)**2.d0 + 5.3556 * Mass_vector(1) - 201.43d0
     case(2) ! 2 - LIQUID KEROSENE / LIQUID OXIGEN (RP1/LOX)
-        Diameter_vector(1) = 3e-5 * Rocket%stage(1)%m_i**2.d0 - 0.0034d0 * Rocket%stage(1)%m_i + 2.5802d0
-        Volume_vector(1) = 0.0076d0 * Rocket%stage(1)%m_i**2.d0 - 1.7119d0 * Rocket%stage(1)%m_i + 230.43d0
+        Diameter_vector(1) = 3e-5 * Mass_vector(1)**2.d0 - 0.0034d0 * Mass_vector(1) + 2.5802d0
+        Volume_vector(1) = 0.0076d0 * Mass_vector(1)**2.d0 - 1.7119d0 * Mass_vector(1) + 230.43d0
     case(3) ! 3 - LIQUID METHANE  / LIQUID OXIGNE (CH4/LOX)
         print*, "WARNING: without statistical data on the geometry"
     case(4) ! 4 - UDMH/LOX
@@ -29,11 +29,11 @@ subroutine rocket_geometry_calculation(Rocket)
     case(5) ! 5 - UDMH/AK271
         print*, "WARNING: without statistical data on the geometry"
     case(6) ! 6 - UDMH/N2O4
-        Diameter_vector(1) = -2e-5 * Rocket%stage(1)%m_i**2.d0 + 0.0132d0 * Rocket%stage(1)%m_i + 1.5097d0
-        Volume_vector(1) = -0.0032 * Rocket%stage(1)%m_i**2.d0 + 2.2922d0 * Rocket%stage(1)%m_i - 101.3d0
+        Diameter_vector(1) = -2e-5 * Mass_vector(1)**2.d0 + 0.0132d0 * Mass_vector(1) + 1.5097d0
+        Volume_vector(1) = -0.0032 * Mass_vector(1)**2.d0 + 2.2922d0 * Mass_vector(1) - 101.3d0
     case(7) ! 7 - AEROZINE50/N2O4
         Diameter_vector(1) = 3.05d0
-        Volume_vector(1) = 0.8946d0 * Rocket%stage(1)%m_i + 47.955d0
+        Volume_vector(1) = 0.8946d0 * Mass_vector(1) + 47.955d0
     case(8) ! 8 - MH/NITRIC ACID(WFNA)
         print*, "WARNING: without statistical data on the geometry"
     case default
@@ -50,9 +50,9 @@ subroutine rocket_geometry_calculation(Rocket)
     case(3) ! 3 - LIQUID METHANE  / LIQUID OXIGNE (CH4/LOX)
         !COMPLETAR
     case(4) ! 4 - UDMH/LOX
-        print*, "WARNING este no es valido"
+        print*, "WARNING: without statistical data on the geometry"
     case(5) ! 5 - UDMH/AK271
-        print*, "WARNING este no es valido"
+        print*, "WARNING: without statistical data on the geometry"
     case(6) ! 6 - UDMH/N2O4
         Volume_vector(2) = -0.0019d0*Mass_vector(2)**2 + 1.7462d0*Mass_vector(2) - 7.4837d0
         Diameter_vector(2) = -0.0001d0*Mass_vector(2)**2 + 0.0297d0*Mass_vector(2) + 2.0639d0
@@ -60,15 +60,15 @@ subroutine rocket_geometry_calculation(Rocket)
         Volume_vector(2) = 0.0511d0*Mass_vector(2)**2 - 1.2408d0*Mass_vector(2) + 34.109d0
         Diameter_vector(2) = -0.0008d0*Mass_vector(2)**2 + 0.0579d0*Mass_vector(2) + 2.0779d0
     case(8) ! 8 - MH/NITRIC ACID(WFNA)
-        print*, "WARNING este no es valido"
+        print*, "WARNING: without statistical data on the geometry"
     case default
         print*, "WARNING: unknown Second stage propellant and oxidizer"
     end select
 
     select case (Third_stage_propellant_and_oxidizer)
     case(1) ! 1 - LIQUID HIDROGEN / LIQUID OXIGEN (LH2/LOX) 
-        Diameter_vector(3) = 0.0139d0 * Rocket%stage(3)%m_i**2.d0 - 0.3527d0 * Rocket%stage(3)%m_i + 4.8378d0
-        Volume_vector(3) = 0.263d0 * Rocket%stage(3)%m_i**2.d0 - 2.4828d0 * Rocket%stage(3)%m_i + 47.045d0
+        Diameter_vector(3) = 0.0139d0 * Mass_vector(3)**2.d0 - 0.3527d0 * Mass_vector(3) + 4.8378d0
+        Volume_vector(3) = 0.263d0 * Mass_vector(3)**2.d0 - 2.4828d0 * Mass_vector(3) + 47.045d0
     case(2) ! 2 - LIQUID KEROSENE / LIQUID OXIGEN (RP1/LOX)
         print*, "WARNING: without statistical data on the geometry"
     case(3) ! 3 - LIQUID METHANE  / LIQUID OXIGNE (CH4/LOX)
@@ -78,8 +78,8 @@ subroutine rocket_geometry_calculation(Rocket)
     case(5) ! 5 - UDMH/AK271
         print*, "WARNING: without statistical data on the geometry"
     case(6) ! 6 - UDMH/N2O4
-        Diameter_vector(3) = 0.7393d0 * log(Rocket%stage(3)%m_i) + 1.2459d0
-        Volume_vector(3) = -0.0089 * Rocket%stage(3)%m_i**2.d0 + 1.4289 * Rocket%stage(3)%m_i + 6.1252d0
+        Diameter_vector(3) = 0.7393d0 * log(Mass_vector(3)) + 1.2459d0
+        Volume_vector(3) = -0.0089 * Mass_vector(3)**2.d0 + 1.4289 * Mass_vector(3) + 6.1252d0
     case(7) ! 7 - AEROZINE50/N2O4
         print*, "WARNING: without statistical data on the geometry"
     case(8) ! 8 - MH/NITRIC ACID(WFNA)
