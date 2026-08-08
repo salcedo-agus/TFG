@@ -21,7 +21,7 @@ program TFG
         print*, "Stage N", i 
         print*, "ISP:               ", Rocket%stage(i)%ISP
         print*, "Exhaust velocity:  ", Rocket%stage(i)%nu_e
-        print*, "Initial stage mass:", Rocket%stage(i)%m_0
+        print*, "Initial stage mass:", Rocket%stage(i)%m_i
         print*, "Propellant mass:   ", Rocket%stage(i)%m_p
         print*, "Structure mass:    ", Rocket%stage(i)%m_s
         print*, "Mass ratio:        ", Rocket%stage(i)%k_m

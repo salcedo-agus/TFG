@@ -18,6 +18,9 @@ module rocket_types
         real(8) t_burn ! Stage burn time
         real(8) D_v    ! Delta_v provided by the stage 
         real(8) nu_e   ! Effective escape velocity 
+
+        real(8) Diameter
+        real(8) Length
     end type Stage_t 
 
     type Rocket_t
