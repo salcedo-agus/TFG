@@ -13,13 +13,15 @@ program TFG
 
     call STAGING_LOOP(Rocket) 
     
+    !#### PRE-SIMULATION ########################
+    call rocket_geometry_calculation(Rocket)
 
     do i=1, Rocket%number_of_stages
         print*, "==========================================="
         print*, "Stage N", i 
         print*, "ISP:               ", Rocket%stage(i)%ISP
         print*, "Exhaust velocity:  ", Rocket%stage(i)%nu_e
-        print*, "Initial stage mass:", Rocket%stage(i)%m_0
+        print*, "Initial stage mass:", Rocket%stage(i)%m_i
         print*, "Propellant mass:   ", Rocket%stage(i)%m_p
         print*, "Structure mass:    ", Rocket%stage(i)%m_s
         print*, "Mass ratio:        ", Rocket%stage(i)%k_m

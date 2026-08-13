@@ -25,11 +25,13 @@ OBJS := \
     $(BUILD_DIR)/Rocket_Types.o   \
     $(BUILD_DIR)/Typical_Data.o   \
     $(BUILD_DIR)/Staging.o        \
+    $(BUILD_DIR)/Root_Finding.o     \
     $(BUILD_DIR)/Payload_Mass_calc.o \
     $(BUILD_DIR)/Stage_Optimization_Loop.o \
     $(BUILD_DIR)/C_Interface.o    \
     $(BUILD_DIR)/Orbit_calc.o     \
-    $(BUILD_DIR)/Thrust_calc.o        
+    $(BUILD_DIR)/Thrust_calc.o    \
+    $(BUILD_DIR)/Geometry_calc.o    
     
 # -- Module search/output flags -----------------------------------------------
 MODFLAGS := -J$(BUILD_DIR) -I$(BUILD_DIR)
@@ -112,37 +114,47 @@ $(BUILD_DIR)/Typical_Data.o: $(INOUT_DIR)/Typical_Data.f90 \
     $(BUILD_DIR)/Rocket_Types.o
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
 
-# 3. Staging — depends on Typical_Data and Rocket_Types
-$(BUILD_DIR)/Staging.o: $(STAGING_DIR)/Staging.f90 \
-    $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
+# 3. Root_Finding.f90 — depends on Rocket_Types, Typical_Data and Staging
+$(BUILD_DIR)/Root_Finding.o: $(STAGING_DIR)/Root_Finding.f90 \
+    $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o $(BUILD_DIR)/Staging.o
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
 
-# 4. C_Interface — depends on Typical_Data and Rocket_Types
+# 4. Staging — depends on Typical_Data, Rocket_Types and Root_Finding
+$(BUILD_DIR)/Staging.o: $(STAGING_DIR)/Staging.f90 \
+    $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o $(BUILD_DIR)/Root_Finding.o
+	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
+
+# 5. C_Interface — depends on Typical_Data and Rocket_Types
 $(BUILD_DIR)/C_Interface.o: $(INTERFACE_DIR)/C_Interface.f90 \
     $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
 
-# 5. Stage_Optimization_Loop.f90 — depends on Typical_Data and Rocket_Types
+# 6. Stage_Optimization_Loop.f90 — depends on Typical_Data and Rocket_Types
 $(BUILD_DIR)/Stage_Optimization_Loop.o: $(STAGING_DIR)/Stage_Optimization_Loop.f90 \
     $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
 
-# 6. Orbit_calc.f90 — depends on Typical_Data
+# 7. Orbit_calc.f90 — depends on Typical_Data
 $(BUILD_DIR)/Orbit_calc.o: $(PRE_STAGING_DIR)/Orbit_calc.f90 \
     $(BUILD_DIR)/Typical_Data.o 
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
 
-# 7. Payload_Mass_calc.f90 — depends on Typical_Data and Rocket_Types
+# 8. Payload_Mass_calc.f90 — depends on Typical_Data and Rocket_Types
 $(BUILD_DIR)/Payload_Mass_calc.o: $(PRE_STAGING_DIR)/Payload_Mass_calc.f90 \
     $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
 
-# 8. Thrust_calc.f90 — depends on Typical_Data and Rocket_Types
+# 9. Thrust_calc.f90 — depends on Typical_Data and Rocket_Types
 $(BUILD_DIR)/Thrust_calc.o: $(PRE_SIMULATION_DIR)/Thrust_calc.f90 \
     $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
 
-# 9. main — depends on Rocket_Types and Typical_Data
+# 10. Geometry_calc.f90 — depends on Rocket_Types and Typical_Data
+$(BUILD_DIR)/Geometry_calc.o: $(PRE_SIMULATION_DIR)/Geometry_calc.f90 \
+    $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
+	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
+
+# 11. main — depends on Rocket_Types and Typical_Data
 $(BUILD_DIR)/main.o: main.f90 \
     $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@

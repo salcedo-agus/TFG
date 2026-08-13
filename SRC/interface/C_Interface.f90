@@ -37,7 +37,7 @@ subroutine run_staging(                         &
     real(c_double) :: L_i, check
 
     ! --- Set module-level globals used by STAGING ---
-    delta_v          = delta_v_in
+    Rocket%delta_v          = delta_v_in
     payload_mass     = payload_mass_in
     number_of_stages = n_stages
 
