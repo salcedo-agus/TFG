@@ -1114,7 +1114,19 @@ class MainWindow(QMainWindow):
         for stage in results["stages"]:
             card = ResultCard(stage["stage"], stage)
             self.results_layout.addWidget(card)
-        
+
+        # Partial-state hint (UI-SPEC:112): one 11px TEXT_DIM label after the
+        # cards when ANY placeholder "—" is rendered (Phase 1 has no per-stage
+        # ΔV/geometry); absent in the pre-run empty state (no cards -> no hint).
+        if any(
+            s.get("dv") is None or s.get("diameter") is None
+            or s.get("length") is None or s.get("volume") is None
+            for s in results["stages"]
+        ):
+            hint = QLabel("ΔV and geometry populate with full pipeline wiring (Phase 2).")
+            hint.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px; border: none;")
+            self.results_layout.addWidget(hint)
+
         self._last_configs = [
             {
                 "propellant": sw.prop_combo.currentText(),
@@ -1124,6 +1136,9 @@ class MainWindow(QMainWindow):
         ]
         self._last_results = results
         self.print_btn.setEnabled(True)
+        # Auto-switch to Results after a successful run (UI-SPEC:193) — fires
+        # only in this success path; _on_inputs_changed never navigates.
+        self.tabs.setCurrentIndex(0)
 
         self._last_results = results
 
