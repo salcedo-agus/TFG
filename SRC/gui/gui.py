@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
     QGridLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox,
     QSlider, QPushButton, QScrollArea, QFrame, QSizePolicy,
     QGroupBox, QMessageBox, QStackedWidget, QGraphicsOpacityEffect,
-    QFileDialog
+    QFileDialog, QTabWidget, QRadioButton
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPropertyAnimation, QEasingCurve
 from PyQt6.QtGui import QFont, QPalette, QColor
@@ -309,6 +309,15 @@ QFrame#divider {{
     max-height: 1px;
     min-height: 1px;
 }}
+QTabWidget::pane {{ background: {BG_DARK}; border: 1px solid {BORDER}; }}
+QTabBar::tab {{ background: {BG_PANEL}; color: {TEXT_SEC}; padding: 8px 24px;
+               border: 1px solid {BORDER}; border-bottom: none; }}
+QTabBar::tab:selected {{ background: {BG_CARD}; color: {ACCENT}; font-weight: 600; }}
+QTabBar::tab:!selected:hover {{ color: {TEXT_PRI}; }}
+QTabBar::tab:top:!selected {{ margin-top: 3px; }}
+QRadioButton {{ color: {TEXT_PRI}; background: transparent; }}
+QRadioButton::indicator {{ width: 16px; height: 16px; }}
+QRadioButton::indicator:checked {{ background: {ACCENT}; }}
 """
 
 # ── Stage input widget ────────────────────────────────────────────────────────
@@ -710,11 +719,11 @@ class MainWindow(QMainWindow):
         self._build_ui()
 
     def _build_ui(self):
-        root = QWidget()
-        self.setCentralWidget(root)
-        root_layout = QHBoxLayout(root)
-        root_layout.setContentsMargins(0, 0, 0, 0)
-        root_layout.setSpacing(0)
+        self.tabs = QTabWidget()
+        self.setCentralWidget(self.tabs)
+        self.tabs.addTab(self._build_results_tab(), "Results")                # index 0 — central/home (D-02)
+        self.tabs.addTab(self._build_setup_tab(),   "Setup")
+        self.tabs.addTab(self._build_vehicle_tab(), "Vehicle Configuration")  # index 2
 
         # ── Left panel (inputs) ───────────────────────────────────────────────
         left_scroll = QScrollArea()
@@ -795,9 +804,8 @@ class MainWindow(QMainWindow):
         self.left_layout.addWidget(self.run_btn)
         self.left_layout.addWidget(self.print_btn)
         self.left_layout.addStretch()
-
         left_scroll.setWidget(left_inner)
-        root_layout.addWidget(left_scroll)
+        self._left_scroll = left_scroll   # orphaned in T1; relocated into Setup tab in T2
 
         # ── Right panel (results) ─────────────────────────────────────────────
         right_scroll = QScrollArea()
@@ -812,7 +820,7 @@ class MainWindow(QMainWindow):
         self.right_layout.addStretch()
 
         right_scroll.setWidget(self.right_inner)
-        root_layout.addWidget(right_scroll, 1)
+        self._right_scroll = right_scroll  # orphaned in T1; relocated into Results tab in T3
 
         self.dv_spin.valueChanged.connect(self._on_inputs_changed)
         self.pl_spin.valueChanged.connect(self._on_inputs_changed)
@@ -821,6 +829,41 @@ class MainWindow(QMainWindow):
         # Build initial stage inputs
         self._rebuild_stage_inputs(self.n_stages_spin.value())
         self._show_empty_state()
+
+    def _build_results_tab(self):
+        """Results tab (index 0): central/home surface (D-02)."""
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        inner = QWidget()
+        self.results_layout = QVBoxLayout(inner)
+        self.results_layout.setContentsMargins(24, 24, 24, 24)   # UI-SPEC lg token
+        self.results_layout.setSpacing(14)
+        self.results_layout.addStretch()
+        scroll.setWidget(inner)
+        return scroll
+
+    def _build_setup_tab(self):
+        """Setup tab (index 1): relocated input panel (lands in T2)."""
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        inner = QWidget()
+        self.setup_layout = QVBoxLayout(inner)
+        self.setup_layout.setContentsMargins(16, 20, 16, 20)
+        self.setup_layout.setSpacing(14)
+        scroll.setWidget(inner)
+        return scroll
+
+    def _build_vehicle_tab(self):
+        """Vehicle Configuration tab (index 2): diameter-mode radios (later plans)."""
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        inner = QWidget()
+        self.vehicle_layout = QVBoxLayout(inner)
+        self.vehicle_layout.setContentsMargins(16, 20, 16, 20)
+        self.vehicle_layout.setSpacing(14)
+        self.vehicle_layout.addStretch()
+        scroll.setWidget(inner)
+        return scroll
 
     def _rebuild_stage_inputs(self, n):
         for w in self.stage_widgets:
