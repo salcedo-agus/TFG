@@ -200,15 +200,17 @@ Rules: `addTab` order fixed (0/1/2); tabs never reordered, hidden, or renamed. I
 
 ## UI Considerations
 
-Applicable state considerations resolved: **13 covered, 1 backstop, 0 unresolved**
+Applicable state considerations resolved: **14 covered, 1 backstop, 0 unresolved** (validated by `ui-consideration-probe.cjs`, 27 applicable / 27 resolved)
 
 | Category | Element(s) | Status | Resolution / Reason |
 |----------|------------|--------|---------------------|
 | empty | Results tab before first run / after invalidation | ✅ covered | Empty state renders documented copy "Run the analysis to see results here." at layout index 0 (existing `_show_empty_state` pattern, relocated) |
 | empty | Sliders for a combo with no statistical data | ✅ covered | "No data for this combination yet" (ORANGE, existing `gui.py:481,495`) |
+| loading | Solver call (Setup → Results) | ✅ covered | Deliberate design: solver is a **blocking call on the UI thread** (research A6) — no skeleton/spinner/progressive reveal exists or is intended; the app is single-threaded and synchronous (see cross-tab contract) |
 | partial | ΔV + geometry fields pending Phase 2 | ✅ covered | Values render "—" in TEXT_DIM; partial-state hint "ΔV and geometry populate with full pipeline wiring (Phase 2)." shown once |
 | zero-one-many | Stage count 1–3 | ✅ covered | `n_stages_spin` bounded 1–3; `_rebuild_stage_inputs` rebuilds exactly n stage widgets; no zero-stage state exists |
 | overflow | Vertical overflow of cards / inputs | ✅ covered | Every tab page is a `QScrollArea` with `setWidgetResizable(True)` (existing container pattern) |
+| overflow | Window too small | ✅ covered | `setMinimumSize(960, 700)` preserved on `MainWindow` and `AppWindow` |
 | long-text | 61-char cycle name "Aproximates Engine Perfermoance Only Base On Propellant/Oxidizer" in combos; "Vehicle Configuration" tab label | 🧪 backstop | Combo `setMinimumWidth(220)` + Qt elision; visual check: dropdown remains readable and tab bar fits at 960px min width |
 | error | Missing stage data | ✅ covered | "Missing Data" modal with stage list + guidance (existing `gui.py:924-931`) |
 | error | Fortran call failure | ✅ covered | "Fortran Error" modal with exception text + recovery path (existing `gui.py:933-943`) |
@@ -216,8 +218,8 @@ Applicable state considerations resolved: **13 covered, 1 backstop, 0 unresolved
 | disabled | Run button not ready | ✅ covered | `ready=false` property → dim BG_INPUT style; `unpolish`/`polish` refresh (existing `gui.py:787-793`) |
 | disabled | Save before any run | ✅ covered | `print_btn.setEnabled(False)` until first successful run (existing `gui.py:786`) |
 | state-toggle | Diameter input box visibility | ✅ covered | Mode 3 → box visible; modes 1/2 → hidden; value persists across toggles |
-| overflow | Window too small | ✅ covered | `setMinimumSize(960, 700)` preserved on `MainWindow` and `AppWindow` |
 | populated | Results after run | ✅ covered | Summary → indicator → divider → n cards; Save enabled; `_last_configs`/`_last_results` captured for export |
+| unclassified | Minimum-confirmed indicator + partial-state hint (E5) | ✅ covered | Manual review resolved: these are `populated`/`partial` state surfaces already covered by the rows above (GREEN/ACCENT2 indicator on run; "—" + hint before Phase 2) |
 
 ---
 
