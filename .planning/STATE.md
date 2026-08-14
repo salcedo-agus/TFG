@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 1
 current_phase_name: Centralized 3-Tab GUI
 status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-08-14T19:45:06.833Z"
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-08-14T20:02:37.609Z"
 last_activity: 2026-08-14
 last_activity_desc: Phase 1 UI-SPEC approved (commit 5f247a8)
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-14)
 ## Current Position
 
 Phase: 1 (Centralized 3-Tab GUI) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-08-14 — Phase 1 execution started
 
-Progress: [███░░░░░░░] 33%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [███░░░░░░░] 33%
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 01-centralized-3-tab-gui P1 | 17min | 3 tasks | 1 files |
+| Phase 01-centralized-3-tab-gui P2 | 14min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,9 @@ Recent decisions affecting current work:
 - [Phase 01-centralized-3-tab-gui]: Tab order contractual: Results(0) active on open / Setup(1) / Vehicle Configuration(2); tabs not movable/closable/renamable
 - [Phase 01-centralized-3-tab-gui]: Tab-bar/radio QSS appended to STYLE using only the 12 named palette constants (append-only)
 - [Phase 01-centralized-3-tab-gui]: dv_spin relocates verbatim into Setup; removal deferred to 01-02-T1
+- [Phase 01-centralized-3-tab-gui]: D-10 completed: no ΔV input of any kind remains in the GUI; orbit height (100.0-2000.0) drives the interim _auto_delta_v() V_circ mirror (g_0=9.80665, Radius=6378.0, cited from Orbit_calc.f90:9-10 / Typical_Data.f90:3-5), documented interim for Phase 2 PIPE-01 removal.
+- [Phase 01-centralized-3-tab-gui]: Diameter mode int stored via QButtonGroup.buttonToggled (fires on programmatic setChecked too), not buttonClicked (user-clicks only) — matches the plan's 'updated on radio toggled' contract and keeps Phase 2 handoff state correct under programmatic changes.
+- [Phase 01-centralized-3-tab-gui]: Vehicle Configuration tab state (mode int + diameter value) stored on MainWindow for Phase 2; deliberately NOT wired into run_staging (Pitfall 8).
 
 ### Pending Todos
 
@@ -98,6 +102,6 @@ Items acknowledged and carried forward:
 
 ## Session Continuity
 
-Last session: 2026-08-14T19:45:06.815Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-08-14T20:02:13.595Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None

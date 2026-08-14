@@ -38,7 +38,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 01-02: Add mission inputs and Vehicle Configuration tab (diameter modes + input box)
+- [x] 01-02: Add mission inputs and Vehicle Configuration tab (diameter modes + input box)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 

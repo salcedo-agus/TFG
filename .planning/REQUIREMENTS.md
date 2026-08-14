@@ -11,9 +11,9 @@
 - [ ] **GUI-02**: Results tab shows, per stage, m0, mf, mp, ms, mass ratios (k_m, k_s, k_L), per-stage ΔV, and exhaust velocity
 - [ ] **GUI-03**: Results tab shows geometry results per stage (diameter, length, volume)
 - [ ] **GUI-04**: Results tab retains the "Save Results" export and the minimum-confirmed indicator
-- [ ] **GUI-05**: Mission inputs live in the GUI (orbit height, payload mass, stage count); ΔV is computed internally by the pipeline, not entered by hand
-- [ ] **GUI-06**: Vehicle Configuration tab offers statistically-determined, constant, and user-specified diameter modes
-- [ ] **GUI-07**: User-specified diameter mode exposes an input box for the diameter value
+- [x] **GUI-05**: Mission inputs live in the GUI (orbit height, payload mass, stage count); ΔV is computed internally by the pipeline, not entered by hand
+- [x] **GUI-06**: Vehicle Configuration tab offers statistically-determined, constant, and user-specified diameter modes
+- [x] **GUI-07**: User-specified diameter mode exposes an input box for the diameter value
 - [x] **GUI-08**: Launch splash screen is preserved
 
 ### Pipeline Exposure
@@ -60,9 +60,9 @@ Deferred to future release. Tracked but not in current roadmap.
 | GUI-02 | Phase 1 | Pending |
 | GUI-03 | Phase 1 | Pending |
 | GUI-04 | Phase 1 | Pending |
-| GUI-05 | Phase 1 | Pending |
-| GUI-06 | Phase 1 | Pending |
-| GUI-07 | Phase 1 | Pending |
+| GUI-05 | Phase 1 | Complete |
+| GUI-06 | Phase 1 | Complete |
+| GUI-07 | Phase 1 | Complete |
 | GUI-08 | Phase 1 | Complete |
 | PIPE-01 | Phase 2 | Pending |
 | PIPE-02 | Phase 2 | Pending |
