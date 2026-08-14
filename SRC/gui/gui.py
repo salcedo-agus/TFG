@@ -725,21 +725,6 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self._build_setup_tab(),   "Setup")
         self.tabs.addTab(self._build_vehicle_tab(), "Vehicle Configuration")  # index 2
 
-        # ── Right panel (results) ─────────────────────────────────────────────
-        right_scroll = QScrollArea()
-        right_scroll.setWidgetResizable(True)
-        right_scroll.setStyleSheet(f"background: {BG_DARK};")
-
-        self.right_inner = QWidget()
-        self.right_inner.setStyleSheet(f"background: {BG_DARK};")
-        self.right_layout = QVBoxLayout(self.right_inner)
-        self.right_layout.setContentsMargins(24, 24, 24, 24)
-        self.right_layout.setSpacing(14)
-        self.right_layout.addStretch()
-
-        right_scroll.setWidget(self.right_inner)
-        self._right_scroll = right_scroll  # orphaned in T1; relocated into Results tab in T3
-
         # Build initial stage inputs
         self._rebuild_stage_inputs(self.n_stages_spin.value())
         self._show_empty_state()
@@ -748,11 +733,22 @@ class MainWindow(QMainWindow):
         """Results tab (index 0): central/home surface (D-02)."""
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
+        scroll.setStyleSheet(f"background: {BG_DARK};")
         inner = QWidget()
+        inner.setStyleSheet(f"background: {BG_DARK};")
         self.results_layout = QVBoxLayout(inner)
         self.results_layout.setContentsMargins(24, 24, 24, 24)   # UI-SPEC lg token
         self.results_layout.setSpacing(14)
         self.results_layout.addStretch()
+
+        # Save Results — relocated from the input panel (UI-SPEC:156), pinned
+        # above the trailing stretch; disabled until a successful run.
+        self.print_btn = QPushButton("⬇  Save Results")
+        self.print_btn.setObjectName("print_btn")
+        self.print_btn.clicked.connect(self._print_results)
+        self.print_btn.setEnabled(False)
+        self.results_layout.addWidget(self.print_btn)
+
         scroll.setWidget(inner)
         return scroll
 
@@ -819,10 +815,6 @@ class MainWindow(QMainWindow):
         self.run_btn = QPushButton("▶  Run Staging Analysis")
         self.run_btn.setObjectName("run_btn")
 
-        self.print_btn = QPushButton("⬇  Save Results")
-        self.print_btn.setObjectName("print_btn")
-        self.print_btn.clicked.connect(self._print_results)
-        self.print_btn.setEnabled(False)
         self.run_btn.setProperty("ready", False)
         self.run_btn.setStyleSheet(f"""
             QPushButton {{ background-color: {BG_INPUT}; color: {TEXT_DIM}; border: 1px solid {BORDER}; border-radius: 8px; padding: 10px 32px; font-weight: 700; font-size: 14px; min-height: 40px; }}
@@ -832,7 +824,6 @@ class MainWindow(QMainWindow):
         """)
         self.run_btn.clicked.connect(self._run)
         self.setup_layout.addWidget(self.run_btn)
-        self.setup_layout.addWidget(self.print_btn)
         self.setup_layout.addStretch()
 
         # Signal wiring — preserved across tab relocation (Pitfall 3)
@@ -875,12 +866,18 @@ class MainWindow(QMainWindow):
         placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
         placeholder.setObjectName("placeholder")
         placeholder.setStyleSheet(f"color: {TEXT_DIM}; font-size: 15px;")
-        self.right_layout.insertWidget(0, placeholder)
+        self.results_layout.insertWidget(0, placeholder)
+        # Re-pin Save Results at the bottom (above the trailing stretch); it is
+        # preserved by reference across _clear_results (relocated from the old
+        # input panel where it lived outside the cleared layout).
+        if self.results_layout.indexOf(self.print_btn) == -1:
+            self.results_layout.addStretch()
+            self.results_layout.addWidget(self.print_btn)
 
     def _clear_results(self):
-        while self.right_layout.count():
-            item = self.right_layout.takeAt(0)
-            if item.widget():
+        while self.results_layout.count():
+            item = self.results_layout.takeAt(0)
+            if item.widget() and item.widget() is not self.print_btn:
                 item.widget().deleteLater()
 
     def _update_run_button(self):
@@ -985,7 +982,7 @@ class MainWindow(QMainWindow):
         )
         summary.setTextFormat(Qt.TextFormat.RichText)
         summary.setStyleSheet(f"color: {TEXT_PRI}; font-size: 14px;")
-        self.right_layout.addWidget(summary)
+        self.results_layout.addWidget(summary)
 
         min_label = QLabel(
             "✔  Minimum confirmed" if results["minimum_found"]
@@ -993,15 +990,15 @@ class MainWindow(QMainWindow):
         )
         color = GREEN if results["minimum_found"] else ACCENT2
         min_label.setStyleSheet(f"color: {color}; font-size: 12px; font-weight: 600;")
-        self.right_layout.addWidget(min_label)
+        self.results_layout.addWidget(min_label)
 
         div = QFrame(); div.setObjectName("divider")
-        self.right_layout.addWidget(div)
+        self.results_layout.addWidget(div)
 
         # Stage cards
         for stage in results["stages"]:
             card = ResultCard(stage["stage"], stage)
-            self.right_layout.addWidget(card)
+            self.results_layout.addWidget(card)
         
         self._last_configs = [
             {
@@ -1015,7 +1012,9 @@ class MainWindow(QMainWindow):
 
         self._last_results = results
 
-        self.right_layout.addStretch()
+        # Save Results pinned above the final stretch (UI-SPEC:156)
+        self.results_layout.addWidget(self.print_btn)
+        self.results_layout.addStretch()
 
 
 
