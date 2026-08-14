@@ -29,13 +29,15 @@ The project moves from a splash + single-panel raw-slider GUI to a centralized 3
   4. Vehicle Configuration offers statistical / constant / user-specified diameter, and specified diameter shows an input box
   5. "Save Results" export, minimum-confirmed indicator, and splash screen all still work
 
-**Plans**: 3/3 plans executed
+**Plans**: 3/3 plans executed + 2 gap-closure plans (from UAT G-01-2, G-01-4)
 
 Plans:
 
 - [x] 01-01-PLAN.md
 - [x] 01-02-PLAN.md
 - [x] 01-03-PLAN.md
+- [ ] 01-04-PLAN.md — Fix `Rocket%rm_L` init on the ctypes/GUI path (G-01-2, null masses)
+- [ ] 01-05-PLAN.md — Fix `test_call.py` import after interface/ reorg (G-01-4, ModuleNotFoundError)
 
 **Wave 1**
 
