@@ -105,6 +105,7 @@ Restructure the GUI into a centralized 3-tab workbench with mission inputs, resu
 
 - Wiring the full pipeline (orbit → payload → staging → thrust → geometry) — Phase 2 (results tab may show only what the staging path already provides until then)
 - Correctness fixes (rm_L init, dedup bridge, MinGW path) — Phase 3
+- **Supersession (2026-08-15):** the `rm_L init` item above is pulled forward from Phase 3 by UAT gap G-01-2's closure plan `01-04` (orchestrator-approved gap closure); FIX-02 bridge dedup, FIX-03 MinGW path, and FIX-05 TEST CASE override remain deferred to Phase 3.
 - Automated tests — deferred to a future session (user decision)
 
 </deferred>
