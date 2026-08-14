@@ -569,14 +569,19 @@ class ResultCard(QFrame):
         def add_metric(row, col, label, value, unit="", color=TEXT_PRI, fmt=":,.1f"):
             lbl = QLabel(label)
             lbl.setStyleSheet(f"color: {TEXT_SEC}; font-size: 11px; border: none;")
-            if value is None:
-                # Placeholder for partial population (PIPE-02): never a fabricated
-                # number — "—" in TEXT_DIM until Phase 2 packs the value.
+            try:
+                if isinstance(value, (int, float)) and value == value:
+                    # value == value excludes NaN: "nan" would be a fabricated
+                    # number, not a real result (PIPE-02).
+                    text = f"{fmt % value}" if fmt.startswith("%") else f"{value:{fmt.lstrip(':')}}"
+                    text = f"{text} {unit}".strip()
+                else:
+                    # Placeholder for partial or invalid population (PIPE-02):
+                    # never a fabricated number — "—" in TEXT_DIM until Phase 2
+                    # packs the value.
+                    text, color = "—", TEXT_DIM
+            except (TypeError, ValueError):
                 text, color = "—", TEXT_DIM
-            elif fmt.startswith("%"):
-                text = f"{fmt % value} {unit}".strip()
-            else:
-                text = f"{value:{fmt.lstrip(':')}} {unit}".strip()
             val = QLabel(text)
             val.setStyleSheet(f"color: {color}; font-size: 14px; font-weight: 600; border: none;")
             grid.addWidget(lbl, row*2,   col)
