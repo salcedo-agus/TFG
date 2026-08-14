@@ -1083,68 +1083,68 @@ class MainWindow(QMainWindow):
                 isp_list=isp_list,
                 ks_list=ks_list,
             )
+
+            self._clear_results()
+
+            # Summary header
+            summary = QLabel(
+                f"Total Initial Mass:  "
+                f"<span style='color:{ACCENT}; font-size:22px; font-weight:700;'>"
+                f"{results['total_initial_mass']:,.1f} kg</span>"
+            )
+            summary.setTextFormat(Qt.TextFormat.RichText)
+            summary.setStyleSheet(f"color: {TEXT_PRI}; font-size: 14px;")
+            self.results_layout.addWidget(summary)
+
+            min_label = QLabel(
+                "✔  Minimum confirmed" if results["minimum_found"]
+                else "✘  Minimum not confirmed — check your inputs"
+            )
+            color = GREEN if results["minimum_found"] else ACCENT2
+            min_label.setStyleSheet(f"color: {color}; font-size: 12px; font-weight: 600;")
+            self.results_layout.addWidget(min_label)
+
+            div = QFrame(); div.setObjectName("divider")
+            self.results_layout.addWidget(div)
+
+            # Stage cards
+            for stage in results["stages"]:
+                card = ResultCard(stage["stage"], stage)
+                self.results_layout.addWidget(card)
+
+            # Partial-state hint (UI-SPEC:112): one 11px TEXT_DIM label after the
+            # cards when ANY placeholder "—" is rendered (Phase 1 has no per-stage
+            # ΔV/geometry); absent in the pre-run empty state (no cards -> no hint).
+            if any(
+                s.get("dv") is None or s.get("diameter") is None
+                or s.get("length") is None or s.get("volume") is None
+                for s in results["stages"]
+            ):
+                hint = QLabel("ΔV and geometry populate with full pipeline wiring (Phase 2).")
+                hint.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px; border: none;")
+                self.results_layout.addWidget(hint)
+
+            self._last_configs = [
+                {
+                    "propellant": sw.prop_combo.currentText(),
+                    "cycle":      sw.cycle_combo.currentText(),
+                }
+                for sw in self.stage_widgets
+            ]
+            self._last_results = results
+            self.print_btn.setEnabled(True)
+            # Auto-switch to Results after a successful run (UI-SPEC:193) — fires
+            # only in this success path; _on_inputs_changed never navigates.
+            self.tabs.setCurrentIndex(0)
+
+            self._last_results = results
+
+            # Save Results pinned above the final stretch (UI-SPEC:156)
+            self.results_layout.addWidget(self.print_btn)
+            self.results_layout.addStretch()
         except Exception as e:
             QMessageBox.critical(self, "Fortran Error", str(e))
             return
-
-        self._clear_results()
-
-        # Summary header
-        summary = QLabel(
-            f"Total Initial Mass:  "
-            f"<span style='color:{ACCENT}; font-size:22px; font-weight:700;'>"
-            f"{results['total_initial_mass']:,.1f} kg</span>"
-        )
-        summary.setTextFormat(Qt.TextFormat.RichText)
-        summary.setStyleSheet(f"color: {TEXT_PRI}; font-size: 14px;")
-        self.results_layout.addWidget(summary)
-
-        min_label = QLabel(
-            "✔  Minimum confirmed" if results["minimum_found"]
-            else "✘  Minimum not confirmed — check your inputs"
-        )
-        color = GREEN if results["minimum_found"] else ACCENT2
-        min_label.setStyleSheet(f"color: {color}; font-size: 12px; font-weight: 600;")
-        self.results_layout.addWidget(min_label)
-
-        div = QFrame(); div.setObjectName("divider")
-        self.results_layout.addWidget(div)
-
-        # Stage cards
-        for stage in results["stages"]:
-            card = ResultCard(stage["stage"], stage)
-            self.results_layout.addWidget(card)
-
-        # Partial-state hint (UI-SPEC:112): one 11px TEXT_DIM label after the
-        # cards when ANY placeholder "—" is rendered (Phase 1 has no per-stage
-        # ΔV/geometry); absent in the pre-run empty state (no cards -> no hint).
-        if any(
-            s.get("dv") is None or s.get("diameter") is None
-            or s.get("length") is None or s.get("volume") is None
-            for s in results["stages"]
-        ):
-            hint = QLabel("ΔV and geometry populate with full pipeline wiring (Phase 2).")
-            hint.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px; border: none;")
-            self.results_layout.addWidget(hint)
-
-        self._last_configs = [
-            {
-                "propellant": sw.prop_combo.currentText(),
-                "cycle":      sw.cycle_combo.currentText(),
-            }
-            for sw in self.stage_widgets
-        ]
-        self._last_results = results
-        self.print_btn.setEnabled(True)
-        # Auto-switch to Results after a successful run (UI-SPEC:193) — fires
-        # only in this success path; _on_inputs_changed never navigates.
-        self.tabs.setCurrentIndex(0)
-
-        self._last_results = results
-
-        # Save Results pinned above the final stretch (UI-SPEC:156)
-        self.results_layout.addWidget(self.print_btn)
-        self.results_layout.addStretch()
 
 
 
