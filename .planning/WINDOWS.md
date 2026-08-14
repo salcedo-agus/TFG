@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 2
+open_count: 3
 waived_count: 0
 fixed_count: 0
-total_count: 2
-last_updated: 2026-08-14T19:45:24.679Z
+total_count: 3
+last_updated: 2026-08-14T20:12:11.076Z
 ---
 
 # Broken Windows Ledger
@@ -17,6 +17,7 @@ last_updated: 2026-08-14T19:45:24.679Z
 |----|-------|------|------|------|-------------|--------|--------|-------------|-------------|
 | 1 | 01-centralized-3-tab-gui | unrun-verify | SRC/test_call.py |  | Phase gate python SRC/test_call.py unrun: build/librocket.dll missing on this machine (STATE.md blocker); bridge code zero-diff per guard | open |  | 2026-08-14T19:45:23.049Z |  |
 | 2 | 01-centralized-3-tab-gui | unrun-verify | SRC/gui/gui.py |  | make gui GUI smoke unrun: requires DLL build + interactive display; human-check items pending user verification (SUMMARY coverage D7) | open |  | 2026-08-14T19:45:24.679Z |  |
+| 3 | 01-centralized-3-tab-gui | unrun-verify | SRC/gui/gui.py |  | make gui GUI smoke unrun for 01-03: ResultCard rows 4-5 placeholders, partial-state hint, auto-switch, Save twice idempotency, min indicator — human-check items pending user verification (SUMMARY coverage D2/D4) | open |  | 2026-08-14T20:12:11.076Z |  |
 
 ````json
 [
@@ -42,6 +43,18 @@ last_updated: 2026-08-14T19:45:24.679Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-14T19:45:24.679Z",
+    "resolved_at": null
+  },
+  {
+    "id": 3,
+    "kind": "unrun-verify",
+    "phase": "01-centralized-3-tab-gui",
+    "file": "SRC/gui/gui.py",
+    "line": null,
+    "description": "make gui GUI smoke unrun for 01-03: ResultCard rows 4-5 placeholders, partial-state hint, auto-switch, Save twice idempotency, min indicator — human-check items pending user verification (SUMMARY coverage D2/D4)",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-14T20:12:11.076Z",
     "resolved_at": null
   }
 ]

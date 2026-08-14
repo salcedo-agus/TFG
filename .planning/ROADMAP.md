@@ -29,9 +29,14 @@ The project moves from a splash + single-panel raw-slider GUI to a centralized 3
   4. Vehicle Configuration offers statistical / constant / user-specified diameter, and specified diameter shows an input box
   5. "Save Results" export, minimum-confirmed indicator, and splash screen all still work
 
-**Plans**: 3 plans
+**Plans**: 3/3 plans executed
 
 Plans:
+
+- [x] 01-01-PLAN.md
+- [x] 01-02-PLAN.md
+- [x] 01-03-PLAN.md
+
 **Wave 1**
 
 - [x] 01-01: Refactor GUI shell into 3 tabs; move existing sliders/propellant-cycle into Setup tab
@@ -42,7 +47,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 01-03: Add results surface (stage masses, ΔV, geometry) with export and minimum-confirmed indicator
+- [x] 01-03: Add results surface (stage masses, ΔV, geometry) with export and minimum-confirmed indicator
 
 ### Phase 2: Full Pipeline Exposure
 
@@ -87,6 +92,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Centralized 3-Tab GUI | 0/3 | Not started | - |
+| 1. Centralized 3-Tab GUI | 3/3 | In Progress|  |
 | 2. Full Pipeline Exposure | 0/2 | Not started | - |
 | 3. Bridge & Correctness Fixes | 0/2 | Not started | - |

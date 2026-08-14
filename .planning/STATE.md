@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 1
 current_phase_name: Centralized 3-Tab GUI
-status: executing
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-08-14T20:02:37.609Z"
+status: verifying
+stopped_at: Phase 1 complete — ready for verification
+last_updated: "2026-08-14T20:16:06.016Z"
 last_activity: 2026-08-14
 last_activity_desc: Phase 1 UI-SPEC approved (commit 5f247a8)
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-08-14)
 
 Phase: 1 (Centralized 3-Tab GUI) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-14 — Phase 1 execution started
 
-Progress: [███████░░░] 67%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [███████░░░] 67%
 |------|----------|-------|-------|
 | Phase 01-centralized-3-tab-gui P1 | 17min | 3 tasks | 1 files |
 | Phase 01-centralized-3-tab-gui P2 | 14min | 2 tasks | 1 files |
+| Phase 01-centralized-3-tab-gui P3 | 9min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,10 @@ Recent decisions affecting current work:
 - [Phase 01-centralized-3-tab-gui]: D-10 completed: no ΔV input of any kind remains in the GUI; orbit height (100.0-2000.0) drives the interim _auto_delta_v() V_circ mirror (g_0=9.80665, Radius=6378.0, cited from Orbit_calc.f90:9-10 / Typical_Data.f90:3-5), documented interim for Phase 2 PIPE-01 removal.
 - [Phase 01-centralized-3-tab-gui]: Diameter mode int stored via QButtonGroup.buttonToggled (fires on programmatic setChecked too), not buttonClicked (user-clicks only) — matches the plan's 'updated on radio toggled' contract and keeps Phase 2 handoff state correct under programmatic changes.
 - [Phase 01-centralized-3-tab-gui]: Vehicle Configuration tab state (mode int + diameter value) stored on MainWindow for Phase 2; deliberately NOT wired into run_staging (Pitfall 8).
+- [Phase 01-centralized-3-tab-gui]: ResultCard add_metric is fmt-aware with two formatting branches (% specs via fmt % value; format-specs via nested braces with lstrip colon): the PATTERNS s5 literal nested-spec pattern raises ValueError for both ':,.1f' (colon in spec) and '%.2f' (% not in the format mini-language); output byte-identical to the plan contract.
+- [Phase 01-centralized-3-tab-gui]: Rows 0-3 keep the legacy :,.1f card rendering (k_m shows '2.3', nu_e '3.5 km/s' — byte-identical to pre-phase per plan truth 2); the UI-SPEC %.4f ratio contract governs the export file (unchanged) and the new rows' %.2f contract, not the legacy card rows.
+- [Phase 01-centralized-3-tab-gui]: Partial-state hint condition mirrors the card placeholder lookup exactly (any of dv/diameter/length/volume None across stages -> one 11px TEXT_DIM hint); Phase 2 dicts packing all four keys suppress the hint automatically (verified offscreen).
+- [Phase 01-centralized-3-tab-gui]: Auto-switch setCurrentIndex(0) placed after print_btn.setEnabled(True) in the _run success path only; _on_inputs_changed remains navigation-free (verified offscreen).
 
 ### Pending Todos
 
@@ -102,6 +107,6 @@ Items acknowledged and carried forward:
 
 ## Session Continuity
 
-Last session: 2026-08-14T20:02:13.595Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-08-14T20:16:05.998Z
+Stopped at: Phase 1 complete — ready for verification
 Resume file: None
