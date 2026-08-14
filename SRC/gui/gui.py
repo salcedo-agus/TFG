@@ -778,13 +778,14 @@ class MainWindow(QMainWindow):
         mg_layout = QGridLayout(mission_group)
         mg_layout.setSpacing(8)
 
-        mg_layout.addWidget(QLabel("ΔV  (km/s)"), 0, 0)
-        self.dv_spin = QDoubleSpinBox()
-        self.dv_spin.setRange(0.1, 100.0)
-        self.dv_spin.setValue(10.0)
-        self.dv_spin.setDecimals(2)
-        self.dv_spin.setSingleStep(0.5)
-        mg_layout.addWidget(self.dv_spin, 0, 1)
+        # Orbit height (row 0) — NEW (UI-SPEC:166); drives the internal ΔV (D-10)
+        mg_layout.addWidget(QLabel("Orbit Height (km)"), 0, 0)
+        self.orbit_height = QDoubleSpinBox()
+        self.orbit_height.setRange(100.0, 2000.0)   # bounded per V5 input validation
+        self.orbit_height.setValue(500.0)
+        self.orbit_height.setDecimals(1)
+        self.orbit_height.setSingleStep(10.0)
+        mg_layout.addWidget(self.orbit_height, 0, 1)
 
         mg_layout.addWidget(QLabel("Payload Mass  (kg)"), 1, 0)
         self.pl_spin = QDoubleSpinBox()
@@ -799,6 +800,12 @@ class MainWindow(QMainWindow):
         self.n_stages_spin.setRange(1, 3)
         self.n_stages_spin.setValue(3)
         mg_layout.addWidget(self.n_stages_spin, 2, 1)
+
+        # Read-only ΔV (auto) — row 3 (UI-SPEC:169); never hand-entered (D-10)
+        mg_layout.addWidget(QLabel("ΔV (auto)"), 3, 0)
+        self.auto_dv_label = QLabel(f"{self._auto_delta_v():.2f} km/s")
+        self.auto_dv_label.setStyleSheet(f"color: {TEXT_SEC}; font-size: 12px;")
+        mg_layout.addWidget(self.auto_dv_label, 3, 1)
 
         self.setup_layout.addWidget(mission_group)
         self.n_stages_spin.valueChanged.connect(self._rebuild_stage_inputs)
@@ -827,9 +834,11 @@ class MainWindow(QMainWindow):
         self.setup_layout.addStretch()
 
         # Signal wiring — preserved across tab relocation (Pitfall 3)
-        self.dv_spin.valueChanged.connect(self._on_inputs_changed)
         self.pl_spin.valueChanged.connect(self._on_inputs_changed)
         self.n_stages_spin.valueChanged.connect(self._on_inputs_changed)
+        # Orbit height fans out to invalidation AND the auto-ΔV label (UI-SPEC:174-175)
+        self.orbit_height.valueChanged.connect(self._on_inputs_changed)
+        self.orbit_height.valueChanged.connect(self._update_auto_dv_label)
 
         scroll.setWidget(inner)
         return scroll
@@ -891,12 +900,24 @@ class MainWindow(QMainWindow):
         self._show_empty_state()
         self.print_btn.setEnabled(False)
 
+    def _auto_delta_v(self):
+        """Interim: V_circ from orbit height, mirroring Orbit_calc.f90:9-10
+        (g_0, Radius from Typical_Data.f90:3-5). Phase 2 replaces this with the
+        full pipeline ΔV (PIPE-01) — marked for removal, do not extend."""
+        g_0, R = 9.80665, 6378.0
+        r = R + self.orbit_height.value()
+        return (g_0 * R ** 2 / (r * 1000.0)) ** 0.5
+
+    def _update_auto_dv_label(self):
+        """Refresh the read-only ΔV (auto) label from the current orbit height."""
+        self.auto_dv_label.setText(f"{self._auto_delta_v():.2f} km/s")
+
     def _print_results(self):
         if not hasattr(self, '_last_results'):
             QMessageBox.warning(self, "No Results", "Run the staging analysis first.")
             return
 
-        dv  = self.dv_spin.value()
+        dv  = self._auto_delta_v()   # internally computed — never hand-entered (D-10)
         pl  = int(self.pl_spin.value())
         n   = self.n_stages_spin.value()
         default_name = f"staging_{n}stage_dv{dv:.1f}_pl{pl}kg.txt"
@@ -912,7 +933,7 @@ class MainWindow(QMainWindow):
         lines.append("=" * 48)
         lines.append("  ROCKET STAGING RESULTS")
         lines.append("=" * 48)
-        lines.append(f"  Delta-V:       {self.dv_spin.value():.2f} km/s")
+        lines.append(f"  Delta-V:       {dv:.2f} km/s")
         lines.append(f"  Payload mass:  {self.pl_spin.value():.1f} kg")
         lines.append(f"  Stages:        {self.n_stages_spin.value()}")
         lines.append(f"  Total initial mass: {r['total_initial_mass']:,.1f} kg")
@@ -963,7 +984,7 @@ class MainWindow(QMainWindow):
         try:
             results = run_staging(
                 n_stages=n,
-                delta_v=self.dv_spin.value(),
+                delta_v=self._auto_delta_v(),
                 payload_mass=self.pl_spin.value(),
                 isp_list=isp_list,
                 ks_list=ks_list,
