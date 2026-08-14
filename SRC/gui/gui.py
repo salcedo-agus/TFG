@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
     QGridLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox,
     QSlider, QPushButton, QScrollArea, QFrame, QSizePolicy,
     QGroupBox, QMessageBox, QStackedWidget, QGraphicsOpacityEffect,
-    QFileDialog, QTabWidget, QRadioButton
+    QFileDialog, QTabWidget, QRadioButton, QButtonGroup
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPropertyAnimation, QEasingCurve
 from PyQt6.QtGui import QFont, QPalette, QColor
@@ -844,16 +844,96 @@ class MainWindow(QMainWindow):
         return scroll
 
     def _build_vehicle_tab(self):
-        """Vehicle Configuration tab (index 2): diameter-mode radios (later plans)."""
+        """Vehicle Configuration tab (index 2): diameter-mode radios (D-11/D-12).
+
+        Mode semantics mirror Fortran diameter_setup 1/2/3 (Geometry_calc.f90:92-105);
+        state stored on MainWindow for Phase 2 handoff — NOT wired into run_staging
+        (Pitfall 8, UI-SPEC:187)."""
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
+        scroll.setStyleSheet(f"background: {BG_PANEL};")
         inner = QWidget()
+        inner.setStyleSheet(f"background: {BG_PANEL};")
         self.vehicle_layout = QVBoxLayout(inner)
         self.vehicle_layout.setContentsMargins(16, 20, 16, 20)
         self.vehicle_layout.setSpacing(14)
+
+        # Header — mirrors the Setup header pattern (UI-SPEC:178)
+        title = QLabel("VEHICLE CONFIGURATION")
+        title.setStyleSheet(f"color: {TEXT_PRI}; font-size: 20px; font-weight: 800; letter-spacing: 2px;")
+        subtitle = QLabel("Diameter sizing mode")
+        subtitle.setStyleSheet(f"color: {TEXT_SEC}; font-size: 12px;")
+        self.vehicle_layout.addWidget(title)
+        self.vehicle_layout.addWidget(subtitle)
+
+        div = QFrame(); div.setObjectName("divider"); self.vehicle_layout.addWidget(div)
+
+        # DIAMETER MODE group — 3 mutually-exclusive radios (QButtonGroup), each
+        # with its 11px TEXT_SEC helper line (UI-SPEC:179-186).
+        self.mode_group = QGroupBox("DIAMETER MODE")
+        mode_layout = QVBoxLayout(self.mode_group)
+        mode_layout.setSpacing(10)
+
+        self.mode_stat  = QRadioButton("Statistically determined")   # → 1, default checked
+        self.mode_const = QRadioButton("Constant")                   # → 2
+        self.mode_user  = QRadioButton("User-specified")             # → 3 (CONTEXT D-11 label)
+
+        self.mode_buttons = QButtonGroup(self)
+        self.mode_buttons.addButton(self.mode_stat, 1)
+        self.mode_buttons.addButton(self.mode_const, 2)
+        self.mode_buttons.addButton(self.mode_user, 3)
+
+        self.diameter_mode = 1                       # Phase 2 handoff state (Pitfall 8)
+        self.mode_stat.setChecked(True)              # mirrors config.txt Diameter_setup = 1
+
+        mode_layout.addWidget(self.mode_stat)
+        mode_layout.addWidget(self._vehicle_helper(
+            "Statistically determined: each stage diameter from propellant regression curves on stage mass"))
+        mode_layout.addWidget(self.mode_const)
+        mode_layout.addWidget(self._vehicle_helper(
+            "Constant: all stages take the widest statistical diameter"))
+        mode_layout.addWidget(self.mode_user)
+        mode_layout.addWidget(self._vehicle_helper(
+            "User-specified: all stages take the diameter entered below"))
+
+        self.vehicle_layout.addWidget(self.mode_group)
+
+        # User-specified diameter box (D-12, GUI-07) — bounded per V5; mirrors
+        # config.txt User_defined_diameter = 2.0 (UI-SPEC:188)
+        diam_row = QHBoxLayout()
+        diam_row.addWidget(QLabel("User-Specified Diameter (m)"))
+        self.diameter_spin = QDoubleSpinBox()
+        self.diameter_spin.setRange(0.5, 20.0)
+        self.diameter_spin.setValue(2.00)
+        self.diameter_spin.setDecimals(2)
+        self.diameter_spin.setSingleStep(0.1)
+        self.diameter_spin.setVisible(False)         # visibility contract: mode 3 only
+        diam_row.addWidget(self.diameter_spin)
+        self.vehicle_layout.addLayout(diam_row)
+
+        # Visibility contract + Phase 2 state. Widgets are never rebuilt, so the
+        # diameter value persists across mode toggles and tab switches.
+        self.mode_user.toggled.connect(self.diameter_spin.setVisible)
+        self.mode_buttons.buttonToggled.connect(self._on_mode_toggled)
+
         self.vehicle_layout.addStretch()
         scroll.setWidget(inner)
         return scroll
+
+    def _vehicle_helper(self, text):
+        """11px TEXT_SEC helper line under a mode radio (UI-SPEC copy contract)."""
+        lbl = QLabel(text)
+        lbl.setStyleSheet(f"color: {TEXT_SEC}; font-size: 11px;")
+        lbl.setIndent(26)
+        return lbl
+
+    def _on_mode_toggled(self, btn, checked):
+        """Store the diameter mode int (1/2/3) for Phase 2 handoff (Pitfall 8).
+
+        Fires on any radio toggle (user click or programmatic setChecked);
+        only the checked transition updates the stored mode."""
+        if checked:
+            self.diameter_mode = self.mode_buttons.id(btn)
 
     def _rebuild_stage_inputs(self, n):
         for w in self.stage_widgets:
