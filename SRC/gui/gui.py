@@ -725,27 +725,57 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self._build_setup_tab(),   "Setup")
         self.tabs.addTab(self._build_vehicle_tab(), "Vehicle Configuration")  # index 2
 
-        # ── Left panel (inputs) ───────────────────────────────────────────────
-        left_scroll = QScrollArea()
-        left_scroll.setWidgetResizable(True)
-        left_scroll.setFixedWidth(420)
-        left_scroll.setStyleSheet(f"background: {BG_PANEL}; border-right: 1px solid {BORDER};")
+        # ── Right panel (results) ─────────────────────────────────────────────
+        right_scroll = QScrollArea()
+        right_scroll.setWidgetResizable(True)
+        right_scroll.setStyleSheet(f"background: {BG_DARK};")
 
-        left_inner = QWidget()
-        left_inner.setStyleSheet(f"background: {BG_PANEL};")
-        self.left_layout = QVBoxLayout(left_inner)
-        self.left_layout.setContentsMargins(16, 20, 16, 20)
-        self.left_layout.setSpacing(14)
+        self.right_inner = QWidget()
+        self.right_inner.setStyleSheet(f"background: {BG_DARK};")
+        self.right_layout = QVBoxLayout(self.right_inner)
+        self.right_layout.setContentsMargins(24, 24, 24, 24)
+        self.right_layout.setSpacing(14)
+        self.right_layout.addStretch()
+
+        right_scroll.setWidget(self.right_inner)
+        self._right_scroll = right_scroll  # orphaned in T1; relocated into Results tab in T3
+
+        # Build initial stage inputs
+        self._rebuild_stage_inputs(self.n_stages_spin.value())
+        self._show_empty_state()
+
+    def _build_results_tab(self):
+        """Results tab (index 0): central/home surface (D-02)."""
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        inner = QWidget()
+        self.results_layout = QVBoxLayout(inner)
+        self.results_layout.setContentsMargins(24, 24, 24, 24)   # UI-SPEC lg token
+        self.results_layout.setSpacing(14)
+        self.results_layout.addStretch()
+        scroll.setWidget(inner)
+        return scroll
+
+    def _build_setup_tab(self):
+        """Setup tab (index 1): relocated input panel, verbatim (D-08)."""
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet(f"background: {BG_PANEL};")
+        inner = QWidget()
+        inner.setStyleSheet(f"background: {BG_PANEL};")
+        self.setup_layout = QVBoxLayout(inner)
+        self.setup_layout.setContentsMargins(16, 20, 16, 20)
+        self.setup_layout.setSpacing(14)
 
         # Title
         title = QLabel("ROCKET STAGING")
         title.setStyleSheet(f"color: {TEXT_PRI}; font-size: 20px; font-weight: 800; letter-spacing: 2px;")
         subtitle = QLabel("Multi-stage propulsion optimizer")
         subtitle.setStyleSheet(f"color: {TEXT_SEC}; font-size: 12px;")
-        self.left_layout.addWidget(title)
-        self.left_layout.addWidget(subtitle)
+        self.setup_layout.addWidget(title)
+        self.setup_layout.addWidget(subtitle)
 
-        div = QFrame(); div.setObjectName("divider"); self.left_layout.addWidget(div)
+        div = QFrame(); div.setObjectName("divider"); self.setup_layout.addWidget(div)
 
         # Mission parameters
         mission_group = QGroupBox("MISSION PARAMETERS")
@@ -774,7 +804,7 @@ class MainWindow(QMainWindow):
         self.n_stages_spin.setValue(3)
         mg_layout.addWidget(self.n_stages_spin, 2, 1)
 
-        self.left_layout.addWidget(mission_group)
+        self.setup_layout.addWidget(mission_group)
         self.n_stages_spin.valueChanged.connect(self._rebuild_stage_inputs)
 
         # Stage inputs container
@@ -783,7 +813,7 @@ class MainWindow(QMainWindow):
         self.stages_layout = QVBoxLayout(self.stages_container)
         self.stages_layout.setContentsMargins(0, 0, 0, 0)
         self.stages_layout.setSpacing(10)
-        self.left_layout.addWidget(self.stages_container)
+        self.setup_layout.addWidget(self.stages_container)
 
         # Run button
         self.run_btn = QPushButton("▶  Run Staging Analysis")
@@ -801,55 +831,15 @@ class MainWindow(QMainWindow):
             QPushButton[ready=true]:pressed {{ background-color: #3fb950; color: {BG_DARK}; }}
         """)
         self.run_btn.clicked.connect(self._run)
-        self.left_layout.addWidget(self.run_btn)
-        self.left_layout.addWidget(self.print_btn)
-        self.left_layout.addStretch()
-        left_scroll.setWidget(left_inner)
-        self._left_scroll = left_scroll   # orphaned in T1; relocated into Setup tab in T2
+        self.setup_layout.addWidget(self.run_btn)
+        self.setup_layout.addWidget(self.print_btn)
+        self.setup_layout.addStretch()
 
-        # ── Right panel (results) ─────────────────────────────────────────────
-        right_scroll = QScrollArea()
-        right_scroll.setWidgetResizable(True)
-        right_scroll.setStyleSheet(f"background: {BG_DARK};")
-
-        self.right_inner = QWidget()
-        self.right_inner.setStyleSheet(f"background: {BG_DARK};")
-        self.right_layout = QVBoxLayout(self.right_inner)
-        self.right_layout.setContentsMargins(24, 24, 24, 24)
-        self.right_layout.setSpacing(14)
-        self.right_layout.addStretch()
-
-        right_scroll.setWidget(self.right_inner)
-        self._right_scroll = right_scroll  # orphaned in T1; relocated into Results tab in T3
-
+        # Signal wiring — preserved across tab relocation (Pitfall 3)
         self.dv_spin.valueChanged.connect(self._on_inputs_changed)
         self.pl_spin.valueChanged.connect(self._on_inputs_changed)
-        self.n_stages_spin.valueChanged.connect(self._on_inputs_changed) 
+        self.n_stages_spin.valueChanged.connect(self._on_inputs_changed)
 
-        # Build initial stage inputs
-        self._rebuild_stage_inputs(self.n_stages_spin.value())
-        self._show_empty_state()
-
-    def _build_results_tab(self):
-        """Results tab (index 0): central/home surface (D-02)."""
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        inner = QWidget()
-        self.results_layout = QVBoxLayout(inner)
-        self.results_layout.setContentsMargins(24, 24, 24, 24)   # UI-SPEC lg token
-        self.results_layout.setSpacing(14)
-        self.results_layout.addStretch()
-        scroll.setWidget(inner)
-        return scroll
-
-    def _build_setup_tab(self):
-        """Setup tab (index 1): relocated input panel (lands in T2)."""
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        inner = QWidget()
-        self.setup_layout = QVBoxLayout(inner)
-        self.setup_layout.setContentsMargins(16, 20, 16, 20)
-        self.setup_layout.setSpacing(14)
         scroll.setWidget(inner)
         return scroll
 
