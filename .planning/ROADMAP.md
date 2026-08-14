@@ -34,7 +34,7 @@ The project moves from a splash + single-panel raw-slider GUI to a centralized 3
 Plans:
 **Wave 1**
 
-- [ ] 01-01: Refactor GUI shell into 3 tabs; move existing sliders/propellant-cycle into Setup tab
+- [x] 01-01: Refactor GUI shell into 3 tabs; move existing sliders/propellant-cycle into Setup tab
 
 **Wave 2** *(blocked on Wave 1 completion)*
 

@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 1
 current_phase_name: Centralized 3-Tab GUI
 status: executing
-stopped_at: Phase 1 plans approved (3 plans, checker APPROVE)
-last_updated: "2026-08-14T19:18:20.277Z"
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-08-14T19:45:06.833Z"
 last_activity: 2026-08-14
 last_activity_desc: Phase 1 UI-SPEC approved (commit 5f247a8)
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 3
-  completed_plans: 0
+  completed_plans: 1
 ---
 
 # Project State
@@ -27,12 +27,12 @@ See: .planning/PROJECT.md (updated 2026-08-14)
 
 ## Current Position
 
-Phase: 1 of 3 (Centralized 3-Tab GUI)
-Plan: 0 of 3 in current phase
+Phase: 1 (Centralized 3-Tab GUI) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-08-14 — Phase 1 UI-SPEC approved (commit 5f247a8)
+Last activity: 2026-08-14 — Phase 1 execution started
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███░░░░░░░] 33%
 
 ## Performance Metrics
 
@@ -56,6 +56,11 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 01-centralized-3-tab-gui P1 | 17min | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -69,6 +74,9 @@ Recent decisions affecting current work:
 - [Phase 1]: UI-SPEC locks tokens (4/8/16/24/32/48 spacing; 12/13/14/16px type; existing STYLE palette), QSS for QTabBar/QRadioButton, English copy, auto-switch to Results after Run
 - [Project]: Tests deferred to future sessions (user decision)
 - [Project]: config.txt stays a separate input path (user decision)
+- [Phase 01-centralized-3-tab-gui]: Tab order contractual: Results(0) active on open / Setup(1) / Vehicle Configuration(2); tabs not movable/closable/renamable
+- [Phase 01-centralized-3-tab-gui]: Tab-bar/radio QSS appended to STYLE using only the 12 named palette constants (append-only)
+- [Phase 01-centralized-3-tab-gui]: dv_spin relocates verbatim into Setup; removal deferred to 01-02-T1
 
 ### Pending Todos
 
@@ -90,6 +98,6 @@ Items acknowledged and carried forward:
 
 ## Session Continuity
 
-Last session: 2026-08-14T19:18:20.250Z
-Stopped at: Phase 1 plans approved (3 plans, checker APPROVE)
-Resume file: .planning/phases/01-centralized-3-tab-gui/01-UI-SPEC.md
+Last session: 2026-08-14T19:45:06.815Z
+Stopped at: Completed 01-01-PLAN.md
+Resume file: None

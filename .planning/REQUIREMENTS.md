@@ -7,14 +7,14 @@
 
 ### GUI — Centralized Workbench
 
-- [ ] **GUI-01**: App opens to a centralized 3-tab interface: a central Results tab, a Setup tab (sliders + propellant/combustion-cycle selectors), and a Vehicle Configuration tab (diameter mode)
+- [x] **GUI-01**: App opens to a centralized 3-tab interface: a central Results tab, a Setup tab (sliders + propellant/combustion-cycle selectors), and a Vehicle Configuration tab (diameter mode)
 - [ ] **GUI-02**: Results tab shows, per stage, m0, mf, mp, ms, mass ratios (k_m, k_s, k_L), per-stage ΔV, and exhaust velocity
 - [ ] **GUI-03**: Results tab shows geometry results per stage (diameter, length, volume)
 - [ ] **GUI-04**: Results tab retains the "Save Results" export and the minimum-confirmed indicator
 - [ ] **GUI-05**: Mission inputs live in the GUI (orbit height, payload mass, stage count); ΔV is computed internally by the pipeline, not entered by hand
 - [ ] **GUI-06**: Vehicle Configuration tab offers statistically-determined, constant, and user-specified diameter modes
 - [ ] **GUI-07**: User-specified diameter mode exposes an input box for the diameter value
-- [ ] **GUI-08**: Launch splash screen is preserved
+- [x] **GUI-08**: Launch splash screen is preserved
 
 ### Pipeline Exposure
 
@@ -56,14 +56,14 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GUI-01 | Phase 1 | Pending |
+| GUI-01 | Phase 1 | Complete |
 | GUI-02 | Phase 1 | Pending |
 | GUI-03 | Phase 1 | Pending |
 | GUI-04 | Phase 1 | Pending |
 | GUI-05 | Phase 1 | Pending |
 | GUI-06 | Phase 1 | Pending |
 | GUI-07 | Phase 1 | Pending |
-| GUI-08 | Phase 1 | Pending |
+| GUI-08 | Phase 1 | Complete |
 | PIPE-01 | Phase 2 | Pending |
 | PIPE-02 | Phase 2 | Pending |
 | FIX-01 | Phase 3 | Pending |
@@ -71,6 +71,7 @@ Deferred to future release. Tracked but not in current roadmap.
 | FIX-03 | Phase 3 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 13 total
 - Mapped to phases: 13
 - Unmapped: 0 ✓
