@@ -442,13 +442,17 @@ Step 2.6 note: `node` is not on PATH in default PowerShell — required only for
 | A5 | Keeping the local `run_staging` copy in `gui.py` during Phase 1 (dedup deferred to FIX-02/Phase 3) | Dependencies & Risks | Low — duplicated code persists 2 phases; zero behavior change either way |
 | A6 | Solver stays fast enough that blocking on the UI thread remains acceptable in Phase 1 | Dependencies & Risks | Low — existing behavior unchanged; QThread can be added later without layout impact |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Interim ΔV value while the pipeline is unwired (Phase 1).** D-10 removes the ΔV input, but `run_staging` requires `delta_v`.
    - What we know: `orbit_height` → `V_circ = sqrt(g_0*Radius²/(r·1000))` with `g_0=9.80665`, `Radius=6378` (`Orbit_calc.f90:9-10`, `Typical_Data.f90:3-5`); the full loss-inclusive ΔV only exists in `STAGING_LOOP` (Phase 2).
    - Options: (a) compute `V_circ` in Python from the orbit-height field (1-line interim duplicate, marked for removal in Phase 2); (b) pass a fixed placeholder constant (e.g. 10.0 as today's default); (c) show a read-only "ΔV (auto)" label either way.
    - Recommendation: (a) + (c) — makes the mission inputs real now and Phase-2-swappable; flag in discuss phase since it touches the "no physics in Python" principle (PIPE-02 binds Phase 2 formally).
+   - RESOLVED: option (a) + (c) adopted — `_auto_delta_v()` interim, marked for Phase 2 removal (01-02-T1).
 2. **Per-stage ΔV display in Phase 1: placeholder vs Python-derived.** `D_v = nu_e·ln(m0/mf)` (`Staging.f90:141`) is derivable from already-returned values.
    - Recommendation: placeholder "—" (user-approved partial population) unless the user prefers the interim derivation; document the choice in the plan.
+   - RESOLVED: placeholder "—" (user-approved partial population), rendered in 01-03-T1.
 3. **QThread for the solver call.** Discretion item. Recommendation: keep blocking (existing behavior, fast solver); remove the dead `QThread` import or leave it — planner's call.
+   - RESOLVED: keep blocking per A6; no threading machinery this phase (01-01-T1).
 4. **Results layout: cards vs table.** Discretion item. Recommendation: keep `ResultCard` grid (existing pattern) and add the 3 new fields (ΔV, diameter, length, volume) as extra grid rows — smallest diff, consistent look.
+   - RESOLVED: ResultCard grid kept, extended by 2 rows (01-03-T1).
