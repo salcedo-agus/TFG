@@ -1007,7 +1007,7 @@ class MainWindow(QMainWindow):
         self.auto_dv_label.setText(f"{self._auto_delta_v():.2f} km/s")
 
     def _print_results(self):
-        if not hasattr(self, '_last_results'):
+        if not (hasattr(self, '_last_results') and hasattr(self, '_last_configs')):
             QMessageBox.warning(self, "No Results", "Run the staging analysis first.")
             return
 
@@ -1033,6 +1033,13 @@ class MainWindow(QMainWindow):
         lines.append(f"  Total initial mass: {r['total_initial_mass']:,.1f} kg")
         lines.append(f"  Minimum found: {'Yes' if r['minimum_found'] else 'No'}")
         lines.append("")
+        if len(r["stages"]) != len(self._last_configs):
+            QMessageBox.critical(
+                self, "Export Error",
+                "Stage results and configuration are out of sync. Re-run the analysis."
+            )
+            return
+
         for s, cfg in zip(r["stages"], self._last_configs):
             lines.append(f"  Stage {s['stage']}")
             lines.append(f"    Propellant:        {cfg['propellant']}")
