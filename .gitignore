@@ -7,6 +7,3 @@
 # Python cache
 __pycache__/
 *.pyc
-
-# GSD planning artifacts (tracked on the 'planning' branch)
-.planning/

@@ -14,7 +14,10 @@ Pipeline (`SRC/Main.f90:8-17`): config → pre-staging (orbit, payload) → stag
 ## Git / branch conventions (IMPORTANT)
 
 - **GSD planning artifacts (`.planning/`) live ONLY on the `planning` branch.**
-  `.planning/` is gitignored on all source branches and untracked there.
+  `.planning/` is tracked there (commit_docs=true) and must stay untracked on all
+  source branches (do NOT `git add` it on source branches; do not re-add it to
+  `.gitignore` — a `.gitignore` entry blocks gsd-tools' own `commit` command even
+  on the `planning` branch).
 - Source work happens on **`dev_GUI`** and **`dev_pre_simulation`**.
 - GSD workflows (new-project, plan, execute, verify) are run from the **`planning`** branch.
 - **Never commit `.planning/` to a source branch.**
