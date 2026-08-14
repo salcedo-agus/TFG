@@ -2,6 +2,7 @@ module rocket_types
     implicit none
     type Stage_t
         real(8) m_0    ! Initial mass of the partial rocket
+        real(8) m_i    ! Initial mass of the stage
         real(8) m_f    ! Final or Empty mass of the partial rocket 
         real(8) m_L    ! Payload mass of the stage 
         real(8) m_s    ! Structure mass of the stage
@@ -17,6 +18,9 @@ module rocket_types
         real(8) t_burn ! Stage burn time
         real(8) D_v    ! Delta_v provided by the stage 
         real(8) nu_e   ! Effective escape velocity 
+
+        real(8) Diameter
+        real(8) Length
     end type Stage_t 
 
     type Rocket_t
@@ -33,5 +37,10 @@ module rocket_types
         real(8) rk_L  ! Payload ratio
 
         real(8) rt_burn  !Rocket burn time (ascent time)
+        real(8) ISP_mean    !Rocket mean ISP
+        real(8) delta_v
+        real(8) DV_loss
+        real(8) nu_e_mean   !Rocket mean exhaust velocity
+
     end type Rocket_t  
 end module 

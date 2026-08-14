@@ -4,7 +4,9 @@ subroutine stage_Thrust_calculator(Rocket)
     use typical_data
     use rocket_types
     use constants
+    implicit none
     type(Rocket_t) Rocket
+    integer i
     ! This vectors are deffined as to not have inconsistencies due to diferent 
     real(8), dimension(3) :: stage_initial_mass !Vector containing the initial mass of each stage
     real(8), dimension(3) :: stage_thrust       !Vector containing the thrust of each stage

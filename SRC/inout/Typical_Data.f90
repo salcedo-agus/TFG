@@ -1,8 +1,8 @@
 module constants
     implicit none 
     real(8), parameter :: pi  = dacos(-1.d0) 
-    real(8), parameter :: g_0 = 9.80665d0 ![m/s] standard acceleration of gravity     
-    real(8), parameter :: Radius = 6378  ![km] Earths radius     
+    real(8), parameter :: g_0 = 9.80665d0 ![m/s2] standard acceleration of gravity     
+    real(8), parameter :: Radius = 6378.d0  ![km] Earths radius     
 end module constants
 
 module typical_data
@@ -33,7 +33,7 @@ module typical_data
     real(8) Third_stage_ks_mean  
     !=============================================================
 
-    real(8) delta_v
+    real(8) V_circ
     real(8) orbit_height
     real(8) payload_mass
     integer number_of_stages
@@ -45,6 +45,9 @@ module typical_data
     integer first_stage_combustion_cycle
     integer second_stage_combustion_cycle
     integer third_stage_combustion_cycle
+
+    integer diameter_setup
+    real(8) user_defined_diameter
 contains
 
 subroutine data_entry(Rocket)
@@ -67,6 +70,8 @@ subroutine data_entry(Rocket)
     print*, "first_stage_combustion_cycle= ", first_stage_combustion_cycle
     print*, "second_stage_combustion_cycle=", second_stage_combustion_cycle
     print*, "third_stage_combustion_cycle= ", third_stage_combustion_cycle
+    print*, "diameter_setup = ", diameter_setup
+    print*, "user_defined_diameter", user_defined_diameter
 
     Rocket%number_of_stages = number_of_stages
     allocate(Rocket%stage(number_of_stages))
@@ -794,28 +799,56 @@ subroutine data_entry(Rocket)
         print*, "WARNING: unknown Third stage propellant and oxidizer"
     end select 
     
-    !============= TEST CASE =============
-    ISP_vector(1) = 400.d0
-    ISP_vector(2) = 350.d0
-    ISP_vector(3) = 300.d0
-
-    k_s_vector(1) = 0.10d0
-    k_s_vector(2) = 0.15d0
-    k_s_vector(3) = 0.20d0
+    !===== DIAMETER CONFIG CHECK =========
+    select case (diameter_setup)
+    case(1) 
+        print*, "Diameter setup: Statistically Determined"
+    case(2)
+        print*, "Diameter setup: Constant"
+    case(3)
+        print*, "Diameter setup: Fairing Requirement"
+    case default
+        print*, "WARNING: unknown Diameter setup"
+        stop
+    end select 
     !=====================================
 
-    !ISP_vector(1) = First_stage_ISP_mean
-    !ISP_vector(2) = Second_stage_ISP_mean
-    !ISP_vector(3) = Third_stage_ISP_mean
+    !============= TEST CASE =============
+    !ISP_vector(1) = 400.d0
+    !ISP_vector(2) = 350.d0
+    !ISP_vector(3) = 300.d0
 
-    !k_s_vector(1) = First_stage_ks_mean
-    !k_s_vector(2) = Second_stage_ks_mean
-    !k_s_vector(3) = Third_stage_ks_mean
+    !k_s_vector(1) = 0.10d0
+    !k_s_vector(2) = 0.15d0
+    !k_s_vector(3) = 0.20d0
+    !============= Soyuz 2-1v ============
+    ISP_vector(1) = 297.d0
+    ISP_vector(2) = 359.d0
+    ISP_vector(3) = 0.d0
+
+    k_s_vector(1) = 0.0791d0
+    k_s_vector(2) = 0.0938d0
+    k_s_vector(3) = 0.d0
+    !=====================================
+
+   ! ISP_vector(1) = First_stage_ISP_mean
+   ! ISP_vector(2) = Second_stage_ISP_mean
+   ! ISP_vector(3) = Third_stage_ISP_mean
+
+   ! k_s_vector(1) = First_stage_ks_mean
+   ! k_s_vector(2) = Second_stage_ks_mean
+   ! k_s_vector(3) = Third_stage_ks_mean
 
     do i=1, Rocket%number_of_stages
         Rocket%stage(i)%ISP = ISP_vector(i)
         Rocket%stage(i)%k_s = k_s_vector(i)
     end do
+
+    Rocket%ISP_mean = 0.d0
+    do i = 1, Rocket%number_of_stages
+        Rocket%ISP_mean = Rocket%ISP_mean + Rocket%stage(i)%ISP
+    end do
+    Rocket%ISP_mean = Rocket%ISP_mean / Rocket%number_of_stages
 
 end subroutine data_entry
 
@@ -895,7 +928,15 @@ subroutine load_config(fname)
         case ("third_stage_combustion_cycle")
             read(value, *, iostat=ios) first_stage_combustion_cycle 
             if (ios /= 0) print *, "WARNING: first_stage_combustion_cycle invalid:", value
+
+        case ("diameter_setup")
+            read(value, *, iostat=ios) diameter_setup
+            if (ios /= 0) print *, "WARNING: diameter_setup invalid:", value    
         
+        case ("user_defined_diameter")
+            read(value, *, iostat=ios) user_defined_diameter
+            if (ios /= 0) print *, "WARNING: user_defined_diameter invalid:", value
+
         case default
             print *, "WARNING: unknown key:", trim(key)
 
