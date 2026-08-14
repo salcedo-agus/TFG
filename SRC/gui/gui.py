@@ -566,10 +566,18 @@ class ResultCard(QFrame):
         grid.setHorizontalSpacing(24)
         grid.setVerticalSpacing(6)
 
-        def add_metric(row, col, label, value, unit="", color=TEXT_PRI):
+        def add_metric(row, col, label, value, unit="", color=TEXT_PRI, fmt=":,.1f"):
             lbl = QLabel(label)
             lbl.setStyleSheet(f"color: {TEXT_SEC}; font-size: 11px; border: none;")
-            val = QLabel(f"{value:,.1f} {unit}".strip())
+            if value is None:
+                # Placeholder for partial population (PIPE-02): never a fabricated
+                # number — "—" in TEXT_DIM until Phase 2 packs the value.
+                text, color = "—", TEXT_DIM
+            elif fmt.startswith("%"):
+                text = f"{fmt % value} {unit}".strip()
+            else:
+                text = f"{value:{fmt.lstrip(':')}} {unit}".strip()
+            val = QLabel(text)
             val.setStyleSheet(f"color: {color}; font-size: 14px; font-weight: 600; border: none;")
             grid.addWidget(lbl, row*2,   col)
             grid.addWidget(val, row*2+1, col)
@@ -582,6 +590,12 @@ class ResultCard(QFrame):
         add_metric(2, 1, "Payload Ratio (k_L)",   data["k_L"], "",   ACCENT)
         add_metric(3, 0, "Struct. Coeff. (k_s)",  data["k_s"], "",   TEXT_PRI)
         add_metric(3, 1, "Exhaust Vel. (ν_e)",    data["nu_e"],"km/s",TEXT_PRI)
+        # Rows 4-5: per-stage ΔV + geometry — .get() defaults (None) render "—"
+        # (TEXT_DIM) until Phase 2 packs dv/diameter/length/volume (signature-stable).
+        add_metric(4, 0, "Stage ΔV",     data.get("dv"),       "km/s", fmt="%.2f")
+        add_metric(4, 1, "Diameter",     data.get("diameter"), "m",    fmt="%.2f")
+        add_metric(5, 0, "Length",       data.get("length"),   "m",    fmt="%.2f")
+        add_metric(5, 1, "Volume",       data.get("volume"),   "m³",   fmt="%.2f")
 
         layout.addLayout(grid)
 
