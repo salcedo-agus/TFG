@@ -1,7 +1,6 @@
 {
   "commit_docs": true,
   "parallelization": true,
-  "subagent_timeout": 300000,
   "model_profile": {
     "researcher": "sonnet",
     "synthesizer": "sonnet",
