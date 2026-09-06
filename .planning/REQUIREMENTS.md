@@ -18,7 +18,7 @@
 
 ### Pipeline Exposure
 
-- [ ] **PIPE-01**: GUI drives the full pipeline: orbit → payload → staging → thrust → geometry
+- [x] **PIPE-01**: GUI drives the full pipeline: orbit → payload → staging → thrust → geometry
 - [x] **PIPE-02**: Fortran interface (C_Interface) exposes bindings needed to run the full pipeline from Python (single ctypes entry), reusing existing modules — no physics reimplementation in Python
 
 ### Fortran Bridge & Correctness
@@ -64,7 +64,7 @@ Deferred to future release. Tracked but not in current roadmap.
 | GUI-06 | Phase 1 | Complete |
 | GUI-07 | Phase 1 | Complete |
 | GUI-08 | Phase 1 | Complete |
-| PIPE-01 | Phase 2 | Pending |
+| PIPE-01 | Phase 2 | Complete |
 | PIPE-02 | Phase 2 | Complete |
 | FIX-01 | Phase 3 | Pending |
 | FIX-02 | Phase 3 | Pending |

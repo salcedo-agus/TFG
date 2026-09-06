@@ -62,12 +62,12 @@ Plans:
   2. GUI results populate from the full pipeline, not just the staging solver
   3. All pipeline results are reused via the existing Fortran modules (no duplicated physics in Python)
 
-**Plans**: 1/2 plans executed
+**Plans**: 2/2 plans executed
 
 Plans:
 
 - [x] 02-01-PLAN.md
-- [ ] 02-02-PLAN.md
+- [x] 02-02-PLAN.md
 
 **Wave 1**
 
@@ -103,5 +103,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Centralized 3-Tab GUI | 5/5 | Completed | 2026-08-15 |
-| 2. Full Pipeline Exposure | 1/2 | In Progress|  |
+| 2. Full Pipeline Exposure | 2/2 | In Progress|  |
 | 3. Bridge & Correctness Fixes | 0/2 | Not started | - |

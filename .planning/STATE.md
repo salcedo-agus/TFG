@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 02
-status: executing
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-09-06T21:50:58.626Z"
+status: verifying
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-09-06T22:34:00.226Z"
 last_activity: 2026-09-06
-last_activity_desc: Phase 01 marked complete
+last_activity_desc: Phase 02 all plans complete — ready for verification
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
 current_phase_name: full-pipeline-exposure
 state_head: 4b500ad0366843285ecf433759f6a55420641c38
 ---
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-08-14)
 
 Phase: 02 — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
-Last activity: 2026-09-06 — Phase 02 execution started
+Status: Phase complete — ready for verification
+Last activity: 2026-09-06 — Phase 02 execution completed (7/7 plans; ready for verification)
 
-Progress: [█████████░] 86%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -65,6 +65,7 @@ Progress: [█████████░] 86%
 | Phase 01-centralized-3-tab-gui P2 | 14min | 2 tasks | 1 files |
 | Phase 01-centralized-3-tab-gui P3 | 9min | 2 tasks | 1 files |
 | Phase 02 P02-01 | 16 | 2 tasks | 4 files |
+| Phase 02 P02-02 | 25 | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -92,6 +93,10 @@ Recent decisions affecting current work:
 - [Phase 02]: 02-01 full-pipeline-exposure: stale Phase 1 GUI process (PID 8724) holding build/librocket.dll killed to unblock the mandated make all rebuild (Rule 3); unrelated streamlit process left untouched
 - [Phase 02]: 02-01 full-pipeline-exposure: per-stage volume packed as pi/4*D^2*L in C_Interface (constants-module pi) per the Geometry_calc identity; no Stage_t Volume field added
 - [Phase 02]: 02-01 full-pipeline-exposure: STATE.md normalized (Plan '1 of ?' placeholder->'1 of 2', current_phase_name fixed to full-pipeline-exposure, milestone plan counts 9/7) so state.advance-plan parses; progress bar still shows Phase 1 view until phase close (orchestrator recomputes)
+- [Phase 02]: T3 (gate=blocking human-verify) approved by the user WITH two follow-up changes implemented atomically: (1) diameter-configuration changes (mode radios + user-specified diameter) clear results / disable Save / reset _last_v_circ / restore '— km/s' label; (2) Run button visible on every tab except Results via a shared central row shown/hidden by tabs.currentChanged
+- [Phase 02]: Diameter invalidation wired in the post-construction wiring block (mode_buttons.buttonToggled + diameter_spin.valueChanged -> _on_inputs_changed); construction-time setChecked/setValue never retroactively triggers; _on_mode_toggled stored-mode semantics (1/2/3) unchanged
+- [Phase 02]: Run button relocated from setup_layout to a shared central row beneath the tabs (_build_ui) — objectName / ready property / stylesheet / clicked->_run unchanged; Save Results stays Results-tab-only; post-run auto-switch to Results unchanged (button hidden there)
+- [Phase 02]: Estimate calibration: 02-02 actuals 2651 tokens (chars/4 over realized gui.py diff) vs 28000 estimated — ~10x over-estimate on a single-file GUI-wiring plan; scale down low-confidence estimates on mapped code
 
 ### Pending Todos
 
@@ -99,7 +104,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- `build/librocket.dll` missing on this machine — GUI validation runs must start with `make gui` (Phase 1 task prerequisite)
+- `build/librocket.dll` present and proven on this machine (02-01 `make all` + `test_call.py` exit 0); GUI/offscreen validation runs run directly against it — no rebuild required unless Fortran sources change
 
 ## Deferred Items
 
@@ -113,6 +118,6 @@ Items acknowledged and carried forward:
 
 ## Session Continuity
 
-Last session: 2026-09-06T21:50:58.605Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-09-06T22:34:00.202Z
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None
