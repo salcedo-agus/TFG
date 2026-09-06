@@ -27,6 +27,7 @@ BUILD_DIR = os.path.join(ROOT_DIR, "..", "build")
 
 # Make sure interface/ is on the path so rocket_lib can be imported if needed
 sys.path.insert(0, os.path.join(ROOT_DIR, "interface"))
+import rocket_lib   # full-pipeline bridge entry (02-01); the inline twin below stays for Phase 3 dedup
 
 if sys.platform == "win32":
     # Add build/ so Python finds librocket.dll
@@ -535,6 +536,12 @@ class StageInputWidget(QGroupBox):
         isp = self.isp_slider.value() / 10.0    if has_isp else None
         ks  = self.ks_slider.value()  / 10000.0 if has_ks  else None
         return isp, ks, (has_isp and has_ks)
+
+    def get_propellant_index(self):
+        """1-based Fortran propellant code (1-8) for this stage — the same index
+        get_values computes at the combo; feeds the Geometry_calc select-case
+        tables via run_full_pipeline (02-02)."""
+        return self.prop_combo.currentIndex() + 1
 
 
 # ── Result card widget ────────────────────────────────────────────────────────
@@ -1088,12 +1095,15 @@ class MainWindow(QMainWindow):
             return
 
         try:
-            results = run_staging(
+            results = rocket_lib.run_full_pipeline(
                 n_stages=n,
-                delta_v=self._auto_delta_v(),
+                orbit_height=self.orbit_height.value(),
                 payload_mass=self.pl_spin.value(),
                 isp_list=isp_list,
                 ks_list=ks_list,
+                propellant_list=[sw.get_propellant_index() for sw in self.stage_widgets],
+                diameter_setup=self.diameter_mode,
+                user_diameter=self.diameter_spin.value(),
             )
 
             self._clear_results()
@@ -1144,6 +1154,8 @@ class MainWindow(QMainWindow):
                 for sw in self.stage_widgets
             ]
             self._last_results = results
+            self._last_v_circ = results["v_circ"]   # Fortran V_circ — label/export source (D-01/D-04/D-05)
+            self._update_auto_dv_label()
             self.print_btn.setEnabled(True)
             # Auto-switch to Results after a successful run (UI-SPEC:193) — fires
             # only in this success path; _on_inputs_changed never navigates.
