@@ -28,7 +28,7 @@ module rocket_types
         type(Stage_t), allocatable :: stage(:)
         real(8) rm_0  ! Initial mass of the Rocket                
         real(8) rm_f  ! Final or Empty mass of the Rokcet
-        real(8) rm_L  ! Payload mass of the Rocket
+        real(8) :: rm_L = 0.d0  ! Payload mass of the Rocket (default-init: defense-in-depth, G-01-2)
         real(8) rm_s  ! Structure mass of the Rocket
         real(8) rm_p  ! Propelant mass of the Rocket
         
