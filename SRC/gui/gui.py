@@ -1015,6 +1015,8 @@ class MainWindow(QMainWindow):
             sw = StageInputWidget(i + 1)
             sw.validity_changed.connect(self._update_run_button)
             sw.validity_changed.connect(self._on_inputs_changed)
+            sw.isp_slider.valueChanged.connect(self._on_inputs_changed)
+            sw.ks_slider.valueChanged.connect(self._on_inputs_changed)
             self.stages_layout.addWidget(sw)
             self.stage_widgets.append(sw)
 
