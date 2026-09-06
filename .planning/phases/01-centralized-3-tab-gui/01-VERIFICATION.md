@@ -1,23 +1,28 @@
 ---
 phase: 01-centralized-3-tab-gui
 verified: 2026-08-14T23:30:00Z
-status: human_needed
+status: passed
 score: 22/23 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
 human_verification:
+
   - test: "Run `make gui` in SRC/ (builds build/librocket.dll then launches). Confirm: splash shows first and fades with the 600 ms InOutQuad curve into the main window; the window opens to 3 styled tabs in order Results / Setup / Vehicle Configuration with Results active; selected tab renders ACCENT (#58a6ff); no trace of the old left/right split; window enforces 960x700 minimum."
     expected: "Splash-first launch, 3-tab workbench in contractual order, styled tab bar, no ghost panels."
     why_human: "Requires building librocket.dll (MinGW/TDM-GCC toolchain) and an interactive display — impossible in the verification environment (DLL absent, documented STATE.md blocker). Recorded as human_judgment item D7 in 01-01-SUMMARY."
+
   - test: "In Setup (make gui): confirm Orbit Height shows 500.0 by default; changing it updates the read-only 'ΔV (auto)' label, clears Results, and disables Save; Run with a valid propellant/cycle combination works; Save exports a .txt whose Delta-V line equals the label value and whose suggested filename follows staging_{n}stage_dv{dv:.1f}_pl{pl}kg.txt."
     expected: "Mission inputs editable; ΔV read-only and always consistent across label/solver/export."
     why_human: "Interactive GUI + real DLL required; recorded as human_judgment item D5 in 01-02-SUMMARY."
+
   - test: "In Results after Run (make gui): each card shows the 8 original metrics unchanged plus 2 new rows (Stage ΔV / Diameter; Length / Volume) all rendering '—' in dim text; the partial-state hint appears once below the cards; the app auto-switches to Results; changing an input invalidates without navigating; Save twice re-opens the dialog each time and the exported .txt is identical in structure to a pre-phase file (only the Delta-V line source differs); the minimum indicator shows ✔/✘ per the run; the window is unresponsive mid-run (blocking, expected)."
     expected: "Results surface complete: 10 metric slots per stage, placeholder semantics, auto-switch, idempotent export, verbatim indicator, blocking solver."
     why_human: "Interactive GUI + real DLL required; recorded as human_judgment item D5 in 01-03-SUMMARY."
+
   - test: "Run `python SRC/test_call.py` from a machine with build/librocket.dll present (phase gate smoke for the unchanged ctypes bridge)."
     expected: "Bridge smoke passes; behavior unchanged by construction (zero diff in gui.py:22-110)."
     why_human: "test_call.py imports the DLL at load — cannot execute here. Recorded as human_judgment item D6 in 01-02/01-03-SUMMARYs."
+
   - test: "Backstop (01-01 truth #9): at the 960px minimum window width, open the Combustion Cycle dropdown on a stage widget and confirm the 61-char cycle name 'Aproximates Engine Perfermoance Only Base On Propellant/Oxidizer' elides readably, and the 3-tab bar (with 'Vehicle Configuration') still fits without clipping."
     expected: "Dropdown readable via Qt elision; tab bar fits at 960px. (setMinimumWidth(220) is present on both combos — gui.py:345,354 — pre-existing and preserved; the visual outcome needs eyes.)"
     why_human: "Declared `verification: backstop` in 01-01-PLAN — visual rendering cannot be confirmed by grep/offscreen checks."
