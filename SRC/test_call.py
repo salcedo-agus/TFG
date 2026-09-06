@@ -1,4 +1,7 @@
 # test_call.py
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "interface"))
 from rocket_lib import run_staging
 
 results = run_staging(
