@@ -14,7 +14,7 @@
 **Run Commands:**
 ```bash
 make fortran              # runs the standalone executable (prints results to stdout)
-python test_call.py       # manual DLL smoke test — must be run from SRC/ (imports rocket_lib)
+python test_call.py       # manual DLL smoke test — imports rocket_lib from interface/, runs from any CWD; needs build/librocket.dll (make all in SRC/)
 ```
 
 ## Test File Organization
