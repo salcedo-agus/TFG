@@ -829,7 +829,7 @@ class MainWindow(QMainWindow):
 
         # Read-only ΔV (auto) — row 3 (UI-SPEC:169); never hand-entered (D-10)
         mg_layout.addWidget(QLabel("ΔV (auto)"), 3, 0)
-        self.auto_dv_label = QLabel(f"{self._auto_delta_v():.2f} km/s")
+        self.auto_dv_label = QLabel("— km/s")
         self.auto_dv_label.setStyleSheet(f"color: {TEXT_SEC}; font-size: 12px;")
         mg_layout.addWidget(self.auto_dv_label, 3, 1)
 
@@ -1005,25 +1005,24 @@ class MainWindow(QMainWindow):
         self._clear_results()
         self._show_empty_state()
         self.print_btn.setEnabled(False)
-
-    def _auto_delta_v(self):
-        """Interim: V_circ from orbit height, mirroring Orbit_calc.f90:9-10
-        (g_0, Radius from Typical_Data.f90:3-5). Phase 2 replaces this with the
-        full pipeline ΔV (PIPE-01) — marked for removal, do not extend."""
-        g_0, R = 9.80665, 6378.0
-        r = R + self.orbit_height.value()
-        return (g_0 * R ** 2 / (r * 1000.0)) ** 0.5
+        self._last_v_circ = None          # no stale V_circ survives an input change (D-04/D-05)
+        self._update_auto_dv_label()
 
     def _update_auto_dv_label(self):
-        """Refresh the read-only ΔV (auto) label from the current orbit height."""
-        self.auto_dv_label.setText(f"{self._auto_delta_v():.2f} km/s")
+        """Refresh the read-only ΔV (auto) label from the last run's Fortran V_circ."""
+        v = getattr(self, '_last_v_circ', None)
+        if isinstance(v, (int, float)) and v == v:  # v == v excludes NaN (ResultCard idiom)
+            self.auto_dv_label.setText(f"{v:.2f} km/s")
+        else:
+            self.auto_dv_label.setText("— km/s")
 
     def _print_results(self):
-        if not (hasattr(self, '_last_results') and hasattr(self, '_last_configs')):
+        if not (hasattr(self, '_last_results') and hasattr(self, '_last_configs')
+                and getattr(self, '_last_v_circ', None) is not None):
             QMessageBox.warning(self, "No Results", "Run the staging analysis first.")
             return
 
-        dv  = self._auto_delta_v()   # internally computed — never hand-entered (D-10)
+        dv  = self._last_v_circ   # Fortran V_circ — label == export Delta-V line == filename (D-01/D-05)
         pl  = int(self.pl_spin.value())
         n   = self.n_stages_spin.value()
         default_name = f"staging_{n}stage_dv{dv:.1f}_pl{pl}kg.txt"
