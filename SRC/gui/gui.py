@@ -745,15 +745,59 @@ class MainWindow(QMainWindow):
         self._build_ui()
 
     def _build_ui(self):
+        # Central container: the tab widget fills the window and a shared Run
+        # button row sits beneath it. The Run button must be reachable from
+        # every tab EXCEPT Results (index 0) — a single widget shown/hidden by
+        # the current tab, instead of duplicating it across layouts (user
+        # request, 2026-09-06). Built BEFORE _rebuild_stage_inputs so the
+        # _update_run_button 'ready' styling has its target from the start.
         self.tabs = QTabWidget()
-        self.setCentralWidget(self.tabs)
+
+        container = QWidget()
+        outer = QVBoxLayout(container)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(0)
+
+        # Shared Run button — objectName / ready property / stylesheet /
+        # clicked connection contract unchanged, only its home layout moved.
+        self.run_btn = QPushButton("▶  Run Staging Analysis")
+        self.run_btn.setObjectName("run_btn")
+        self.run_btn.setProperty("ready", False)
+        self.run_btn.setStyleSheet(f"""
+            QPushButton {{ background-color: {BG_INPUT}; color: {TEXT_DIM}; border: 1px solid {BORDER}; border-radius: 8px; padding: 10px 32px; font-weight: 700; font-size: 14px; min-height: 40px; }}
+            QPushButton[ready=true] {{ background-color: {GREEN}; color: {BG_DARK}; border: none; }}
+            QPushButton[ready=true]:hover {{ background-color: #56d364; color: {BG_DARK}; }}
+            QPushButton[ready=true]:pressed {{ background-color: #3fb950; color: {BG_DARK}; }}
+        """)
+        self.run_btn.clicked.connect(self._run)
+
+        outer.addWidget(self.tabs, 1)
+        run_row = QHBoxLayout()
+        run_row.setContentsMargins(24, 12, 24, 16)
+        run_row.addStretch()
+        run_row.addWidget(self.run_btn)
+        run_row.addStretch()
+        outer.addLayout(run_row)
+        self.setCentralWidget(container)
+
         self.tabs.addTab(self._build_results_tab(), "Results")                # index 0 — central/home (D-02)
         self.tabs.addTab(self._build_setup_tab(),   "Setup")
         self.tabs.addTab(self._build_vehicle_tab(), "Vehicle Configuration")  # index 2
 
+        # Run visibility follows the current tab: hidden on Results (index 0),
+        # shown on every other tab. Explicit initial sync guards the case where
+        # adding the first tab did not emit currentChanged (Results is active
+        # on open, so the button starts hidden).
+        self.tabs.currentChanged.connect(self._on_tab_changed)
+        self._on_tab_changed(self.tabs.currentIndex())
+
         # Build initial stage inputs
         self._rebuild_stage_inputs(self.n_stages_spin.value())
         self._show_empty_state()
+
+    def _on_tab_changed(self, index):
+        """Show the shared Run button on every tab except Results (index 0)."""
+        self.run_btn.setVisible(index != 0)
 
     def _build_results_tab(self):
         """Results tab (index 0): central/home surface (D-02)."""
@@ -844,19 +888,10 @@ class MainWindow(QMainWindow):
         self.stages_layout.setSpacing(10)
         self.setup_layout.addWidget(self.stages_container)
 
-        # Run button
-        self.run_btn = QPushButton("▶  Run Staging Analysis")
-        self.run_btn.setObjectName("run_btn")
-
-        self.run_btn.setProperty("ready", False)
-        self.run_btn.setStyleSheet(f"""
-            QPushButton {{ background-color: {BG_INPUT}; color: {TEXT_DIM}; border: 1px solid {BORDER}; border-radius: 8px; padding: 10px 32px; font-weight: 700; font-size: 14px; min-height: 40px; }}
-            QPushButton[ready=true] {{ background-color: {GREEN}; color: {BG_DARK}; border: none; }}
-            QPushButton[ready=true]:hover {{ background-color: #56d364; color: {BG_DARK}; }}
-            QPushButton[ready=true]:pressed {{ background-color: #3fb950; color: {BG_DARK}; }}
-        """)
-        self.run_btn.clicked.connect(self._run)
-        self.setup_layout.addWidget(self.run_btn)
+        # Run button lives in the shared row beneath the tabs (_build_ui) so it
+        # is reachable from Setup AND Vehicle Configuration, hidden only on the
+        # Results tab (user request, 2026-09-06). Keep the trailing stretch:
+        # setup content stays top-aligned.
         self.setup_layout.addStretch()
 
         # Signal wiring — preserved across tab relocation (Pitfall 3)
