@@ -19,14 +19,14 @@ The user can go from mission parameters to a complete, trustworthy vehicle desig
 - ✓ PyQt6 GUI with per-stage ISP/k_s sliders + propellant/combustion-cycle selectors — existing
 - ✓ config.txt parsing (mission + per-stage setup + diameter mode) — existing
 - ✓ Results export to .txt with minimum-confirmed indicator — existing
+- ✓ Centralized 3-tab GUI: central results tab, setup tab (sliders + propellant/cycle), vehicle-configuration tab (diameter mode) — validated in Phase 1
+- ✓ Results tab shows stage masses (m0, mf, mp, ms), mass ratios (k_m, k_s, k_L), per-stage ΔV, exhaust velocity, and geometry (diameter, length, volume) — validated in Phase 1
+- ✓ Mission inputs in the GUI (orbit height, payload mass, stage count); ΔV computed internally by the pipeline — validated in Phase 2
+- ✓ Vehicle-configuration tab: statistically-determined diameters, constant diameter, and user-specified diameter with an input box — validated in Phase 1
+- ✓ Full pipeline exposed to the GUI: orbit → payload → staging → thrust → geometry — validated in Phase 2
 
 ### Active
 
-- [ ] Centralized 3-tab GUI: central results tab, setup tab (sliders + propellant/cycle), vehicle-configuration tab (diameter mode)
-- [ ] Results tab shows stage masses (m0, mf, mp, ms), mass ratios (k_m, k_s, k_L), per-stage ΔV, exhaust velocity, and geometry (diameter, length, volume)
-- [ ] Mission inputs in the GUI (orbit height, payload mass, stage count); ΔV computed internally by the pipeline
-- [ ] Vehicle-configuration tab: statistically-determined diameters, constant diameter, and user-specified diameter with an input box
-- [ ] Full pipeline exposed to the GUI: orbit → payload → staging → thrust → geometry
 - [ ] Fix `Rocket%rm_L` never initialized on the ctypes/GUI path
 - [ ] Remove duplicated `run_staging` ctypes bridge (`rocket_lib.py` vs inline `gui.py`)
 - [ ] Remove hardcoded MinGW path dependency
@@ -42,7 +42,7 @@ The user can go from mission parameters to a complete, trustworthy vehicle desig
 ## Context
 
 - Brownfield repo: Fortran 90/2008 core (`SRC/`) + Python 3.11/PyQt6 GUI bridged via ctypes `librocket.dll`. No external APIs, no databases; Windows primary target (TDM-GCC-64), macOS/Linux Makefile branches exist.
-- Pipeline (`SRC/Main.f90:8-17`): config → pre-staging (orbit, payload) → staging solver → pre-simulation (thrust, geometry). GUI currently bypasses everything except `STAGING` via `run_staging`.
+- Pipeline (`SRC/Main.f90:8-17`): config → pre-staging (orbit, payload) → staging solver → pre-simulation (thrust, geometry). The GUI now drives the full pipeline through the single `run_full_pipeline` ctypes entry (Phase 2); the interim `run_staging` bridge and its inline `gui.py` twin remain for Phase 3 dedup.
 - Known issues from the codebase map (`.planning/codebase/CONCERNS.md`): `Rocket%rm_L` unset on ctypes path (`C_Interface.f90:40-54`, read at `Staging.f90:86`); config parser writes stage-2/3 combustion cycles into stage-1 variable (`Typical_Data.f90:924-930`); hardcoded Soyuz TEST CASE overrides ISP/k_s tables (`Typical_Data.f90:824-832`); duplicated ctypes bridge (`rocket_lib.py:45` + `gui.py:80`); Makefile circular dep between `Staging.o` and `Root_Finding.o`; zero automated tests.
 - Codebase map refreshed 2026-08-14 (commit `e59e494`).
 
@@ -58,10 +58,10 @@ The user can go from mission parameters to a complete, trustworthy vehicle desig
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Centralized 3-tab GUI (results / setup / vehicle config) | User wants one workbench, not scattered panels | — Pending |
-| Mission inputs in GUI; ΔV computed internally | Full-pipeline exposure; no raw ΔV guessing | — Pending |
-| Keep splash screen | User preference | — Pending |
-| config.txt stays a separate path | User decision; Fortran main keeps working untouched | — Pending |
+| Centralized 3-tab GUI (results / setup / vehicle config) | User wants one workbench, not scattered panels | ✓ Good (Phase 1) |
+| Mission inputs in GUI; ΔV computed internally | Full-pipeline exposure; no raw ΔV guessing | ✓ Good (Phase 2) |
+| Keep splash screen | User preference | ✓ Good |
+| config.txt stays a separate path | User decision; Fortran main keeps working untouched | ✓ Good |
 | GSD planning artifacts only on `planning` branch | User concern about repo cleanliness | ✓ Good |
 | Tests deferred to future sessions | User decision | — Pending |
 
@@ -83,4 +83,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-14 after initialization*
+*Last updated: 2026-09-06 after Phase 2 completion*
