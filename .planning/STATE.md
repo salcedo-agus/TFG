@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 01
+current_phase: 02
 status: executing
-stopped_at: Phase 2 context gathered
-last_updated: "2026-09-06T21:11:13.434Z"
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-09-06T21:50:58.626Z"
 last_activity: 2026-09-06
 last_activity_desc: Phase 01 marked complete
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 7
-  completed_plans: 5
-current_phase_name: centralized-3-tab-gui
+  completed_plans: 6
+current_phase_name: full-pipeline-exposure
 state_head: 4b500ad0366843285ecf433759f6a55420641c38
 ---
 
@@ -24,16 +24,16 @@ state_head: 4b500ad0366843285ecf433759f6a55420641c38
 See: .planning/PROJECT.md (updated 2026-08-14)
 
 **Core value:** The user can go from mission parameters to a complete, trustworthy vehicle design (stage masses, ΔV, thrust, geometry) entirely from the GUI.
-**Current focus:** Phase 01 — centralized-3-tab-gui
+**Current focus:** Phase 02
 
 ## Current Position
 
-Phase: 01 — COMPLETE
-Plan: 1 of 5
+Phase: 02 — EXECUTING
+Plan: 2 of 2
 Status: Ready to execute
-Last activity: 2026-09-06 — Phase 01 marked complete
+Last activity: 2026-09-06 — Phase 02 execution started
 
-Progress: [██████████] 100%
+Progress: [█████████░] 86%
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Progress: [██████████] 100%
 | Phase 01-centralized-3-tab-gui P1 | 17min | 3 tasks | 1 files |
 | Phase 01-centralized-3-tab-gui P2 | 14min | 2 tasks | 1 files |
 | Phase 01-centralized-3-tab-gui P3 | 9min | 2 tasks | 1 files |
+| Phase 02 P02-01 | 16 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,10 @@ Recent decisions affecting current work:
 - [Phase 01-centralized-3-tab-gui]: Rows 0-3 keep the legacy :,.1f card rendering (k_m shows '2.3', nu_e '3.5 km/s' — byte-identical to pre-phase per plan truth 2); the UI-SPEC %.4f ratio contract governs the export file (unchanged) and the new rows' %.2f contract, not the legacy card rows.
 - [Phase 01-centralized-3-tab-gui]: Partial-state hint condition mirrors the card placeholder lookup exactly (any of dv/diameter/length/volume None across stages -> one 11px TEXT_DIM hint); Phase 2 dicts packing all four keys suppress the hint automatically (verified offscreen).
 - [Phase 01-centralized-3-tab-gui]: Auto-switch setCurrentIndex(0) placed after print_btn.setEnabled(True) in the _run success path only; _on_inputs_changed remains navigation-free (verified offscreen).
+- [Phase 02]: 02-01 full-pipeline-exposure: tracer gate applied in autonomous form — dispatch mandated full-plan completion and T1's verify is fully automated, so the tracer <verify> was re-run end-to-end before expanding to T2 instead of halting for a rubber-stamp human-verify
+- [Phase 02]: 02-01 full-pipeline-exposure: stale Phase 1 GUI process (PID 8724) holding build/librocket.dll killed to unblock the mandated make all rebuild (Rule 3); unrelated streamlit process left untouched
+- [Phase 02]: 02-01 full-pipeline-exposure: per-stage volume packed as pi/4*D^2*L in C_Interface (constants-module pi) per the Geometry_calc identity; no Stage_t Volume field added
+- [Phase 02]: 02-01 full-pipeline-exposure: STATE.md normalized (Plan '1 of ?' placeholder->'1 of 2', current_phase_name fixed to full-pipeline-exposure, milestone plan counts 9/7) so state.advance-plan parses; progress bar still shows Phase 1 view until phase close (orchestrator recomputes)
 
 ### Pending Todos
 
@@ -108,6 +113,6 @@ Items acknowledged and carried forward:
 
 ## Session Continuity
 
-Last session: 2026-09-06T20:07:37.582Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-full-pipeline-exposure/02-CONTEXT.md
+Last session: 2026-09-06T21:50:58.605Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: None
