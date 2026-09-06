@@ -65,8 +65,12 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
+**Wave 1**
 
 - [ ] 02-01: Add Fortran bind(C) pipeline entry to C_Interface (reuse pre-staging, staging, thrust, geometry)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 02-02: Add Python wrapper in rocket_lib.py and wire the GUI to the full pipeline
 
 ### Phase 3: Bridge & Correctness Fixes
