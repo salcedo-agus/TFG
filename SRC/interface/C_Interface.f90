@@ -50,6 +50,13 @@ subroutine run_staging(                         &
         Rocket%stage(i)%k_s = ks_in(i)
     end do
 
+    ! --- Initialize Rocket%rm_L (G-01-2) ---
+    ! Mirror the console path (Payload_Mass_calc.f90:11-19, PAF eq. 11:
+    ! m_adapter = 0.0755*payload_mass + 50) so both paths share one formula.
+    ! Without this, Staging.f90:86/106 read uninitialized stack memory on the
+    ! ctypes/GUI path, producing null/NaN masses in the Results tab.
+    Rocket%rm_L = payload_mass + 0.0755d0 * payload_mass + 50.d0
+
     ! --- Run the solver ---
     call STAGING(Rocket)
 
