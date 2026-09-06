@@ -127,7 +127,7 @@ Each task was committed atomically:
 3. **Task 3 (follow-up 1): Invalidate results when diameter configuration changes** — `51a5695` (feat(gui))
 4. **Task 3 (follow-up 2): Show run button on all tabs except results** — `3e7eab2` (feat(gui))
 
-**Plan metadata:** pending — committed with the state updates after this summary.
+**Plan metadata:** `5431e8f` (docs(02-02): complete full-pipeline-exposure plan)
 
 ## Files Created/Modified
 
@@ -186,7 +186,7 @@ None - no external service configuration required.
 ## Self-Check: PASSED
 
 - 02-02-SUMMARY.md exists ✓
-- Commits present: `70095ec`, `6cd13b3`, `51a5695`, `3e7eab2` ✓ (verified via git log)
+- Commits present: `70095ec`, `6cd13b3`, `51a5695`, `3e7eab2`, `5431e8f` ✓ (verified via git log)
 - py_compile clean ✓; extended offscreen harness exit 0 ✓; `python SRC/test_call.py` exit 0 (cross-plan gate) ✓
 - Inline bridge gui.py:19-110 byte-identical to `24a0518` (modulo the single T1 import) ✓ — harness static gate
 - Grep gates: 1 `import rocket_lib`, 0 `_auto_delta_v`, 5 `_last_v_circ` ✓
