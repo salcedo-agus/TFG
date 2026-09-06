@@ -938,9 +938,18 @@ class MainWindow(QMainWindow):
         self.vehicle_layout.addLayout(diam_row)
 
         # Visibility contract + Phase 2 state. Widgets are never rebuilt, so the
-        # diameter value persists across mode toggles and tab switches.
+        # diameter value persists across mode toggles and tab switches. Wired
+        # only AFTER every widget above is fully built — the construction-time
+        # setChecked/setValue calls (mode_stat at ~913, diameter_spin at ~933)
+        # must not retroactively trigger invalidation.
         self.mode_user.toggled.connect(self.diameter_spin.setVisible)
         self.mode_buttons.buttonToggled.connect(self._on_mode_toggled)
+        # Diameter configuration is an input: toggling any mode radio or
+        # changing the user-specified value invalidates results exactly like
+        # every other input (D-04/D-05 state integrity — no stale converged
+        # numbers are shown or exported against changed diameter inputs).
+        self.mode_buttons.buttonToggled.connect(self._on_inputs_changed)
+        self.diameter_spin.valueChanged.connect(self._on_inputs_changed)
 
         self.vehicle_layout.addStretch()
         scroll.setWidget(inner)
