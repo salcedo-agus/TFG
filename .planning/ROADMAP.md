@@ -92,8 +92,8 @@ Plans:
 
 Plans:
 
-- [ ] 03-01: Fix `Rocket%rm_L` initialization on the ctypes path
-- [ ] 03-02: Consolidate ctypes bridge into rocket_lib.py and remove hardcoded MinGW path
+- [ ] 03-01-PLAN.md — D-02 rm_L bounds regression test + green suite baseline (FIX-01 verification)
+- [ ] 03-02-PLAN.md — Single-wave run_staging removal (all layers) + build/-only DLL load + Makefile MinGW discovery + docs refresh
 
 ## Progress
 
