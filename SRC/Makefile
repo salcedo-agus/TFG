@@ -49,12 +49,12 @@ ifeq ($(OS), Windows_NT)
     MKDIR        := mkdir
     RM           := del /Q
     RMDIR        := rmdir /Q /S
-    MINGW_BIN    := C:/TDM-GCC-64/bin
-    RUNTIME_DLLS := \
-        $(MINGW_BIN)/libgfortran_64-5.dll \
-        $(MINGW_BIN)/libgcc_s_seh_64-1.dll \
-        $(MINGW_BIN)/libquadmath_64-0.dll  \
-        $(MINGW_BIN)/libwinpthread_64-1.dll
+    # Discover MinGW at build time (D-09): `?=` honors env/CLI override;
+    # `where gfortran` + patsubst dir-strip + firstword multi-hit guard.
+    MINGW_BIN ?= $(patsubst %\gfortran.exe,%,$(firstword $(shell where gfortran 2>NUL)))
+    ifeq ($(strip $(MINGW_BIN)),)
+        $(error gfortran not found in PATH. Install TDM-GCC/MinGW-w64 or set MINGW_BIN=<dir> explicitly.)
+    endif
 else
     UNAME := $(shell uname -s)
     ifeq ($(UNAME), Darwin)
