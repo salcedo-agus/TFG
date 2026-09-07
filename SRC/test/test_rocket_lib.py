@@ -145,6 +145,32 @@ class RunFullPipelineVariantDomains(unittest.TestCase):
         self.assertAlmostEqual(high["v_circ"], v_circ_formula(2000.0), delta=1e-6)
 
 
+class ConservativeBoundsGuard(unittest.TestCase):
+    """D-02 (FIX-01): conservative rm_L bounds guard for the full-pipeline bridge.
+
+    Proves Rocket%rm_L is correctly initialized on the ctypes/GUI path: the
+    stage-1 initial mass must be finite and strictly exceed payload + PAF
+    (Payload_Mass_calc.f90 eq. 11, the single formula source), and every
+    stage's k_L must sit in (0, 1). Catches uninitialized/garbage rm_L
+    (Staging.f90 reads Rocket%rm_L) without pinning exact physics.
+    """
+
+    def test_conservative_bounds_n3(self):
+        r = run_full_pipeline(**N3_CONFIG)
+        # PAF eq. 11: m_adapter = 0.0755*payload_mass + 50 (Payload_Mass_calc.f90:12)
+        paf = 0.0755 * N3_CONFIG["payload_mass"] + 50.0
+        m0 = r["stages"][0]["m0"]
+        self.assertTrue(math.isfinite(m0),
+                        "stage-1 m0 not finite — uninitialized/garbage rm_L likely")
+        self.assertGreater(m0, N3_CONFIG["payload_mass"] + paf,
+                           "stage-1 m0 must strictly exceed payload + PAF (rm_L formula)")
+        for s in r["stages"]:
+            self.assertGreater(s["k_L"], 0.0,
+                               f"k_L not > 0 for stage {s['stage']}")
+            self.assertLess(s["k_L"], 1.0,
+                            f"k_L not < 1 for stage {s['stage']}")
+
+
 class RunStagingWrapperContract(unittest.TestCase):
     """Legacy run_staging wrapper regression companion (FIX-02 dedup debt)."""
 
