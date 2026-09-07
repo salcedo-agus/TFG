@@ -88,12 +88,12 @@ Plans:
   2. Only one ctypes bridge module exists; gui.py imports it
   3. Library path resolution no longer depends on a hardcoded MinGW directory
 
-**Plans**: 2 plans
+**Plans**: 1/2 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 03-01-PLAN.md — D-02 rm_L bounds regression test + green suite baseline (FIX-01 verification)
+- [x] 03-01-PLAN.md — D-02 rm_L bounds regression test + green suite baseline (FIX-01 verification)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -108,4 +108,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Centralized 3-Tab GUI | 5/5 | Completed | 2026-08-15 |
 | 2. Full Pipeline Exposure | 2/2 | Complete    | 2026-09-06 |
-| 3. Bridge & Correctness Fixes | 0/2 | Not started | - |
+| 3. Bridge & Correctness Fixes | 1/2 | In Progress|  |
