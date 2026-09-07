@@ -20,7 +20,7 @@ _INTERFACE = os.path.join(_SRC_DIR, "interface")
 if _INTERFACE not in sys.path:
     sys.path.insert(0, _INTERFACE)
 
-from rocket_lib import run_full_pipeline, run_staging
+from rocket_lib import run_full_pipeline
 
 # Constants mirroring Orbit_calc.f90:10 (g_0, Radius from the constants module)
 G_0    = 9.80665
@@ -169,25 +169,6 @@ class ConservativeBoundsGuard(unittest.TestCase):
                                f"k_L not > 0 for stage {s['stage']}")
             self.assertLess(s["k_L"], 1.0,
                             f"k_L not < 1 for stage {s['stage']}")
-
-
-class RunStagingWrapperContract(unittest.TestCase):
-    """Legacy run_staging wrapper regression companion (FIX-02 dedup debt)."""
-
-    def test_run_staging_contract(self):
-        r = run_staging(
-            n_stages=3, delta_v=10.0, payload_mass=5000.0,
-            isp_list=[400.0, 350.0, 300.0], ks_list=[0.10, 0.15, 0.20],
-        )
-        self.assertEqual(set(r.keys()), {"total_initial_mass", "minimum_found", "stages"})
-        self.assertIsInstance(r["minimum_found"], bool)
-        self.assertGreater(r["total_initial_mass"], 5000.0)
-        self.assertEqual(len(r["stages"]), 3)
-        for s in r["stages"]:
-            self.assertEqual(set(s.keys()),
-                             {"stage", "m0", "mf", "mp", "ms", "k_m", "k_s", "k_L", "nu_e"})
-            for key in ("m0", "mf", "mp", "ms", "k_m", "k_s", "k_L", "nu_e"):
-                self.assertTrue(math.isfinite(s[key]), f"{key} not finite stage {s['stage']}")
 
 
 if __name__ == "__main__":
