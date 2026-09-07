@@ -363,22 +363,22 @@ Bounds probe run this session (n=1/2/3 × payload 1000–1,000,000 kg × orbit 1
 
 **If this table is empty:** n/a — it is not empty, but no user confirmation is required: all three items are verified or cited, and A1/A2 have safe fallbacks by design.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **03-01 vs 03-02 rescoping after the D-03 fold-in**
+1. **03-01 vs 03-02 rescoping after the D-03 fold-in** — **[RESOLVED]** in the plans: 03-01 = D-02 bounds test + clean-rebuild verification; 03-02 = the single coordinated dedup wave (Fortran + bridge + GUI + tests + DLL rebuild) + docs refresh.
    - What we know: rm_L consolidation folds into the dedup change; 03-01 may reduce to verification + bounds test (CONTEXT D-03, discretion item).
    - What's unclear: which plan owns which file and the execution order.
-   - Recommendation: 03-01 = verification + D-02 bounds test + docs refresh (D-06); 03-02 = the single coordinated dedup wave (Fortran + bridge + GUI + tests + DLL rebuild). Exact split is the planner's discretion.
+   - Recommendation: 03-01 = verification + D-02 bounds test + docs refresh (D-06); 03-02 = the single coordinated dedup wave (Fortran + bridge + GUI + tests + DLL rebuild). Exact split is the planner's discretion. **[RESOLVED by plans 03-01/03-02]**
 
-2. **`RUNTIME_DLLS` dead variable** (Makefile:53-57)
+2. **`RUNTIME_DLLS` dead variable** (Makefile:53-57) — **[RESOLVED]** optional cleanup granted as agent discretion in 03-02 Task 2 Group B; permitted only if zero behavior change, skip if any doubt.
    - What we know: defined, never referenced; the copy rules hardcode the four names (170-173).
    - What's unclear: whether to fold the copy rules onto the variable as cleanup.
-   - Recommendation: permitted as optional cleanup (discretion); must not change behaviour. Skipping is also fine — the copy rules work as-is with the discovered path.
+   - Recommendation: permitted as optional cleanup (discretion); must not change behaviour. Skipping is also fine — the copy rules work as-is with the discovered path. **[RESOLVED: optional, discretion-gated]**
 
-3. **Manual GUI smoke after dedup**
+3. **Manual GUI smoke after dedup** — **[RESOLVED]** landed in 03-02 Task 2 Group D with an offscreen-QT fallback (`QT_QPA_PLATFORM=offscreen` on `test_gui_full_pipeline.py`) when a windowed launch is not possible.
    - What we know: `test_gui_full_pipeline.py` (13 tests) exercises the GUI's pipeline invocation without launching the window.
    - What's unclear: whether a launched-window smoke (`make gui`) is required by the verifier.
-   - Recommendation: include `python SRC/gui/gui.py` launch + one run as a verification step (D-05's "green at every commit" covers tests; the launch smoke covers the removed twin's import-time effect).
+   - Recommendation: include `python SRC/gui/gui.py` launch + one run as a verification step (D-05's "green at every commit" covers tests; the launch smoke covers the removed twin's import-time effect). **[RESOLVED: windowed launch + offscreen fallback]**
 
 ## Environment Availability
 
