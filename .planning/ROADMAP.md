@@ -91,8 +91,12 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
+**Wave 1**
 
 - [ ] 03-01-PLAN.md — D-02 rm_L bounds regression test + green suite baseline (FIX-01 verification)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 03-02-PLAN.md — Single-wave run_staging removal (all layers) + build/-only DLL load + Makefile MinGW discovery + docs refresh
 
 ## Progress
