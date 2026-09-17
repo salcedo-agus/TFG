@@ -2,10 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 03
-status: completed
+status: Awaiting next milestone
 stopped_at: Completed 03-02-PLAN.md
-last_updated: "2026-09-17T22:28:35.425Z"
+last_updated: "2026-09-17T22:48:50.468Z"
 last_activity: 2026-09-17
 last_activity_desc: Phase 03 complete
 progress:
@@ -13,6 +12,7 @@ progress:
   completed_phases: 3
   total_plans: 9
   completed_plans: 9
+current_phase: 03
 current_phase_name: Bridge & Correctness Fixes
 state_head: 4b500ad0366843285ecf433759f6a55420641c38
 ---
@@ -28,12 +28,10 @@ See: .planning/PROJECT.md (updated 2026-08-14)
 
 ## Current Position
 
-Phase: 03
-Plan: Not started
-Status: All phases complete
-Last activity: 2026-09-17 — Phase 03 complete
-
-Progress: [██████████] 100%
+Phase: Milestone v1.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-09-17 — Milestone v1.0 completed and archived
 
 ## Performance Metrics
 
@@ -127,8 +125,19 @@ Items acknowledged and carried forward:
 | Phase 3 | rm_L init fix, bridge dedup, MinGW path | Pending | 2026-08-14 |
 | Future | Automated tests | Pending | 2026-08-14 |
 
+Items acknowledged and deferred at milestone close on 2026-09-17:
+
+| Category | Item | Status |
+|----------|------|--------|
+| debug | DEBUG-null-masses-on-run | diagnosed |
+| debug | DEBUG-test-call-import-error | diagnosed |
+
 ## Session Continuity
 
 Last session: 2026-09-17T22:09:24.577Z
 Stopped at: Completed 03-02-PLAN.md
 Resume file: None
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone

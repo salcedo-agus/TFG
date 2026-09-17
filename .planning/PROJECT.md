@@ -55,6 +55,14 @@ The user can go from mission parameters to a complete, trustworthy vehicle desig
 - **Tests**: deferred — no test infrastructure work in current scope
 - **Language**: UI and code comments mix Spanish/English as today; GUI text currently English
 
+## Current State
+
+- Shipped v1.0 milestone (3 phases, 9 plans, 20 tasks)
+- Tech stack: Fortran 90/2008 + Python 3.11/PyQt6, ~4.5K LOC
+- GUI: centralized 3-tab workbench driving full Fortran pipeline via single `run_full_pipeline` ctypes entry
+- Bridge: `Rocket%rm_L` initialized correctly, `run_staging` removed, MinGW discovered at build time
+- Tests: deferred (user decision)
+
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
@@ -84,4 +92,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-17 after Phase 3 completion (v1.0 milestone complete)*
+*Last updated: 2026-09-17 after v1.0 milestone complete*
