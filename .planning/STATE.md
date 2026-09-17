@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 03
 current_phase_name: Bridge & Correctness Fixes
-status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-09-07T18:35:00.329Z"
+status: verifying
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-09-17T22:09:24.599Z"
 last_activity: 2026-09-07
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
 state_head: 4b500ad0366843285ecf433759f6a55420641c38
 ---
 
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-08-14)
 
 Phase: 03 (Bridge & Correctness Fixes) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-07 — Phase 03 execution started
 
-Progress: [█████████░] 89%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Progress: [█████████░] 89%
 | Phase 02 P02-01 | 16 | 2 tasks | 4 files |
 | Phase 02 P02-02 | 25 | 3 tasks | 1 files |
 | Phase 03-bridge-correctness-fixes P1 | 2min | 2 tasks | 1 files |
+| Phase 03-bridge-correctness-fixes P03-02 | 15 min | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,12 @@ Recent decisions affecting current work:
 - [Phase 02]: Run button relocated from setup_layout to a shared central row beneath the tabs (_build_ui) — objectName / ready property / stylesheet / clicked->_run unchanged; Save Results stays Results-tab-only; post-run auto-switch to Results unchanged (button hidden there)
 - [Phase 02]: Estimate calibration: 02-02 actuals 2651 tokens (chars/4 over realized gui.py diff) vs 28000 estimated — ~10x over-estimate on a single-file GUI-wiring plan; scale down low-confidence estimates on mapped code
 - [Phase 03-bridge-correctness-fixes]: D-02 bounds sentinel is a standalone unittest.TestCase calling run_full_pipeline(**N3_CONFIG) directly; conservative guards (m0 > payload+PAF, k_L in (0,1)) cannot false-fail on valid inputs but trip on uninitialized/garbage rm_L; PAF recomputed in-test from Payload_Mass_calc.f90 eq. 11. Task 2 (clean rebuild + baseline) is verification-only — zero source changes, no task commit. Tracer gate applied autonomously on resume: Task-1 tracer verify re-run end-to-end against fresh DLL before Task 2 — all 24 green.
+- [Phase ?]: Coordinated single-wave removal of run_staging at every layer (D-04/D-05): Fortran bind(C), Python wrapper + argtypes, gui.py inline twin + _lib handle + _MINGW_CANDIDATES block, test consumers — all in one atomic commit so the suite never sees a red collection-time ImportError
+- [Phase ?]: run_full_pipeline is the sole survivor; the inline rm_L formula copy in C_Interface.f90 dies with run_staging — Payload_Mass_calculator is the single formula source (FIX-01/D-01)
+- [Phase ?]: Makefile MINGW_BIN uses ?= (not :=) discovery via where gfortran + patsubst + firstword, with  hint — env/CLI override honored (D-09/FIX-03)
+- [Phase ?]: Python loads DLL build/-only via add_dll_directory(BUILD_DIR); MINGW_BIN env lookup removed from rocket_lib.py (D-08/FIX-03)
+- [Phase ?]: test_call.py converted to run_full_pipeline-only smoke (D-07); keeps sys.path hook and all five assertion groups
+- [Phase ?]: Codebase map docs (CONCERNS, INTEGRATIONS, STRUCTURE, TESTING, ARCHITECTURE, STACK, PROJECT, REQUIREMENTS, AGENTS.md) refreshed in one commit marking FIX-01/02/03 resolved
 
 ### Pending Todos
 
@@ -121,6 +128,6 @@ Items acknowledged and carried forward:
 
 ## Session Continuity
 
-Last session: 2026-09-07T18:35:00.308Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-09-17T22:09:24.577Z
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None

@@ -88,7 +88,7 @@ Plans:
   2. Only one ctypes bridge module exists; gui.py imports it
   3. Library path resolution no longer depends on a hardcoded MinGW directory
 
-**Plans**: 1/2 plans executed
+**Plans**: 2/2 plans executed
 
 Plans:
 **Wave 1**
@@ -97,7 +97,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 03-02-PLAN.md — Single-wave run_staging removal (all layers) + build/-only DLL load + Makefile MinGW discovery + docs refresh
+- [x] 03-02-PLAN.md — Single-wave run_staging removal (all layers) + build/-only DLL load + Makefile MinGW discovery + docs refresh
 
 ## Progress
 
@@ -108,4 +108,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Centralized 3-Tab GUI | 5/5 | Completed | 2026-08-15 |
 | 2. Full Pipeline Exposure | 2/2 | Complete    | 2026-09-06 |
-| 3. Bridge & Correctness Fixes | 1/2 | In Progress|  |
+| 3. Bridge & Correctness Fixes | 2/2 | In Progress|  |
