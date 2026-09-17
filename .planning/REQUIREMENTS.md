@@ -55,16 +55,16 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VIS-01 | Phase 4 | Pending |
-| VIS-02 | Phase 4 | Pending |
-| VIS-03 | Phase 4 | Pending |
+| VIS-01 | Phase 5 | Pending |
+| VIS-02 | Phase 5 | Pending |
+| VIS-03 | Phase 5 | Pending |
 | FAIR-01 | Phase 4 | Pending |
 | FAIR-02 | Phase 4 | Pending |
 | FAIR-03 | Phase 4 | Pending |
 | FAIR-04 | Phase 4 | Pending |
-| GUI-09 | Phase 4 | Pending |
-| GUI-10 | Phase 4 | Pending |
-| GUI-11 | Phase 4 | Pending |
+| GUI-09 | Phase 6 | Pending |
+| GUI-10 | Phase 6 | Pending |
+| GUI-11 | Phase 6 | Pending |
 
 **Coverage:**
 
