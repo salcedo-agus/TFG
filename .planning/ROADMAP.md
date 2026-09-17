@@ -12,7 +12,7 @@ The project moves from a splash + single-panel raw-slider GUI to a centralized 3
 
 - [x] **Phase 1: Centralized 3-Tab GUI** - Build the tabbed workbench (results / setup / vehicle-config) with mission inputs, results display, and splash preserved
 - [x] **Phase 2: Full Pipeline Exposure** - Add a single ctypes pipeline entry point so the GUI runs orbit → payload → staging → thrust → geometry (completed 2026-09-06)
-- [ ] **Phase 3: Bridge & Correctness Fixes** - Fix `Rocket%rm_L` init, deduplicate the ctypes bridge, remove the hardcoded MinGW path
+- [x] **Phase 3: Bridge & Correctness Fixes** - Fix `Rocket%rm_L` init, deduplicate the ctypes bridge, remove the hardcoded MinGW path (completed 2026-09-17)
 
 ## Phase Details
 
@@ -108,4 +108,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Centralized 3-Tab GUI | 5/5 | Completed | 2026-08-15 |
 | 2. Full Pipeline Exposure | 2/2 | Complete    | 2026-09-06 |
-| 3. Bridge & Correctness Fixes | 2/2 | In Progress|  |
+| 3. Bridge & Correctness Fixes | 2/2 | Complete    | 2026-09-17 |
