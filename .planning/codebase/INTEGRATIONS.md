@@ -44,8 +44,7 @@
 ## Environment Configuration
 
 **Required env vars:**
-- `MINGW_BIN` (optional) — MinGW bin directory override for runtime DLL loading (`SRC/gui/gui.py:36`, `SRC/interface/rocket_lib.py:19`)
-- All other configuration via `SRC/config.txt`
+- None — all configuration via `SRC/config.txt` (the Makefile's build-time `MINGW_BIN` override is a build-time developer affordance, not a runtime env var)
 
 **Secrets location:**
 - N/A — no secrets exist in this codebase (no .env files present)
@@ -60,9 +59,9 @@
 
 ## Bridge Layer (Fortran ↔ Python)
 
-- `SRC/interface/C_Interface.f90` exposes `run_staging` with `bind(C)` for 15 pointer arguments (scalars + arrays)
-- `SRC/interface/rocket_lib.py` wraps it with ctypes; `SRC/gui/gui.py` duplicates the same ctypes wrapper inline (see CONCERNS.md — duplicated bridge)
-- Loads `build/librocket.dll` (Windows) or `build/librocket.so` (Linux)
+- `SRC/interface/C_Interface.f90` exposes `run_full_pipeline` with `bind(C)` — the single ctypes entry (legacy staging-only bridge removed, 03-02)
+- `SRC/interface/rocket_lib.py` wraps it with ctypes; `SRC/gui/gui.py` imports `rocket_lib` (no inline duplicate)
+- Loads `build/librocket.dll` (Windows) or `build/librocket.so` (Linux) — build/-only DLL load via `os.add_dll_directory(BUILD_DIR)`; no `MINGW_BIN` runtime lookup
 
 ---
 

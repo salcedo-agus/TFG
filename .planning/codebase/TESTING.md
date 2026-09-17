@@ -39,9 +39,9 @@ No suites exist. The only executable "test" is `SRC/test_call.py`:
 
 ```python
 # SRC/test_call.py — hardcoded 3-stage case, prints results
-from rocket_lib import run_staging
-results = run_staging(n_stages=3, delta_v=10.0, payload_mass=5000.0,
-                      isp_list=[400.0, 350.0, 300.0], ks_list=[0.10, 0.15, 0.20])
+from rocket_lib import run_full_pipeline
+results = run_full_pipeline(n_stages=3, delta_v=10.0, payload_mass=5000.0,
+                            isp_list=[400.0, 350.0, 300.0], ks_list=[0.10, 0.15, 0.20])
 ```
 
 **Patterns:**
@@ -55,7 +55,7 @@ results = run_staging(n_stages=3, delta_v=10.0, payload_mass=5000.0,
 - N/A — no tests to mock in; the ctypes DLL itself is the unit under test
 
 **What to Mock:**
-- If adding tests, isolate Fortran solver from config parsing by calling `run_staging` directly (it already bypasses `load_config`)
+- If adding tests, isolate Fortran solver from config parsing by calling `run_full_pipeline` directly (it still bypasses `load_config`)
 
 **What NOT to Mock:**
 - The Fortran solver — the point is to exercise `librocket.dll` for real
@@ -97,7 +97,7 @@ results = run_staging(n_stages=3, delta_v=10.0, payload_mass=5000.0,
 
 ## Recommended Test Gaps (high priority)
 
-1. Golden-value check for the staging solver: verify `run_staging` against the known Soyuz 2-1v case (`ISP=[297, 359]`, `k_s=[0.0791, 0.0938]`, 2 stages) — currently the hardcoded TEST CASE in `Typical_Data.f90:824-832`
+1. Golden-value check for the staging solver: verify `run_full_pipeline` against the known Soyuz 2-1v case (`ISP=[297, 359]`, `k_s=[0.0791, 0.0938]`, 2 stages) — currently the hardcoded TEST CASE in `Typical_Data.f90:824-832`
 2. Golden-value check for `orbit_speed_calculator`: 200 km orbit → V_circ ≈ 7.79 km/s (regression guard for the unit fix in `Orbit_calc.f90`)
 3. Round-trip test for `load_config` parsing all keys including the second/third-stage combustion cycles (would catch the config-write bug in `Typical_Data.f90:924-930`)
 4. Consistency check between `typical_data_ranges.py` and `Typical_Data.f90` (run `parse_typical_data.py` and diff)

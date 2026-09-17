@@ -37,7 +37,7 @@
 ## Key Dependencies
 
 **Critical:**
-- gfortran 10.3.0 (TDM-GCC-64) - the only Fortran compiler; hardcoded `MINGW_BIN := C:/TDM-GCC-64/bin` in `SRC/Makefile:52`
+- gfortran 10.3.0 (TDM-GCC-64) - the only Fortran compiler; discovered at build time via `?=` + `where gfortran` in `SRC/Makefile` (env/CLI `MINGW_BIN` override honored, no hardcoded path — Phase 3, FIX-03)
 - PyQt6 - the only external Python package, used by `SRC/gui/gui.py`
 
 **Infrastructure:**
@@ -48,7 +48,7 @@
 **Environment:**
 - `config.txt` parsed at runtime by hand-rolled parser `load_config` in `SRC/inout/Typical_Data.f90:855` (reads `SRC/config.txt` relative to CWD)
 - Keys: `orbit_height` [km], `payload_mass` [kg], `number_of_stages`, per-stage `*_propellant_and_oxidizer` (1–8), per-stage `*_combustion_cycle` (0–5), `Diameter_setup` (1–3), `user_defined_diameter`
-- Optional `MINGW_BIN` env var for the MinGW bin dir (`SRC/gui/gui.py:36-45`)
+- Build-time only: Makefile `MINGW_BIN` override (no runtime env vars; Python loads build/-only via `add_dll_directory`)
 
 **Build:**
 - `SRC/Makefile` — targets: `all`, `fortran`, `gui`, `parse`, `clean`; `-O2 -Wall` flags; modules emitted to `../build` via `-J`
@@ -56,7 +56,7 @@
 ## Platform Requirements
 
 **Development:**
-- Windows + TDM-GCC-64 (hardcoded path), or macOS/Linux with gfortran + python3
+- Windows + TDM-GCC-64 (discovered at build time), or macOS/Linux with gfortran + python3
 - Python 3.11 with PyQt6
 
 **Production:**

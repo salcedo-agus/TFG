@@ -35,19 +35,19 @@ Pipeline (`SRC/Main.f90:8-17`): config → pre-staging (orbit, payload) → stag
 
 ## Current priorities (user decisions)
 
-- Updating the **GUI / Python side**: (1) expose the full Fortran pipeline to the GUI,
-  (2) fix correctness bugs (`Rocket%rm_L` uninitialized on ctypes path, duplicated
-  `run_staging` bridge in `gui.py`, hardcoded MinGW path).
+- Updating the **GUI / Python side**: the full Fortran pipeline is exposed to the GUI;
+  bridge consolidated to the single `run_full_pipeline` ctypes entry (`run_staging`
+  removed at every layer — `C_Interface.f90`, `rocket_lib.py`, `gui.py`, tests).
+- **Phase 3 bridge-correctness fixes are done** (FIX-01/02/03): `Rocket%rm_L` is
+  initialized on the ctypes path; the duplicated bridge is gone; the Makefile
+  discovers MinGW at build time via `?=` + `where gfortran` (no hardcoded path).
 - **Automated tests are deferred** — not part of the current work, leave for future sessions.
 - Planning artifacts live on the `planning` branch (see above).
 
 ## Known codebase issues (see `.planning/codebase/CONCERNS.md` on the planning branch)
 
-- `Rocket%rm_L` never set on the ctypes/GUI path (`SRC/interface/C_Interface.f90:40-54`,
-  read at `SRC/staging/Staging.f90:86`).
 - Config parser writes stage-2/3 combustion cycles into `first_stage_combustion_cycle`
   (`SRC/inout/Typical_Data.f90:924-930`).
 - Hardcoded Soyuz TEST CASE overrides all ISP/k_s tables in the Fortran path
   (`SRC/inout/Typical_Data.f90:824-832`).
-- Duplicated ctypes bridge: `SRC/interface/rocket_lib.py:45` and `SRC/gui/gui.py:80`.
 - Zero automated tests.

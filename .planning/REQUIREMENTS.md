@@ -23,9 +23,9 @@
 
 ### Fortran Bridge & Correctness
 
-- [ ] **FIX-01**: `Rocket%rm_L` is initialized on the ctypes/GUI path (currently unset; read at `Staging.f90:86`)
-- [ ] **FIX-02**: The duplicated `run_staging` ctypes bridge is consolidated into one module (`rocket_lib.py`), and `gui.py` uses it
-- [ ] **FIX-03**: Hardcoded MinGW path is removed/replaced with a resolvable library path
+- [x] **FIX-01**: `Rocket%rm_L` is initialized on the ctypes/GUI path (currently unset; read at `Staging.f90:86`)
+- [x] **FIX-02**: The duplicated `run_staging` ctypes bridge is consolidated into one module (`rocket_lib.py`), and `gui.py` uses it
+- [x] **FIX-03**: Hardcoded MinGW path is removed/replaced with a resolvable library path
 
 ## v2 Requirements
 
@@ -66,9 +66,9 @@ Deferred to future release. Tracked but not in current roadmap.
 | GUI-08 | Phase 1 | Complete |
 | PIPE-01 | Phase 2 | Complete |
 | PIPE-02 | Phase 2 | Complete |
-| FIX-01 | Phase 3 | Pending |
-| FIX-02 | Phase 3 | Pending |
-| FIX-03 | Phase 3 | Pending |
+| FIX-01 | Phase 3 | Complete |
+| FIX-02 | Phase 3 | Complete |
+| FIX-03 | Phase 3 | Complete |
 
 **Coverage:**
 

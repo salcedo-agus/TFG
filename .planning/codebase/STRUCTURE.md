@@ -26,7 +26,7 @@
 │   │   ├── Typical_Data.f90        # constants, config globals, ISP/ks tables, load_config
 │   │   └── parse_typical_data.py   # Codegen: Typical_Data.f90 → typical_data_ranges.py
 │   ├── interface/            # Fortran↔Python bridge
-│   │   ├── C_Interface.f90         # bind(C) run_staging
+│   │   ├── C_Interface.f90         # bind(C) run_full_pipeline (sole bridge entry)
 │   │   └── rocket_lib.py           # ctypes wrapper
 │   └── gui/                  # PyQt6 GUI
 │       ├── gui.py                  # Main GUI (splash + staging panel)
@@ -74,7 +74,7 @@
 
 **Entry Points:**
 - `SRC/Main.f90`: standalone Fortran executable (all targets)
-- `SRC/interface/C_Interface.f90:9` (`run_staging`): ctypes entry
+- `SRC/interface/C_Interface.f90:9` (`run_full_pipeline`): sole ctypes entry
 - `SRC/gui/gui.py:1023`: Python GUI entry
 
 **Configuration:**

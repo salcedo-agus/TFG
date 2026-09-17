@@ -16,11 +16,9 @@
 - Impact: All the carefully maintained propellant/cycle ISP and k_s tables (`typical_data_ranges.py`) have **no effect** on the Fortran executable; the same values are only used by the GUI. The Fortran solver always runs the Soyuz case.
 - Fix approach: Restore the `First_stage_ISP_mean` / `First_stage_ks_mean` assignments (or gate the TEST CASE behind a flag).
 
-**[Duplicated ctypes bridge]:**
-- Issue: `run_staging` ctypes wrapper defined twice — `SRC/interface/rocket_lib.py:45` and inline in `SRC/gui/gui.py:80`.
-- Files: `SRC/interface/rocket_lib.py`, `SRC/gui/gui.py`
-- Impact: Two copies of the 15-argument signature can drift; maintenance duplicated.
-- Fix approach: `gui.py` should import `run_staging` from `rocket_lib` (it already adds `interface/` to `sys.path` at `gui.py:29`).
+**[Duplicated ctypes bridge] — RESOLVED (Phase 3, FIX-02):**
+- Issue: a ctypes bridge was defined twice — `SRC/interface/rocket_lib.py` and inline in `SRC/gui/gui.py`.
+- Fix applied: bridge consolidated to the single `run_full_pipeline` entry in `rocket_lib.py`; the duplicate and the legacy staging-only bridge were removed at every layer (`C_Interface.f90`, `rocket_lib.py`, `gui.py`, tests) — 03-02.
 
 **[Staging.f90 `g` function retains a large commented-out block]:**
 - Issue: ~20 lines of commented-out alternate formulations remain in `SRC/staging/Staging.f90:12-31`.
@@ -41,12 +39,9 @@
 
 ## Known Bugs
 
-**[`Rocket%rm_L` never initialized on the ctypes/GUI path]:**
-- Symptoms: On the Python path, `run_staging` (`SRC/interface/C_Interface.f90:9`) sets module globals `payload_mass`, `number_of_stages`, `delta_v` but **never sets `Rocket%rm_L`**. `STAGING` then reads `Rocket%rm_L` when computing the stage-1 initial mass (`SRC/staging/Staging.f90:86`). The Fortran main path sets it via `Payload_Mass_calculator`, but the ctypes path does not.
-- Files: `SRC/interface/C_Interface.f90:40-54`, `SRC/staging/Staging.f90:86`, `SRC/pre-staging-calcs/Payload_Mass_calc.f90`
-- Trigger: Any GUI or `test_call.py` run — the payload mass is effectively uninitialized/garbage on that path.
-- Workaround: None in code; GUI results may be nonsensical.
-- Fix: In `run_staging`, set `Rocket%rm_L = payload_mass_in` (or call the payload/PAB logic).
+**[`Rocket%rm_L` never initialized on the ctypes/GUI path] — RESOLVED (Phase 3, FIX-01):**
+- Symptoms: On the Python path, the old staging-only bridge set module globals `payload_mass`, `number_of_stages`, `delta_v` but **never set `Rocket%rm_L`**. `STAGING` then read `Rocket%rm_L` when computing the stage-1 initial mass (`SRC/staging/Staging.f90:86`). The Fortran main path sets it via `Payload_Mass_calculator`, but the ctypes path did not.
+- Fix applied: the full-pipeline bridge (`run_full_pipeline`) initializes `Rocket%rm_L` via `Payload_Mass_calculator` on the ctypes path; the legacy bridge that skipped it is removed — 03-02.
 
 **[Second/third-stage combustion cycle config ignored]**: See Tech Debt item 1 above — this is also a functional bug.
 
@@ -66,11 +61,9 @@
 - Cause: Unconditional `print*` statements in inner loops.
 - Improvement path: Gate prints behind a verbosity flag or remove.
 
-**[Hardcoded MinGW path]:**
-- Problem: `SRC/Makefile:52` hardcodes `MINGW_BIN := C:/TDM-GCC-64/bin`; runtime DLL copy and GUI DLL search depend on it.
-- Files: `SRC/Makefile`, `SRC/gui/gui.py`
-- Cause: Single-machine assumption.
-- Improvement path: Discover MinGW via `where gfortran` / environment rather than hardcoding.
+**[Hardcoded MinGW path] — RESOLVED (Phase 3, FIX-03):**
+- Problem: `SRC/Makefile:52` hardcoded `MINGW_BIN := C:/TDM-GCC-64/bin`; runtime DLL copy and GUI DLL search depended on it.
+- Fix applied: `MINGW_BIN ?=` discovery via `where gfortran` + patsubst + firstword, with a `$(error ...)` hint when discovery is empty; env/CLI override honored (build-time only, never a runtime DLL-search input).
 
 ## Fragile Areas
 

@@ -45,14 +45,14 @@
 | `Root_Finding_Methods` | `Bolzano_Interval_Start`, `Bolzano_Bisection`, (stub) `Newton_Raphson` | `SRC/staging/Root_Finding.f90` |
 | `stage_Thrust_calculator` | empirical stage thrust, mass flow, burn time | `SRC/pre-simulation-calcs/Thrust_calc.f90` |
 | `rocket_geometry_calculation` | statistical diameter/volume/length per propellant | `SRC/pre-simulation-calcs/Geometry_calc.f90` |
-| `c_interface` | `run_staging` C-bindable entry for Python | `SRC/interface/C_Interface.f90` |
+| `c_interface` | `run_full_pipeline` C-bindable entry (sole bridge) for Python | `SRC/interface/C_Interface.f90` |
 
 ## Pattern Overview
 
 **Overall:** Pipeline / procedural multi-pass design: PRE-STAGING → STAGING → PRE-SIMULATION, orchestrated linearly in `SRC/Main.f90:8-17`. Fortran uses module + external-subroutine style; shared state flows through module globals in `typical_data` plus a `Rocket_t` object threaded through subroutines.
 
 **Key Characteristics:**
-- Dual entry points: standalone Fortran (`Main.f90`) and Python ctypes (`run_staging`) — two code paths into the same solver
+- Two execution paths: standalone Fortran (`Main.f90`) and Python ctypes (`run_full_pipeline`) — both driving the same solver pipeline
 - Shared global state lives in module variables (`typical_data`): `V_circ`, `orbit_height`, `payload_mass`, `number_of_stages`, per-stage propellant/cycle indices
 - Numerical root finding uses a procedure pointer (`func_interface`) + bisection
 - New modules `Root_Finding.f90` (extracted from `Staging.f90`) and `Geometry_calc.f90` (new pre-simulation sizing) were added in the latest refactor
@@ -108,7 +108,7 @@
 ### GUI / ctypes Path
 
 1. `gui.py` collects stage ISP/k_s + ΔV + payload (`SRC/gui/gui.py:_run`)
-2. `run_staging(...)` → ctypes → `C_Interface.f90:run_staging` sets module globals, builds `Rocket`, calls `STAGING` (`SRC/interface/C_Interface.f90:40-54`)
+2. `run_full_pipeline(...)` → ctypes → `C_Interface.f90:run_full_pipeline` seeds module globals, builds `Rocket` (incl. `Rocket%rm_L` via `Payload_Mass_calculator`), calls `STAGING` (`SRC/interface/C_Interface.f90`)
 3. Arrays packed back to Python for display (`SRC/interface/C_Interface.f90:57-90`)
 
 **State Management:**
@@ -133,17 +133,17 @@
 - Triggers: `make fortran`
 - Responsibilities: runs full pipeline, prints results
 
-**`run_staging` (bind(C)):**
+**`run_full_pipeline` (bind(C)):**
 - Location: `SRC/interface/C_Interface.f90:9`
 - Triggers: Python ctypes call
-- Responsibilities: expose STAGING solver to GUI
+- Responsibilities: expose the full pipeline (payload → orbit → staging → thrust → geometry) to the GUI
 
 ## Architectural Constraints
 
 - **Threading:** Single-threaded. No OpenMP, no threading in either Fortran or Python.
 - **Global state:** Module globals in `SRC/inout/Typical_Data.f90` (`V_circ`, `orbit_height`, `payload_mass`, `number_of_stages`, per-stage indices) — shared mutable state, mutated by `C_Interface.f90` on the ctypes path. Not reentrant.
 - **Circular imports:** None in Python (GUI imports `typical_data_ranges`, `rocket_lib` optional).
-- **Dual entry duplication:** `Main.f90` initializes `Rocket%rm_L` via `Payload_Mass_calculator`, but the ctypes path does **not** — a functional gap (see CONCERNS.md).
+- **Dual entry duplication:** `Main.f90` and the ctypes path (`run_full_pipeline` via `Payload_Mass_calculator`) both initialize `Rocket%rm_L` — gap resolved in Phase 3 (FIX-01).
 - **Build ordering:** `SRC/Makefile` declares circular module dependencies between `Staging.o` and `Root_Finding.o` (see CONCERNS.md).
 
 ## Anti-Patterns
@@ -151,14 +151,14 @@
 ### Module-Global Implicit State
 
 **What happens:** Configuration and intermediate values live in module globals (`payload_mass`, `V_circ`, `number_of_stages`) rather than being passed as arguments. `C_Interface.f90:40-42` writes them just before calling `STAGING`.
-**Why it's wrong:** Two entry points (`Main.f90` vs ctypes) must each remember to initialize these globals; the ctypes path forgets `Rocket%rm_L`, causing inconsistent behavior. Hard to test in isolation.
-**Do this instead:** Pass state explicitly as arguments (the `Rocket_t` object already provides this container). `Payload_Mass_calculator` correctly sets `Rocket%rm_L` on the object; the ctypes path should too.
+**Why it's wrong:** Two execution paths (`Main.f90` vs ctypes) must each remember to initialize these globals; the ctypes path previously forgot `Rocket%rm_L`, causing inconsistent behavior. Hard to test in isolation.
+**Do this instead:** Pass state explicitly as arguments (the `Rocket_t` object already provides this container). `Payload_Mass_calculator` correctly sets `Rocket%rm_L` on the object; the ctypes path now calls it too (Phase 3, FIX-01).
 
-### Duplicated Bridge Wrapper
+### Duplicated Bridge Wrapper — RESOLVED (Phase 3, FIX-02)
 
-**What happens:** The ctypes `run_staging` wrapper is defined in both `SRC/interface/rocket_lib.py:45` and inlined again in `SRC/gui/gui.py:80`.
-**Why it's wrong:** Two copies of the same 15-argument signature can drift apart; changes must be made twice.
-**Do this instead:** Have `gui.py` import `rocket_lib.run_staging` (it already inserts `interface/` on `sys.path` at `SRC/gui/gui.py:29`).
+**What happened:** The ctypes bridge was defined in both `SRC/interface/rocket_lib.py:45` and inlined again in `SRC/gui/gui.py:80`.
+**Why it was wrong:** Two copies of the same signature can drift apart; changes must be made twice.
+**Fix applied:** Bridge consolidated to the single `run_full_pipeline` entry in `rocket_lib.py`; `gui.py` imports it; the duplicate was removed at every layer — 03-02.
 
 ### Heavy `print*` Debug Output in Solver
 
