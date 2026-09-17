@@ -30,7 +30,12 @@ The user can go from mission parameters to a complete, trustworthy vehicle desig
 
 ### Active
 
-- Open FIX-04/05/06 (config-cycle write bug, dead Soyuz TEST CASE, Makefile circular dep) — queued for a future release, see REQUIREMENTS.md v2
+- **VIS-01**: Rocket dimension diagrams in Vehicle Config tab (post-analysis) — diameter, length, volume per stage
+- **FAIR-01**: Fairing diameter mode "Constant" — fairing diameter equals body diameter
+- **FAIR-02**: Fairing diameter mode "User-specified" — body diameter adjusts to user fairing input
+- **FAIR-03**: Fairing diameter mode "Hammer-Head" — fairing > body; body constant + statistically defined; fairing user-defined
+- **GUI-09**: GUI aesthetic exploration (ASCII art candidate; evaluate matplotlib/Qt alternatives)
+- Open FIX-04/05/06 (config-cycle write bug, dead Soyuz TEST CASE, Makefile circular dep) — queued for a future release
 
 ### Out of Scope
 
@@ -63,6 +68,18 @@ The user can go from mission parameters to a complete, trustworthy vehicle desig
 - Bridge: `Rocket%rm_L` initialized correctly, `run_staging` removed, MinGW discovered at build time
 - Tests: deferred (user decision)
 
+## Current Milestone: v1.1 GUI Visual Enhancements & Fairing Configuration
+
+**Goal:** Add rocket visualization diagrams and fairing diameter configuration to the Vehicle Configuration tab, plus explore GUI aesthetic directions.
+
+**Target features:**
+- Rocket dimension diagrams in Vehicle Config tab (post-analysis)
+- Fairing diameter modes:
+  - **Constant** — fairing = body diameter
+  - **User-specified** — body adjusts to fairing input
+  - **Hammer-Head** — fairing > body; body constant + statistically defined; fairing user-defined
+- GUI aesthetic exploration (ASCII art candidate; other directions open)
+
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
@@ -92,4 +109,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-17 after v1.0 milestone complete*
+*Last updated: 2026-09-17 after v1.0 milestone complete — v1.1 started*
