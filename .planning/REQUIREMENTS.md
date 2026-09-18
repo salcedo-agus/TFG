@@ -13,10 +13,10 @@
 
 ### Fairing Configuration (FAIR)
 
-- [ ] **FAIR-01**: Fairing mode "Constant" — fairing diameter equals body diameter
+- [x] **FAIR-01**: Fairing mode "Constant" — fairing diameter equals body diameter
 - [ ] **FAIR-02**: Fairing mode "User-specified" — body diameter adjusts to user fairing input
-- [ ] **FAIR-03**: Fairing mode "Hammer-Head" — fairing > body; body constant + statistically defined; fairing user-defined
-- [ ] **FAIR-04**: Fairing geometry included in results export (.txt)
+- [x] **FAIR-03**: Fairing mode "Hammer-Head" — fairing > body; body constant + statistically defined; fairing user-defined
+- [x] **FAIR-04**: Fairing geometry included in results export (.txt)
 
 ### GUI Aesthetics (GUI)
 
@@ -58,10 +58,10 @@ Deferred to future release. Tracked but not in current roadmap.
 | VIS-01 | Phase 5 | Pending |
 | VIS-02 | Phase 5 | Pending |
 | VIS-03 | Phase 5 | Pending |
-| FAIR-01 | Phase 4 | Pending |
+| FAIR-01 | Phase 4 | Complete |
 | FAIR-02 | Phase 4 | Pending |
-| FAIR-03 | Phase 4 | Pending |
-| FAIR-04 | Phase 4 | Pending |
+| FAIR-03 | Phase 4 | Complete |
+| FAIR-04 | Phase 4 | Complete |
 | GUI-09 | Phase 6 | Pending |
 | GUI-10 | Phase 6 | Pending |
 | GUI-11 | Phase 6 | Pending |
