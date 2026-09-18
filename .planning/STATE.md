@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
 status: in-progress
-stopped_at: Completed 04-01-PLAN.md (Constant fairing mode tracer slice)
-last_updated: "2026-09-18T04:04:04.941Z"
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-09-18T04:35:22.080Z"
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 current_phase_name: GUI Fairing Controls (Stand-in)
 ---
@@ -38,8 +38,8 @@ current_phase_name: GUI Fairing Controls (Stand-in)
 | Field | Value |
 |-------|-------|
 | **Current Phase** | 4. GUI Fairing Controls (Stand-in) |
-| **Current Plan** | 04-01 (completed) — next: 04-02 |
-| **Phase Status** | In progress (1/3 plans) |
+| **Current Plan** | 04-02 (completed) — next: 04-03 |
+| **Phase Status** | In progress (2/3 plans) |
 | **Overall Progress** | ████░░░░░░ 33% (1/3 phases) |
 
 ---
@@ -49,11 +49,11 @@ current_phase_name: GUI Fairing Controls (Stand-in)
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 0 / 3 |
-| Plans Executed | 1 |
-| Tasks Completed | 2 |
+| Plans Executed | 2 |
+| Tasks Completed | 5 |
 | Requirements Validated | 3 / 11 (FAIR-01, FAIR-03, FAIR-04) |
-| Commits This Milestone | 1 |
-| Last Commit | 4a985b4 (feat: Constant fairing mode tracer slice) |
+| Commits This Milestone | 4 |
+| Last Commit | 2cfab80 (feat: extend fairing_geometry.py for Tapered/Hammer-Head modes) |
 
 ---
 **Per-Plan Metrics:**
@@ -61,6 +61,7 @@ current_phase_name: GUI Fairing Controls (Stand-in)
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 04-gui-fairing-controls-stand-in P01 | 45 min | 2 tasks | 3 files |
+| Phase 04-gui-fairing-controls-stand-in P02 | 45 min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -80,7 +81,7 @@ current_phase_name: GUI Fairing Controls (Stand-in)
 
 ### Active Todos
 
-- [ ] Execute Plan 04-02 (Fairing constraint validator, Tapered/Hammer-Head spinbox ranges)
+- [x] Execute Plan 04-02 (Fairing constraint validator, Tapered/Hammer-Head spinbox ranges)
 - [ ] Execute Plan 04-03 (Diagram zoom/pan/PNG export, qt-material theme, dark title bar)
 - [ ] Plan Phase 5 (Vehicle Config Diagram)
 - [ ] Plan Phase 6 (GUI Aesthetic Polish)
@@ -100,15 +101,15 @@ current_phase_name: GUI Fairing Controls (Stand-in)
 
 ## Session Continuity
 
-**Last session:** 2026-09-18T04:01:35.517Z
-**Stopped at:** Completed 04-01-PLAN.md (Constant fairing mode tracer slice)
+**Last session:** 2026-09-18T04:35:22.053Z
+**Stopped at:** Completed 04-02-PLAN.md
 **Resume file:** None
 
 ### Last Session
 
 - **Date:** 2026-09-18
-- **Work Done:** Executed Plan 04-01 — implemented Constant fairing mode end-to-end (UI controls, mock geometry, true-scale diagram, export integration)
-- **Next Action:** Execute Plan 04-02 for constraint validation and non-Constant fairing modes
+- **Work Done:** Executed Plan 04-02 — implemented FairingConstraintValidator with D-04 matrix, Tapered/Hammer-Head modes, dynamic spinbox ranges, and extended fairing geometry
+- **Next Action:** Execute Plan 04-03 for diagram zoom/pan/PNG export, qt-material theme, dark title bar
 
 ### Context for Resume
 
@@ -134,3 +135,6 @@ If resuming mid-phase:
 - [Phase ?]: Fairing geometry mocked in Python for Phase 4 GUI integration; Fortran implementation deferred to v2+ — GUI-first development validates UX before committing to Fortran changes; mock uses standard aerospace formulas (ogive L=3×D, volume=0.75×cylinder, boat-tail 10°)
 - [Phase ?]: QGraphicsView/QGraphicsScene for true-scale rocket diagram with native zoom/pan/PNG export — Native Qt scene-graph avoids 500+ lines of custom transform/scroll handling; built-in affine transforms, ScrollHandDrag, scene.render() for PNG
 - [Phase ?]: Fairing group hidden until body mode selected (D-02) — appears on user interaction, not default state — Prevents UI clutter; fairing controls only relevant after user chooses body diameter mode; mirrors existing diameter_spin visibility contract
+- [Phase 4, Plan 2]: FairingConstraintValidator centralizes D-04 constraint matrix and dynamic spinbox ranges — single source of truth for body/fairing mode validation; expression-based ranges ("body_d", "last_body_d") resolved at runtime
+- [Phase 4, Plan 2]: Fairing mode radios rebuilt (not show/hide) on body mode change — ensures only valid combinations exist in button group; prevents stale state from hidden-but-checked radios
+- [Phase 4, Plan 2]: Boat-tail geometry for Hammer-Head mode (10°) computed via _boat_tail_coords helper — enables true-scale diagram rendering of fairing-to-body transition

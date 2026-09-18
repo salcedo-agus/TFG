@@ -32,10 +32,10 @@
   4. Hammer-Head mode: fairing diameter > body diameter; body uses statistically-defined diameter; fairing uses user-defined diameter; diagram shows ogive profile
   5. Fairing geometry (diameter, length, volume per stage) included in `.txt` results export (mock data for now)
 
-**Plans**: 1/3 plans executed
+**Plans**: 2/3 plans executed
 
 - [x] 04-01-PLAN.md — Tracer: Constant fairing mode end-to-end (UI, mock geometry, diagram, export)
-- [ ] 04-02-PLAN.md — Constraint validator + Tapered/Hammer-Head modes (D-04 matrix)
+- [x] 04-02-PLAN.md — Constraint validator + Tapered/Hammer-Head modes (D-04 matrix)
 - [ ] 04-03-PLAN.md — Diagram rendering + export for all modes, live updates
 
 **UI hint**: yes
@@ -78,7 +78,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 4. GUI Fairing Controls (Stand-in) | 1/3 | In Progress|  |
+| 4. GUI Fairing Controls (Stand-in) | 2/3 | In Progress|  |
 | 5. Vehicle Config Diagram | 0/0 | Not started | - |
 | 6. GUI Aesthetic Polish | 0/0 | Not started | - |
 
