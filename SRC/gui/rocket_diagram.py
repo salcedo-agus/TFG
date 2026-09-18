@@ -13,12 +13,11 @@ from PyQt6.QtCore import Qt, QRectF, QPointF
 from PyQt6.QtGui import QTransform
 from PyQt6.QtGui import QPainter, QPixmap, QPen, QColor, QPolygonF, QFont
 
-from .fairing_geometry import compute_fairing_geometry_per_stage
-
 
 # Color constants (mirror gui.py palette)
-ACCENT = "#58a6ff"
-ACCENT2 = "#f78166"
+STAGE_BODY_COLOR = "#58a6ff"      # ACCENT
+FAIRING_COLOR = "#f78166"         # ACCENT2
+FAIRING_HAMMER_COLOR = "#d29922"  # ORANGE
 BG_CARD = "#1c2128"
 TEXT_PRI = "#e6edf3"
 TEXT_SEC = "#8b949e"
@@ -67,6 +66,33 @@ class RocketDiagramView(QGraphicsView):
         else:
             super().wheelEvent(event)
 
+    def update_diagram(self, stage_data: list[dict], fairing_data: list[dict] | None, show_placeholder: bool):
+        """
+        Update the diagram with new data or show placeholder.
+
+        Args:
+            stage_data: List of dicts with 'diameter', 'length' keys (from Fortran results)
+            fairing_data: List of dicts from fairing_geometry.compute_fairing_geometry_per_stage
+            show_placeholder: If True, clear scene and show "Run analysis to see diagram"
+        """
+        if show_placeholder:
+            self.scene.clear()
+            # Add centered placeholder text
+            text_item = QGraphicsTextItem("Run analysis to see diagram")
+            text_item.setDefaultTextColor(QColor(TEXT_SEC))
+            font = QFont("Segoe UI", 14)
+            font.setWeight(QFont.Weight.Medium)
+            text_item.setFont(font)
+            # Center in view (scene is empty, so use view center)
+            # We'll set a temporary scene rect to position it
+            self.scene.setSceneRect(-200, -50, 400, 100)
+            text_item.setPos(-text_item.boundingRect().width() / 2, -text_item.boundingRect().height() / 2)
+            self.scene.addItem(text_item)
+            self.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
+            return
+
+        self.build_rocket_scene(stage_data, fairing_data)
+
     def build_rocket_scene(self, stage_data: list[dict], fairing_data: list[dict]):
         """
         Build the rocket diagram from stage data and fairing data.
@@ -95,7 +121,7 @@ class RocketDiagramView(QGraphicsView):
             rect = QRectF(-d / 2, y_offset, d, L)
             item = QGraphicsRectItem(rect)
             # Thin cosmetic pen (2cm in true-scale)
-            item.setPen(QPen(QColor(ACCENT), 0.02))
+            item.setPen(QPen(QColor(STAGE_BODY_COLOR), 0.02))
             item.setBrush(QColor(BG_CARD))
             self.scene.addItem(item)
             y_offset += L
@@ -110,8 +136,11 @@ class RocketDiagramView(QGraphicsView):
             # Closed polygon: right half up, then left half down
             fairing_poly = QPolygonF(right_coords + left_coords[::-1])
             item = QGraphicsPolygonItem(fairing_poly)
-            item.setPen(QPen(QColor(ACCENT2), 0.02))
-            item.setBrush(QColor(ACCENT2).lighter(150))
+            # Use different color for Hammer-Head mode (has boat-tail)
+            is_hammer_head = f.get("boat_tail_angle", 0.0) > 0
+            fairing_pen_color = FAIRING_HAMMER_COLOR if is_hammer_head else FAIRING_COLOR
+            item.setPen(QPen(QColor(fairing_pen_color), 0.02))
+            item.setBrush(QColor(fairing_pen_color).lighter(150))
             self.scene.addItem(item)
 
         # Set scene rect and fit to view
@@ -162,6 +191,7 @@ if __name__ == "__main__":
     ]
 
     # Mock fairing data (Constant mode)
+    from .fairing_geometry import compute_fairing_geometry_per_stage
     fairing = compute_fairing_geometry_per_stage([2.0, 2.0, 1.5], 1)
 
     view = RocketDiagramView()
