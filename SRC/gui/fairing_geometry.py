@@ -15,6 +15,47 @@ VOLUME_FACTOR = 0.75     # Fairing volume ≈ 0.75 × cylinder volume
 BOAT_TAIL_DEG = 10.0     # Hammer-Head boat-tail angle
 
 
+def _ogive_coords(diameter: float, length: float) -> list[tuple[float, float]]:
+    """
+    Generate ogive profile coordinates (right half, from tip to base).
+
+    Args:
+        diameter: Fairing diameter in meters
+        length: Ogive length in meters
+
+    Returns:
+        List of (x, y) coordinates from tip (0,0) to base (L, R)
+    """
+    R = diameter / 2
+    L = length
+    coords = [(0.0, 0.0)]  # tip
+    for i in range(1, 21):  # 20 segments
+        x = L * i / 20
+        y = R * math.sqrt(max(0.0, 1.0 - (x / L)**2))
+        coords.append((x, y))
+    return coords
+
+
+def _boat_tail_coords(fairing_d: float, body_d: float, angle_deg: float) -> tuple[list[tuple[float, float]], float]:
+    """
+    Generate boat-tail transition coordinates.
+
+    Args:
+        fairing_d: Fairing diameter in meters
+        body_d: Body diameter in meters
+        angle_deg: Boat-tail angle in degrees
+
+    Returns:
+        Tuple of (coords, bt_length) where coords is list of (x, y) from
+        ogive base to body radius, and bt_length is the axial length.
+    """
+    bt_angle = math.radians(angle_deg)
+    bt_length = (fairing_d - body_d) / 2 / math.tan(bt_angle)
+    # Single point at the body radius
+    coords = [(bt_length, body_d / 2)]
+    return coords, bt_length
+
+
 def compute_fairing_geometry(body_diameter: float, fairing_mode: int,
                              fairing_diameter: float | None = None) -> dict:
     """
@@ -45,21 +86,15 @@ def compute_fairing_geometry(body_diameter: float, fairing_mode: int,
     volume = VOLUME_FACTOR * cylinder_vol
 
     # Diagram coordinates (true-scale 1m=1px, origin at fairing tip, Y-up)
-    # Ogive profile: y = R * sqrt(1 - (x/L)^2) for tangent ogive
-    R = fairing_d / 2
-    L = ogive_length
-    coords = [(0.0, 0.0)]  # tip
-    for i in range(1, 21):  # 20 segments
-        x = L * i / 20
-        y = R * math.sqrt(max(0.0, 1.0 - (x / L)**2))
-        coords.append((x, y))
+    # Ogive profile using helper
+    coords = _ogive_coords(fairing_d, ogive_length)
 
     # Add boat-tail for Hammer-Head
     bt_length = 0.0
     if fairing_mode == 3:
-        bt_angle = math.radians(BOAT_TAIL_DEG)
-        bt_length = (fairing_d - body_diameter) / 2 / math.tan(bt_angle)
-        coords.append((L + bt_length, body_diameter / 2))
+        bt_coords, bt_length = _boat_tail_coords(fairing_d, body_diameter, BOAT_TAIL_DEG)
+        # Offset boat-tail coords by ogive length
+        coords.extend([(ogive_length + x, y) for x, y in bt_coords])
 
     return {
         "diameter": fairing_d,
@@ -97,3 +132,34 @@ if __name__ == "__main__":
     assert abs(r['ogive_length'] - 6.0) < 0.01
     assert r['volume'] > 0
     print("OK: Constant mode test passed")
+
+    # Test Tapered mode
+    r = compute_fairing_geometry(2.0, 2, 1.5)
+    print(f"Tapered mode (body=2.0, fairing=1.5): {r}")
+    assert r['diameter'] == 1.5
+    assert abs(r['ogive_length'] - 4.5) < 0.01
+    assert r['boat_tail_angle'] == 0.0
+    print("OK: Tapered mode test passed")
+
+    # Test Hammer-Head mode
+    r = compute_fairing_geometry(2.0, 3, 3.0)
+    print(f"Hammer-Head mode (body=2.0, fairing=3.0): {r}")
+    assert r['diameter'] == 3.0
+    assert r['boat_tail_angle'] == 10.0
+    assert len(r['coords']) > 20  # ogive (21) + boat-tail (1)
+    print("OK: Hammer-Head mode test passed")
+
+    # Test helper functions
+    ogive = _ogive_coords(2.0, 6.0)
+    assert len(ogive) == 21
+    assert ogive[0] == (0.0, 0.0)
+    assert abs(ogive[-1][0] - 6.0) < 0.01
+    assert abs(ogive[-1][1] - 0.0) < 0.01  # base of ogive is at y=0
+    print("OK: _ogive_coords test passed")
+
+    bt_coords, bt_len = _boat_tail_coords(3.0, 2.0, 10.0)
+    assert len(bt_coords) == 1
+    assert abs(bt_coords[0][1] - 1.0) < 0.01  # body_d/2 = 1.0
+    print("OK: _boat_tail_coords test passed")
+
+    print("\\nAll tests passed!")
