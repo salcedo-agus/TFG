@@ -1091,6 +1091,8 @@ class MainWindow(QMainWindow):
         self.print_btn.setEnabled(False)
         self._last_v_circ = None          # no stale V_circ survives an input change (D-04/D-05)
         self._update_auto_dv_label()
+        # Show placeholder on diagram immediately when any input changes (D-09)
+        self.rocket_diagram.update_diagram([], None, True)
 
     def _update_auto_dv_label(self):
         """Refresh the read-only ΔV (auto) label from the last run's Fortran V_circ."""
@@ -1216,7 +1218,7 @@ class MainWindow(QMainWindow):
             # Build rocket diagram with stage data + fairing (VIS-01)
             stage_data = [{"diameter": s.get("diameter", 2.0), "length": s.get("length", 10.0)}
                           for s in results["stages"]]
-            self.rocket_diagram.build_rocket_scene(stage_data, fairing_data)
+            self.rocket_diagram.update_diagram(stage_data, fairing_data, False)
 
             self._clear_results()
 
