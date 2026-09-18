@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
 status: in-progress
-stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-09-18T04:35:22.080Z"
+stopped_at: Completed 04-03-PLAN.md
+last_updated: "2026-09-18T13:59:23.482Z"
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
-  percent: 0
+  completed_plans: 3
+  percent: 33
 current_phase_name: GUI Fairing Controls (Stand-in)
 ---
 
@@ -38,8 +38,8 @@ current_phase_name: GUI Fairing Controls (Stand-in)
 | Field | Value |
 |-------|-------|
 | **Current Phase** | 4. GUI Fairing Controls (Stand-in) |
-| **Current Plan** | 04-02 (completed) — next: 04-03 |
-| **Phase Status** | In progress (2/3 plans) |
+| **Current Plan** | 04-03 (completed) — phase complete |
+| **Phase Status** | Complete (3/3 plans) |
 | **Overall Progress** | ████░░░░░░ 33% (1/3 phases) |
 
 ---
@@ -49,11 +49,11 @@ current_phase_name: GUI Fairing Controls (Stand-in)
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 0 / 3 |
-| Plans Executed | 2 |
-| Tasks Completed | 5 |
-| Requirements Validated | 3 / 11 (FAIR-01, FAIR-03, FAIR-04) |
-| Commits This Milestone | 4 |
-| Last Commit | 2cfab80 (feat: extend fairing_geometry.py for Tapered/Hammer-Head modes) |
+| Plans Executed | 3 |
+| Tasks Completed | 8 |
+| Requirements Validated | 4 / 11 (FAIR-01, FAIR-03, FAIR-04, VIS-01) |
+| Commits This Milestone | 6 |
+| Last Commit | daa4ddc (feat: Wire diagram updates to input changes; per-stage fairing computation) |
 
 ---
 **Per-Plan Metrics:**
@@ -62,6 +62,7 @@ current_phase_name: GUI Fairing Controls (Stand-in)
 |------|----------|-------|-------|
 | Phase 04-gui-fairing-controls-stand-in P01 | 45 min | 2 tasks | 3 files |
 | Phase 04-gui-fairing-controls-stand-in P02 | 45 min | 3 tasks | 3 files |
+| Phase 04-gui-fairing-controls-stand-in P03 | 5 min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -81,8 +82,9 @@ current_phase_name: GUI Fairing Controls (Stand-in)
 
 ### Active Todos
 
+- [x] Execute Plan 04-01 (Constant fairing mode tracer: UI, mock geometry, diagram, export)
 - [x] Execute Plan 04-02 (Fairing constraint validator, Tapered/Hammer-Head spinbox ranges)
-- [ ] Execute Plan 04-03 (Diagram zoom/pan/PNG export, qt-material theme, dark title bar)
+- [x] Execute Plan 04-03 (Diagram rendering + live updates + export for all modes)
 - [ ] Plan Phase 5 (Vehicle Config Diagram)
 - [ ] Plan Phase 6 (GUI Aesthetic Polish)
 
@@ -101,15 +103,15 @@ current_phase_name: GUI Fairing Controls (Stand-in)
 
 ## Session Continuity
 
-**Last session:** 2026-09-18T04:35:22.053Z
-**Stopped at:** Completed 04-02-PLAN.md
+**Last session:** 2026-09-18T13:59:23.452Z
+**Stopped at:** Completed 04-03-PLAN.md
 **Resume file:** None
 
 ### Last Session
 
 - **Date:** 2026-09-18
-- **Work Done:** Executed Plan 04-02 — implemented FairingConstraintValidator with D-04 matrix, Tapered/Hammer-Head modes, dynamic spinbox ranges, and extended fairing geometry
-- **Next Action:** Execute Plan 04-03 for diagram zoom/pan/PNG export, qt-material theme, dark title bar
+- **Work Done:** Executed Plan 04-03 — enhanced RocketDiagramView with per-stage fairing rendering, placeholder state, live input wiring, and unified fairing geometry computation for diagram and export
+- **Next Action:** Plan Phase 5 (Vehicle Config Diagram) for zoom/pan/PNG export enablement
 
 ### Context for Resume
 
@@ -138,3 +140,8 @@ If resuming mid-phase:
 - [Phase 4, Plan 2]: FairingConstraintValidator centralizes D-04 constraint matrix and dynamic spinbox ranges — single source of truth for body/fairing mode validation; expression-based ranges ("body_d", "last_body_d") resolved at runtime
 - [Phase 4, Plan 2]: Fairing mode radios rebuilt (not show/hide) on body mode change — ensures only valid combinations exist in button group; prevents stale state from hidden-but-checked radios
 - [Phase 4, Plan 2]: Boat-tail geometry for Hammer-Head mode (10°) computed via _boat_tail_coords helper — enables true-scale diagram rendering of fairing-to-body transition
+- [Phase ?]: RocketDiagramView.update_diagram() replaces build_rocket_scene() as primary API; supports placeholder mode — Cleaner separation; placeholder as first-class operation
+- [Phase ?]: Diagram shows placeholder immediately on any input change (_on_inputs_changed), not after _run — Prevents stale diagram display; addresses T-04-09 threat
+- [Phase ?]: Unified fairing computation: both diagram and export call compute_fairing_geometry_per_stage — Single source of truth eliminates drift between visual and exported data
+- [Phase ?]: Hammer-Head fairing rendered in distinct orange color for boat-tail transition — Makes discontinuous diameter (fairing > body) visually obvious
+- [Phase ?]: True-scale coordinate system: scene built in meters (1 unit = 1 meter), Y-up via QTransform.fromScale(1, -1) — Fairing tip at top, stages stack downward visually; matches rocket visual convention

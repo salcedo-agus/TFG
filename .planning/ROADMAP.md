@@ -11,7 +11,7 @@
 
 ## Phases
 
-- [ ] **Phase 4: GUI Fairing Controls (Stand-in)** — Add fairing diameter mode controls to Vehicle Config tab with Python-side mock fairing data; no Fortran changes
+- [x] **Phase 4: GUI Fairing Controls (Stand-in)** — Add fairing diameter mode controls to Vehicle Config tab with Python-side mock fairing data; no Fortran changes
 - [ ] **Phase 5: Vehicle Config Diagram** — Render interactive rocket dimension diagram in Vehicle Config tab using mock fairing data; zoom/pan/export; real-time updates
 - [ ] **Phase 6: GUI Aesthetic Polish** — Apply modern qt-material theme, Windows dark title bar, evaluate ASCII art splash candidate
 
@@ -32,11 +32,11 @@
   4. Hammer-Head mode: fairing diameter > body diameter; body uses statistically-defined diameter; fairing uses user-defined diameter; diagram shows ogive profile
   5. Fairing geometry (diameter, length, volume per stage) included in `.txt` results export (mock data for now)
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans executed
 
 - [x] 04-01-PLAN.md — Tracer: Constant fairing mode end-to-end (UI, mock geometry, diagram, export)
 - [x] 04-02-PLAN.md — Constraint validator + Tapered/Hammer-Head modes (D-04 matrix)
-- [ ] 04-03-PLAN.md — Diagram rendering + export for all modes, live updates
+- [x] 04-03-PLAN.md — Diagram rendering + export for all modes, live updates
 
 **UI hint**: yes
 
@@ -78,7 +78,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 4. GUI Fairing Controls (Stand-in) | 2/3 | In Progress|  |
+| 4. GUI Fairing Controls (Stand-in) | 3/3 | Complete | 2026-09-18 |
 | 5. Vehicle Config Diagram | 0/0 | Not started | - |
 | 6. GUI Aesthetic Polish | 0/0 | Not started | - |
 

@@ -7,7 +7,7 @@
 
 ### Rocket Visualization (VIS)
 
-- [ ] **VIS-01**: Rocket dimension diagram in Vehicle Config tab — shows per-stage body diameter, length, volume post-analysis
+- [x] **VIS-01**: Rocket dimension diagram in Vehicle Config tab — shows per-stage body diameter, length, volume post-analysis
 - [ ] **VIS-02**: Diagram supports zoom, pan, and PNG export
 - [ ] **VIS-03**: Diagram updates in real-time when results change
 
@@ -55,7 +55,7 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VIS-01 | Phase 5 | Pending |
+| VIS-01 | Phase 5 | Complete |
 | VIS-02 | Phase 5 | Pending |
 | VIS-03 | Phase 5 | Pending |
 | FAIR-01 | Phase 4 | Complete |
