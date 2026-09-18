@@ -26,6 +26,10 @@ ROOT_DIR = os.path.dirname(GUI_DIR)
 sys.path.insert(0, os.path.join(ROOT_DIR, "interface"))
 import rocket_lib   # full-pipeline bridge entry (run_full_pipeline, 03-02)
 
+# ── Fairing geometry (Phase 4 mock) ───────────────────────────────────────────
+from .fairing_geometry import compute_fairing_geometry_per_stage
+from .rocket_diagram import RocketDiagramView
+
 # ── ISP / k_s data (auto-generated from Typical_Data.f90) ───────────────────
 # Run parse_typical_data.py to regenerate this file after editing Typical_Data.f90
 import importlib, sys as _sys
@@ -821,11 +825,11 @@ class MainWindow(QMainWindow):
         return scroll
 
     def _build_vehicle_tab(self):
-        """Vehicle Configuration tab (index 2): diameter-mode radios (D-11/D-12).
+        """Vehicle Configuration tab (index 2): diameter-mode radios (D-11/D-12)
+        and fairing mode controls (FAIR-01/03/04, D-01..D-03).
 
-        Mode semantics mirror Fortran diameter_setup 1/2/3 (Geometry_calc.f90:92-105);
-        state stored on MainWindow for Phase 2 handoff — wired into run_full_pipeline
-        (Pitfall 8, UI-SPEC:187)."""
+        Body mode semantics mirror Fortran diameter_setup 1/2/3 (Geometry_calc.f90:92-105);
+        fairing mode is Python mock for Phase 4 (v1.1), replaced by Fortran in v2+."""
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setStyleSheet(f"background: {BG_PANEL};")
@@ -844,6 +848,21 @@ class MainWindow(QMainWindow):
         self.vehicle_layout.addWidget(subtitle)
 
         div = QFrame(); div.setObjectName("divider"); self.vehicle_layout.addWidget(div)
+
+        # ── Body / Fairing mode groups side-by-side (60/40 split, D-01) ──
+        modes_split = QHBoxLayout()
+        modes_split.setSpacing(16)
+
+        # LEFT: Body Diameter Mode (60% weight)
+        body_container = QWidget()
+        body_layout = QVBoxLayout(body_container)
+        body_layout.setContentsMargins(0, 0, 0, 0)
+        body_layout.setSpacing(8)
+
+        # "Body" header label (D-03)
+        body_header = QLabel("Body")
+        body_header.setStyleSheet(f"color: {ACCENT}; font-size: 12px; font-weight: 600; letter-spacing: 1px;")
+        body_layout.addWidget(body_header)
 
         # DIAMETER MODE group — 3 mutually-exclusive radios (QButtonGroup), each
         # with its 11px TEXT_SEC helper line (UI-SPEC:179-186).
@@ -873,7 +892,7 @@ class MainWindow(QMainWindow):
         mode_layout.addWidget(self._vehicle_helper(
             "User-specified: all stages take the diameter entered below"))
 
-        self.vehicle_layout.addWidget(self.mode_group)
+        body_layout.addWidget(self.mode_group)
 
         # User-specified diameter box (D-12, GUI-07) — bounded per V5; mirrors
         # config.txt User_defined_diameter = 2.0 (UI-SPEC:188)
@@ -886,7 +905,76 @@ class MainWindow(QMainWindow):
         self.diameter_spin.setSingleStep(0.1)
         self.diameter_spin.setVisible(False)         # visibility contract: mode 3 only
         diam_row.addWidget(self.diameter_spin)
-        self.vehicle_layout.addLayout(diam_row)
+        body_layout.addLayout(diam_row)
+
+        body_layout.addStretch()
+        modes_split.addWidget(body_container, 60)  # 60% weight (D-01)
+
+        # RIGHT: Fairing Diameter Mode (40% weight)
+        fairing_container = QWidget()
+        fairing_layout = QVBoxLayout(fairing_container)
+        fairing_layout.setContentsMargins(0, 0, 0, 0)
+        fairing_layout.setSpacing(8)
+
+        # "Fairing" header label (D-03)
+        fairing_header = QLabel("Fairing")
+        fairing_header.setStyleSheet(f"color: {ACCENT2}; font-size: 12px; font-weight: 600; letter-spacing: 1px;")
+        fairing_layout.addWidget(fairing_header)
+
+        # FAIRING MODE group (D-01, D-02: initially hidden)
+        self.fairing_mode_group = QGroupBox("FAIRING MODE")
+        fairing_mode_layout = QVBoxLayout(self.fairing_mode_group)
+        fairing_mode_layout.setSpacing(10)
+
+        self.fairing_mode_const = QRadioButton("Constant (same as body)")      # → 1
+        self.fairing_mode_tapered = QRadioButton("Tapered (smaller than body)") # → 2
+        self.fairing_mode_hammer = QRadioButton("Hammer-Head (larger than body)") # → 3
+
+        self.fairing_mode_buttons = QButtonGroup(self)
+        self.fairing_mode_buttons.addButton(self.fairing_mode_const, 1)
+        self.fairing_mode_buttons.addButton(self.fairing_mode_tapered, 2)
+        self.fairing_mode_buttons.addButton(self.fairing_mode_hammer, 3)
+
+        self.fairing_mode = 1                       # Phase 4 state: 1=Constant, 2=Tapered, 3=Hammer-Head
+        self.fairing_mode_const.setChecked(True)    # default per FAIR-01
+
+        fairing_mode_layout.addWidget(self.fairing_mode_const)
+        fairing_mode_layout.addWidget(self._vehicle_helper(
+            "Constant: fairing diameter equals body diameter"))
+        fairing_mode_layout.addWidget(self.fairing_mode_tapered)
+        fairing_mode_layout.addWidget(self._vehicle_helper(
+            "Tapered: fairing diameter ≤ last stage body diameter (user-specified)"))
+        fairing_mode_layout.addWidget(self.fairing_mode_hammer)
+        fairing_mode_layout.addWidget(self._vehicle_helper(
+            "Hammer-Head: fairing diameter ≥ body diameter (user-specified)"))
+
+        fairing_layout.addWidget(self.fairing_mode_group)
+
+        # Fairing diameter spinbox (conditional, mirrors diameter_spin pattern)
+        fairing_diam_row = QHBoxLayout()
+        fairing_diam_row.addWidget(QLabel("Fairing Diameter (m)"))
+        self.fairing_diameter_spin = QDoubleSpinBox()
+        self.fairing_diameter_spin.setRange(0.5, 20.0)
+        self.fairing_diameter_spin.setValue(2.00)
+        self.fairing_diameter_spin.setDecimals(2)
+        self.fairing_diameter_spin.setSingleStep(0.1)
+        self.fairing_diameter_spin.setSuffix(" m")
+        self.fairing_diameter_spin.setVisible(False)   # hidden for Constant mode
+        fairing_diam_row.addWidget(self.fairing_diameter_spin)
+        fairing_layout.addLayout(fairing_diam_row)
+
+        fairing_layout.addStretch()
+        modes_split.addWidget(fairing_container, 40)  # 40% weight (D-01)
+
+        self.vehicle_layout.addLayout(modes_split)
+
+        # Fairing group initially hidden (D-02): appears after body mode selected
+        self.fairing_mode_group.setVisible(False)
+
+        # ── Rocket Diagram View (VIS-01) ──
+        self.rocket_diagram = RocketDiagramView()
+        self.rocket_diagram.setMinimumHeight(300)
+        self.vehicle_layout.addWidget(self.rocket_diagram)
 
         # Visibility contract + Phase 2 state. Widgets are never rebuilt, so the
         # diameter value persists across mode toggles and tab switches. Wired
@@ -901,6 +989,14 @@ class MainWindow(QMainWindow):
         # numbers are shown or exported against changed diameter inputs).
         self.mode_buttons.buttonToggled.connect(self._on_inputs_changed)
         self.diameter_spin.valueChanged.connect(self._on_inputs_changed)
+
+        # Fairing mode wiring (D-02, FAIR-01/03/04)
+        # Show fairing group when any body mode is selected (user interaction)
+        self.mode_buttons.buttonToggled.connect(self._on_body_mode_toggled)
+        # Store fairing mode and invalidate on change
+        self.fairing_mode_buttons.buttonToggled.connect(self._on_fairing_mode_toggled)
+        self.fairing_mode_buttons.buttonToggled.connect(self._on_inputs_changed)
+        self.fairing_diameter_spin.valueChanged.connect(self._on_inputs_changed)
 
         self.vehicle_layout.addStretch()
         scroll.setWidget(inner)
@@ -920,6 +1016,21 @@ class MainWindow(QMainWindow):
         only the checked transition updates the stored mode."""
         if checked:
             self.diameter_mode = self.mode_buttons.id(btn)
+
+    def _on_body_mode_toggled(self, btn, checked):
+        """Show fairing mode group when any body mode is selected (D-02)."""
+        if checked:
+            self.fairing_mode_group.setVisible(True)
+
+    def _on_fairing_mode_toggled(self, btn, checked):
+        """Store the fairing mode int (1/2/3) and update spinbox visibility.
+
+        Constant mode (1): no user input needed, spinbox hidden.
+        Tapered (2) / Hammer-Head (3): spinbox visible for user-specified diameter."""
+        if checked:
+            self.fairing_mode = self.fairing_mode_buttons.id(btn)
+            # Spinbox visible only for non-Constant modes
+            self.fairing_diameter_spin.setVisible(self.fairing_mode != 1)
 
     def _rebuild_stage_inputs(self, n):
         for w in self.stage_widgets:
@@ -1026,6 +1137,23 @@ class MainWindow(QMainWindow):
             lines.append(f"    Payload rat (k_L): {s['k_L']:>12.4f}")
             lines.append(f"    Exhaust vel (v_e): {s['nu_e']:>12.4f} km/s")
             lines.append("")
+
+        # Fairing Geometry section (FAIR-04, D-10)
+        # Compute fairing geometry for export (same as in _run)
+        body_diameters = [s.get("diameter", 2.0) for s in r["stages"]]
+        fairing_d = self.fairing_diameter_spin.value() if self.fairing_mode != 1 else None
+        fairing_data = compute_fairing_geometry_per_stage(
+            body_diameters, self.fairing_mode, fairing_d
+        )
+        if fairing_data:
+            lines.append("  FAIRING GEOMETRY")
+            for i, f in enumerate(fairing_data):
+                lines.append(f"    Stage {i+1} Fairing:")
+                lines.append(f"      Diameter:  {f.get('diameter', 0.0):>10.2f} m")
+                lines.append(f"      Length:    {f.get('length', 0.0):>10.2f} m")
+                lines.append(f"      Volume:    {f.get('volume', 0.0):>10.2f} m³")
+                lines.append("")
+
         lines.append("=" * 48)
 
         with open(path, "w", encoding="utf-8") as f:
@@ -1066,6 +1194,18 @@ class MainWindow(QMainWindow):
                 diameter_setup=self.diameter_mode,
                 user_diameter=self.diameter_spin.value(),
             )
+
+            # Compute fairing geometry from stage body diameters (Phase 4 mock)
+            body_diameters = [s.get("diameter", 2.0) for s in results["stages"]]
+            fairing_d = self.fairing_diameter_spin.value() if self.fairing_mode != 1 else None
+            fairing_data = compute_fairing_geometry_per_stage(
+                body_diameters, self.fairing_mode, fairing_d
+            )
+
+            # Build rocket diagram with stage data + fairing (VIS-01)
+            stage_data = [{"diameter": s.get("diameter", 2.0), "length": s.get("length", 10.0)}
+                          for s in results["stages"]]
+            self.rocket_diagram.build_rocket_scene(stage_data, fairing_data)
 
             self._clear_results()
 
