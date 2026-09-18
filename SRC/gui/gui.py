@@ -29,6 +29,7 @@ import rocket_lib   # full-pipeline bridge entry (run_full_pipeline, 03-02)
 # ── Fairing geometry (Phase 4 mock) ───────────────────────────────────────────
 from .fairing_geometry import compute_fairing_geometry_per_stage
 from .rocket_diagram import RocketDiagramView
+from .constraints import FairingConstraintValidator
 
 # ── ISP / k_s data (auto-generated from Typical_Data.f90) ───────────────────
 # Run parse_typical_data.py to regenerate this file after editing Typical_Data.f90
@@ -971,6 +972,19 @@ class MainWindow(QMainWindow):
         # Fairing group initially hidden (D-02): appears after body mode selected
         self.fairing_mode_group.setVisible(False)
 
+        # ── Fairing Constraint Validator (D-04, D-05) ──
+        # Provides dynamic spinbox ranges and fairing mode radio rebuilding
+        # based on body mode selection per D-04 constraint matrix.
+        self.fairing_validator = FairingConstraintValidator(
+            body_mode_group=self.mode_buttons,
+            fairing_mode_group=self.fairing_mode_buttons,
+            fairing_mode_groupbox=self.fairing_mode_group,
+            fairing_spin=self.fairing_diameter_spin,
+            get_body_diameters_fn=lambda: [s.get("diameter", 2.0) for s in self._last_results.get("stages", [])] if hasattr(self, "_last_results") and self._last_results else [2.0],
+            get_last_body_d_fn=lambda: self._last_results["stages"][-1].get("diameter", 2.0) if hasattr(self, "_last_results") and self._last_results and self._last_results.get("stages") else 2.0,
+            get_body_d_fn=lambda: max(s.get("diameter", 2.0) for s in self._last_results.get("stages", [])) if hasattr(self, "_last_results") and self._last_results and self._last_results.get("stages") else 2.0,
+        )
+
         # ── Rocket Diagram View (VIS-01) ──
         self.rocket_diagram = RocketDiagramView()
         self.rocket_diagram.setMinimumHeight(300)
@@ -1023,14 +1037,11 @@ class MainWindow(QMainWindow):
             self.fairing_mode_group.setVisible(True)
 
     def _on_fairing_mode_toggled(self, btn, checked):
-        """Store the fairing mode int (1/2/3) and update spinbox visibility.
+        """Store the fairing mode int (1/2/3) from button group.
 
-        Constant mode (1): no user input needed, spinbox hidden.
-        Tapered (2) / Hammer-Head (3): spinbox visible for user-specified diameter."""
+        Spinbox visibility and range are now managed by FairingConstraintValidator."""
         if checked:
-            self.fairing_mode = self.fairing_mode_buttons.id(btn)
-            # Spinbox visible only for non-Constant modes
-            self.fairing_diameter_spin.setVisible(self.fairing_mode != 1)
+            self.fairing_mode = self.fairing_mode_buttons.checkedId()
 
     def _rebuild_stage_inputs(self, n):
         for w in self.stage_widgets:

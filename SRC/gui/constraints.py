@@ -39,6 +39,7 @@ class FairingConstraintValidator:
         self,
         body_mode_group: QButtonGroup,
         fairing_mode_group: QButtonGroup,
+        fairing_mode_groupbox,  # QGroupBox containing the fairing mode radios
         fairing_spin: QDoubleSpinBox,
         get_body_diameters_fn,
         get_last_body_d_fn,
@@ -46,6 +47,7 @@ class FairingConstraintValidator:
     ):
         self.body_mode_group = body_mode_group
         self.fairing_mode_group = fairing_mode_group
+        self.fairing_mode_groupbox = fairing_mode_groupbox
         self.fairing_spin = fairing_spin
         self.get_body_diameters = get_body_diameters_fn
         self.get_last_body_d = get_last_body_d_fn
@@ -76,10 +78,20 @@ class FairingConstraintValidator:
         """
         allowed = self.CONSTRAINTS.get(body_mode, {})
 
-        # Clear existing buttons from group (but keep them for re-adding)
-        # We need to remove all buttons from the group
+        # Clear existing buttons from group
         for button in list(self.fairing_mode_group.buttons()):
             self.fairing_mode_group.removeButton(button)
+
+        # Get the layout of the fairing mode group box (QGroupBox)
+        layout = self.fairing_mode_groupbox.layout()
+        if not layout:
+            return
+
+        # Remove all existing widgets from the layout (radios and helpers)
+        while layout.count():
+            item = layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
 
         # Recreate and add allowed modes
         # Order: 1 (Constant) always first, then 2, then 3
@@ -87,22 +99,17 @@ class FairingConstraintValidator:
             label, _, _ = allowed[mode_id]
             radio = QRadioButton(label)
             self.fairing_mode_group.addButton(radio, mode_id)
-            # Find the parent layout and add the widget
-            # The fairing_mode_group's parent is the QGroupBox, which has a layout
-            # We need to insert into the layout before the spinbox row
-            parent_widget = self.fairing_mode_group.parent()
-            if parent_widget:
-                layout = parent_widget.layout()
-                if layout:
-                    # Insert before the last stretch item (which is at the end)
-                    layout.insertWidget(layout.count() - 1, radio)
+            layout.addWidget(radio)
 
-                    # Also add helper text
-                    constraint = allowed[mode_id]
-                    helper_text = self._get_helper_text(mode_id, constraint)
-                    if helper_text:
-                        helper_lbl = self._create_helper_label(helper_text)
-                        layout.insertWidget(layout.count() - 1, helper_lbl)
+            # Also add helper text
+            constraint = allowed[mode_id]
+            helper_text = self._get_helper_text(mode_id, constraint)
+            if helper_text:
+                helper_lbl = self._create_helper_label(helper_text)
+                layout.addWidget(helper_lbl)
+
+        # Add stretch at the end
+        layout.addStretch()
 
         # Select the first allowed mode (Constant = 1 is always allowed)
         first_button = self.fairing_mode_group.button(min(allowed.keys()))
