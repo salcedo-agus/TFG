@@ -27,8 +27,7 @@ module rocket_types
         real(8) m_wiring      ! Wiring mass
         real(8) m_engines     ! Engines mass
         real(8) m_avionics    ! Avionics mass
-        real(8) m_
-
+        real(8) m_unpr_str    ! Mass of unpresurized structure
 
         real(8) k_m    ! Mass ratio
         real(8) k_s    ! Structural ratio
