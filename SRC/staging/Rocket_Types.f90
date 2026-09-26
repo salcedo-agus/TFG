@@ -1,13 +1,35 @@
 module rocket_types
     implicit none
+    type Tank_t
+        real(8) m_liq ! Fuel or oxidizer mass
+        
+        real(8) v_ulage       ! Ulage volume needed for pressurizing the tank
+        real(8) v_contraction ! Contraction volume for cryogenic liquids
+        
+        real(8) dome_AR       ! Dome aspect ratio
+        real(8) h_cyl         ! Cylinder height
+
+        real(8) m_shell       ! Tank mass
+        real(8) m_insulation  ! Insulation mas for cryogenic liquids
+    end type Tank_t
+
     type Stage_t
         real(8) m_0    ! Initial mass of the partial rocket
         real(8) m_i    ! Initial mass of the stage
         real(8) m_f    ! Final or Empty mass of the partial rocket 
         real(8) m_L    ! Payload mass of the stage 
         real(8) m_s    ! Structure mass of the stage
-        real(8) m_p    ! Propelant mass of the stage
-        
+        real(8) m_p    ! Usable propelant mass of the stage
+
+        real(8) m_p_total     ! Includes propelant masses not available for propulsion
+        real(8) m_p_start_up  ! Propelant mass used for engine Start-Up
+        real(8) m_p_aditional ! Residual propelant mass, left in the tanks at engine cut-off 
+        real(8) m_wiring      ! Wiring mass
+        real(8) m_engines     ! Engines mass
+        real(8) m_avionics    ! Avionics mass
+        real(8) m_
+
+
         real(8) k_m    ! Mass ratio
         real(8) k_s    ! Structural ratio
         real(8) k_L    ! Payload ratio
