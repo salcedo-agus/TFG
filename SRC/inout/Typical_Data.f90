@@ -78,6 +78,10 @@ subroutine data_entry(Rocket)
 
      select case (first_stage_propellant_and_oxidizer)
     case(1) ! 1 - LIQUID HIDROGEN / LIQUID OXIGEN (LH2/LOX)
+        rocket%stage(1)%f_fuel_ox = 4.96d0  !MIXTURE RATIO
+        rocket%stage(1)%rho_f = 71.d0   !densidad del LH2 en kg/m3
+        rocket%stage(1)%rho_ox = 1.141d0   !densidad del LOX en kg/m3
+        rocket%stage(1)%bulk_density = (rocket%stage(1)%f_fuel_ox + 1.d0) / (rocket%stage(1)%f_fuel_ox/rocket%stage(1)%rho_f + 1/rocket%stage(1)%rho_ox)
         select case (first_stage_combustion_cycle)
         case (0) ! 0 - Aproximates engine perfermoance only base on propellant/oxidizer
             First_stage_ISP_lower = 0.d0
@@ -119,6 +123,7 @@ subroutine data_entry(Rocket)
             print*, "WARNING: unknown first stage combustion cycle" 
         end select    
     case(2) ! 2 - LIQUID KEROSENE / LIQUID OXIGEN (RP1/LOX)
+        rocket%stage(1)%f_fuel_ox = 2.82d0
         select case (first_stage_combustion_cycle)
         case (0) ! 0 - Aproximates engine perfermoance only base on propellant/oxidizer
             First_stage_ISP_lower = 0.d0
@@ -369,6 +374,10 @@ subroutine data_entry(Rocket)
 
     select case (Second_stage_propellant_and_oxidizer)
     case(1) ! 1 - LIQUID HIDROGEN / LIQUID OXIGEN (LH2/LOX)
+        rocket%stage(2)%f_fuel_ox = 4.96d0  !MIXTURE RATIO
+        rocket%stage(2)%rho_f = 71.d0   !densidad del LH2 en kg/m3
+        rocket%stage(2)%rho_ox = 1.141d0   !densidad del LOX en kg/m3
+        rocket%stage(2)%bulk_density = (rocket%stage(1)%f_fuel_ox + 1.d0) / (rocket%stage(1)%f_fuel_ox/rocket%stage(1)%rho_f + 1/rocket%stage(1)%rho_ox)
         select case (Second_stage_combustion_cycle)
         case (0) ! 0 - Aproximates engine perfermoance only base on propellant/oxidizer
             Second_stage_ISP_lower = 0.d0
@@ -404,6 +413,7 @@ subroutine data_entry(Rocket)
             print*, "WARNING: unknown Second stage combustion cycle" 
         end select    
     case(2) ! 2 - LIQUID KEROSENE / LIQUID OXIGEN (RP1/LOX)
+        rocket%stage(2)%f_fuel_ox = 2.82d0
         select case (Second_stage_combustion_cycle)
         case (0) ! 0 - Aproximates engine perfermoance only base on propellant/oxidizer
             Second_stage_ISP_lower = 0.d0
@@ -630,6 +640,10 @@ subroutine data_entry(Rocket)
 
     select case (Third_stage_propellant_and_oxidizer)
     case(1) ! 1 - LIQUID HIDROGEN / LIQUID OXIGEN (LH2/LOX)
+        rocket%stage(3)%f_fuel_ox = 4.96d0  !MIXTURE RATIO
+        rocket%stage(3)%rho_f = 71.d0   !densidad del LH2 en kg/m3
+        rocket%stage(3)%rho_ox = 1.141d0   !densidad del LOX en kg/m3
+        rocket%stage(3)%bulk_density = (rocket%stage(1)%f_fuel_ox + 1.d0) / (rocket%stage(1)%f_fuel_ox/rocket%stage(1)%rho_f + 1/rocket%stage(1)%rho_ox)
         select case (Third_stage_combustion_cycle)
         case (0) ! 0 - Aproximates engine perfermoance only base on propellant/oxidizer
             Third_stage_ISP_lower = 0.d0
@@ -665,6 +679,7 @@ subroutine data_entry(Rocket)
             print*, "WARNING: unknown Third stage combustion cycle" 
         end select    
     case(2) ! 2 - LIQUID KEROSENE / LIQUID OXIGEN (RP1/LOX)
+        rocket%stage(3)%f_fuel_ox = 2.82d0
         select case (Third_stage_combustion_cycle)
         case (0) ! 0 - Aproximates engine perfermoance only base on propellant/oxidizer
             Third_stage_ISP_lower = 359.d0

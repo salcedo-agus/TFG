@@ -1,16 +1,19 @@
+<<<<<<< HEAD
 subroutine sub_systems_calculation(Rocket)
     use typical_data
     use rocket_types
     use constants
     implicit none
     type(Rocket_t), intent(inout) :: Rocket
+    real(8), parameter :: t_start_up = 1.d0     !t_start_up fijo en 1 segundo
+    real(8), parameter :: f_residual = 0.0125d0     !f_residual fijo en 1.25%
     integer i 
 
     call fuel_oxi_divider(Rocket)
 
     do i=1, Rocket%number_of_stages
-        Rocket%stage(i)%m_p_start_up  = 1.d0 * Rocket%stage(i)%m_dot
-        Rocket%stage(i)%m_p_aditional = 0.0125d0 * Rocket%stage(i)%m_p
+        Rocket%stage(i)%m_p_start_up = rocket%stage(i)%m_dot * t_start_up
+        Rocket%stage(i)%m_p_aditional = (rocket%stage(i)%m_p + rocket%stage(i)%m_p_start_up) * f_residual   !tengo en cuenta para la m_p_aditional tanto la masa de propulsion como la de startup
         
         Rocket%stage(i)%m_p_total = Rocket%stage(i)%m_p_aditional + Rocket%stage(i)%m_p_start_up + Rocket%stage(i)%m_p
         
@@ -93,3 +96,37 @@ subroutine fuel_oxi_divider(Rocket)
         Rocket%stage(i)%f_fuel_oxi = f_vector(i)
     end do
 end subroutine fuel_oxi_divider
+=======
+subroutine m_p_total_calc(Rocket)
+    use rocket_types
+    use typical_data
+    implicit none
+    type(Rocket_t), intent(inout) :: Rocket
+    real(8), parameter :: t_start_up = 1.d0     !t_start_up fijo en 1 segundo
+    real(8), parameter :: f_residual = 0.0125d0     !f_residual fijo en 1.25%
+    integer i
+
+!==================== m_p_total calculation according to section 4 ===============================    
+    do i=1, number_of_stages
+        rocket%stage(i)%m_p_start_up = rocket%stage(i)%m_dot * t_start_up
+        rocket%stage(i)%m_p_aditional = (rocket%stage(i)%m_p + rocket%stage(i)%m_p_start_up) * f_residual   !tengo en cuenta para la m_p_aditional tanto la masa de propulsion como la de startup
+        rocket%stage(i)%m_p_total = rocket%stage(i)%m_p_start_up + rocket%stage(i)%m_p_aditional
+    end do
+
+end subroutine m_p_total_calc
+
+
+
+!subroutine MERS_Calc
+ !   use rocket_types
+  !  use typical_data
+   ! implicit none
+    !type(Rocket_t), intent(inout) :: Rocket
+
+!    rocket%stage(i)%m_unpr_str =
+
+ !   do i=1, number_of_stages
+         
+  !  end do
+!end subroutine MERS_Calc
+>>>>>>> dca9d91ba87c3352c1a7554087842ad28364f070

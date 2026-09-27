@@ -28,6 +28,11 @@ module rocket_types
         real(8) m_wiring      ! Wiring mass
         real(8) m_engines     ! Engines mass
         real(8) m_avionics    ! Avionics mass
+        real(8) f_fuel_ox
+        real(8) bulk_density
+        real(8) rho_f
+        real(8) rho_ox
+
         real(8) m_unpr_str    ! Mass of unpresurized structure
 
         type(Tank_t), dimension(2) :: Tank ! Propelant tanks; 1 = fuel tank | 2 = oxidizer tank
