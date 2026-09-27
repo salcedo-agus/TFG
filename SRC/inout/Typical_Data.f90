@@ -821,14 +821,21 @@ subroutine data_entry(Rocket)
     !k_s_vector(1) = 0.10d0
     !k_s_vector(2) = 0.15d0
     !k_s_vector(3) = 0.20d0
-    !============= Soyuz 2-1v ============
-    ISP_vector(1) = 297.d0
-    ISP_vector(2) = 359.d0
-    ISP_vector(3) = 0.d0
+    ISP_vector(1) = 302.6d0
+    ISP_vector(2) = 444.9d0
+    ISP_vector(3) = 428.d0
 
-    k_s_vector(1) = 0.0791d0
-    k_s_vector(2) = 0.0938d0
-    k_s_vector(3) = 0.d0
+    k_s_vector(1) = 0.0784d0
+    k_s_vector(2) = 0.106d0
+    k_s_vector(3) = 0.1486d0
+    !============= Soyuz 2-1v ============
+    !ISP_vector(1) = 297.d0
+    !ISP_vector(2) = 359.d0
+    !ISP_vector(3) = 0.d0
+
+    !k_s_vector(1) = 0.0791d0
+    !k_s_vector(2) = 0.0938d0
+    !k_s_vector(3) = 0.d0
     !=====================================
 
    ! ISP_vector(1) = First_stage_ISP_mean

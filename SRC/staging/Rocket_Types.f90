@@ -14,13 +14,14 @@ module rocket_types
     end type Tank_t
 
     type Stage_t
-        real(8) m_0    ! Initial mass of the partial rocket
-        real(8) m_i    ! Initial mass of the stage
-        real(8) m_f    ! Final or Empty mass of the partial rocket 
-        real(8) m_L    ! Payload mass of the stage 
-        real(8) m_s    ! Structure mass of the stage
-        real(8) m_p    ! Usable propelant mass of the stage
+        real(8) m_0           ! Initial mass of the partial rocket
+        real(8) m_i           ! Initial mass of the stage
+        real(8) m_f           ! Final or Empty mass of the partial rocket 
+        real(8) m_L           ! Payload mass of the stage 
+        real(8) m_s           ! Structure mass of the stage
+        real(8) m_p           ! Usable propelant mass of the stage
 
+        real(8) f_fuel_oxi    ! Fuel/Oxidizer mix ratio
         real(8) m_p_total     ! Includes propelant masses not available for propulsion
         real(8) m_p_start_up  ! Propelant mass used for engine Start-Up
         real(8) m_p_aditional ! Residual propelant mass, left in the tanks at engine cut-off 
@@ -28,6 +29,8 @@ module rocket_types
         real(8) m_engines     ! Engines mass
         real(8) m_avionics    ! Avionics mass
         real(8) m_unpr_str    ! Mass of unpresurized structure
+
+        type(Tank_t), dimension(2) :: Tank ! Propelant tanks; 1 = fuel tank | 2 = oxidizer tank
 
         real(8) k_m    ! Mass ratio
         real(8) k_s    ! Structural ratio

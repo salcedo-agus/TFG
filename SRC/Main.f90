@@ -26,5 +26,7 @@ program TFG
         print*, "Structure mass:    ", Rocket%stage(i)%m_s
         print*, "Mass ratio:        ", Rocket%stage(i)%k_m
         print*, "Structure Ratio:   ", Rocket%stage(i)%k_s
+        print*, "Diameter:          ", Rocket%stage(i)%Diameter
+        print*, "Length:            ", Rocket%stage(i)%Length
     end do
 end program
