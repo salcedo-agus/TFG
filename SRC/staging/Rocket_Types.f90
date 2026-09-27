@@ -27,7 +27,10 @@ module rocket_types
         real(8) m_wiring      ! Wiring mass
         real(8) m_engines     ! Engines mass
         real(8) m_avionics    ! Avionics mass
-        real(8) m_
+        real(8) f_fuel_ox
+        real(8) bulk_density
+        real(8) rho_f
+        real(8) rho_ox
 
 
         real(8) k_m    ! Mass ratio
