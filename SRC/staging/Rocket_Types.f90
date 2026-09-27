@@ -32,6 +32,7 @@ module rocket_types
         real(8) rho_f
         real(8) rho_ox
 
+        real(8) m_unpr_str    ! Mass of unpresurized structure
 
         real(8) k_m    ! Mass ratio
         real(8) k_s    ! Structural ratio
