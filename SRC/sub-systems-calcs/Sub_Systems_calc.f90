@@ -69,6 +69,10 @@ subroutine fuel_oxi_divider(Rocket)
     real(8), dimension(2,3) :: insulation_mass_ratio ![kg/m^2] Insulation mass per tank surface area
     real(8), dimension(2,3) :: liquid_density        ![kg/m^3]
 
+    propellant_and_oxidizer_vector(1) = first_stage_propellant_and_oxidizer
+    propellant_and_oxidizer_vector(2) = second_stage_propellant_and_oxidizer
+    propellant_and_oxidizer_vector(3) = third_stage_propellant_and_oxidizer
+
     do i=1, 3
         select case(propellant_and_oxidizer_vector(i))
             case(1) ! 1 - LIQUID HIDROGEN / LIQUID OXIGEN (LH2/LOX)
