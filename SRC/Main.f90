@@ -15,6 +15,7 @@ program TFG
     
     !#### PRE-SIMULATION ########################
     call rocket_geometry_calculation(Rocket)
+    call sub_systems_calculation(Rocket) 
 
     do i=1, Rocket%number_of_stages
         print*, "==========================================="
