@@ -49,6 +49,20 @@ subroutine sub_systems_calculation(Rocket)
                 (Rocket%stage(i)%tank(1)%v_total - pi*Rocket%stage(i)%Diameter**3/(6.d0*Rocket%stage(i)%tank(1)%dome_AR))
             Rocket%stage(i)%tank(1)%Surface = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(1)%h_cyl  
        end if
+
+       if (Rocket%stage(i)%tank(2)%v_total < pi*Rocket%stage(i)%Diameter**3 &
+            /(6.d0*Rocket%stage(i)%tank(2)%dome_AR)) then
+          ! Spherical Tank 
+            Rocket%stage(i)%tank(2)%h_cyl = 0.d0  
+            E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(2)%dome_AR**2)
+            Rocket%stage(i)%tank(2)%Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
+                (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(2)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
+       else
+          ! Cylindrical Tank
+            Rocket%stage(i)%tank(2)%h_cyl = 4.d0/(pi*Rocket%stage(i)%Diameter**2)*&
+                (Rocket%stage(i)%tank(2)%v_total - pi*Rocket%stage(i)%Diameter**3/(6.d0*Rocket%stage(i)%tank(2)%dome_AR))
+            Rocket%stage(i)%tank(1)%Surface = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(1)%h_cyl  
+       end if
        !AGREGAR MERS
     end do
 
