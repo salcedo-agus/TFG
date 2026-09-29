@@ -11,6 +11,12 @@ subroutine sub_systems_calculation(Rocket)
 
     call fuel_oxi_divider(Rocket)
 
+    if (Rocket%rm_L < 1000.d0) then
+        Rocket%rm_avionics = 75.d0
+    else 
+        Rocket%rm_avionics = 350.d0
+    end if 
+
     do i=1, Rocket%number_of_stages
         Rocket%stage(i)%m_p_start_up = rocket%stage(i)%m_dot * t_start_up
         Rocket%stage(i)%m_p_aditional = (rocket%stage(i)%m_p + rocket%stage(i)%m_p_start_up) * f_residual   !tengo en cuenta para la m_p_aditional tanto la masa de propulsion como la de startup
@@ -20,11 +26,11 @@ subroutine sub_systems_calculation(Rocket)
         
         Rocket%stage(i)%tank(1)%m_liq = Rocket%stage(i)%f_fuel_oxi/(1.d0 + Rocket%stage(i)%f_fuel_oxi)&
             *Rocket%stage(i)%m_p_total 
-        Rocket%stage(i)%tank(2)%m_liq = Rocket%stage(i)%f_fuel_oxi/(1.d0 - Rocket%stage(i)%f_fuel_oxi)&
+        Rocket%stage(i)%tank(2)%m_liq = 1.d0/(1.d0 + Rocket%stage(i)%f_fuel_oxi)&
             *Rocket%stage(i)%m_p_total
 
-        Rocket%stage(i)%tank(1)%v_liq = Rocket%stage(i)%tank(1)%rho_liq * Rocket%stage(i)%tank(1)%m_liq
-        Rocket%stage(i)%tank(2)%v_liq = Rocket%stage(i)%tank(2)%rho_liq * Rocket%stage(i)%tank(2)%m_liq
+        Rocket%stage(i)%tank(1)%v_liq = Rocket%stage(i)%tank(1)%m_liq / Rocket%stage(i)%tank(1)%rho_liq
+        Rocket%stage(i)%tank(2)%v_liq = Rocket%stage(i)%tank(2)%m_liq / Rocket%stage(i)%tank(2)%rho_liq
 
        Rocket%stage(i)%tank(1)%v_ullage = 0.d0
        Rocket%stage(i)%tank(2)%v_ullage = 0.d0
@@ -49,7 +55,17 @@ subroutine sub_systems_calculation(Rocket)
                 (Rocket%stage(i)%tank(1)%v_total - pi*Rocket%stage(i)%Diameter**3/(6.d0*Rocket%stage(i)%tank(1)%dome_AR))
             Rocket%stage(i)%tank(1)%Surface = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(1)%h_cyl  
        end if
-       !AGREGAR MERS
+       Rocket%stage(i)%tank(1)%m_unpr_str = 13.3d0 * Rocket%stage(i)%tank(1)%Surface
+       Rocket%stage(i)%tank(2)%m_unpr_str = 13.3d0 * Rocket%stage(i)%tank(2)%Surface
+       
+       if (i == Rocket%number_of_stages) then 
+        Rocket%stage(i)%m_avionics = 0.8d0 * Rocket%rm_avionics
+       else 
+        Rocket%stage(i)%m_avionics = 0.2d0 * Rocket%rm_avionics / (Rocket%number_of_stages - 1.d0)
+       end if
+
+       Rocket%stage(i)%m_wiring = 1.43d0 * Rocket%stage(i)%Length
+        !AGREGAR MERS
     end do
 
 end subroutine sub_systems_calculation
@@ -63,31 +79,31 @@ subroutine fuel_oxi_divider(Rocket)
     integer i
     integer, dimension(3) :: propellant_and_oxidizer_vector 
     real(8), dimension(3) :: f_vector                ! fuel/oxidizer mixture ratio
-    ! In the following variables : tank_mass_ratio(1,*) = for fuel tank | tank_mass_ratio(1,*) = for oxidizer tank
+    ! In the following variables : tank_mass_ratio(1,*) = for fuel tank | tank_mass_ratio(2,*) = for oxidizer tank
     !                              The second index indicates stage
-    real(8), dimension(2,3) :: tank_mass_ratio       ![kg/m^3] Tank mass per propelant volume
+    real(8), dimension(2,3) :: tank_mass_ratio       ![kg/kg] Tank mass per propelant mass
     real(8), dimension(2,3) :: insulation_mass_ratio ![kg/m^2] Insulation mass per tank surface area
     real(8), dimension(2,3) :: liquid_density        ![kg/m^3]
 
     do i=1, 3
         select case(propellant_and_oxidizer_vector(i))
             case(1) ! 1 - LIQUID HIDROGEN / LIQUID OXIGEN (LH2/LOX)
-                f_vector(i) = 0.d0
-                tank_mass_ratio(1,i) = 0.d0
-                tank_mass_ratio(2,i) = 0.d0
-                insulation_mass_ratio(1,i) = 0.d0
-                insulation_mass_ratio(2,i) = 0.d0
-                liquid_density(1,i) = 0.d0
-                liquid_density(2,i) = 0.d0
+                f_vector(i) = 4.96d0
+                tank_mass_ratio(1,i) = 0.128d0
+                tank_mass_ratio(2,i) = 0.0107d0
+                insulation_mass_ratio(1,i) = 2.88d0
+                insulation_mass_ratio(2,i) = 1.123d0
+                liquid_density(1,i) = 71.d0
+                liquid_density(2,i) = 1140.d0
             case(2) ! 2 - LIQUID KEROSENE / LIQUID OXIGEN (RP1/LOX)
-                f_vector(i) = 0.d0
-                tank_mass_ratio(1,i) = 0.d0
-                tank_mass_ratio(2,i) = 0.d0
+                f_vector(i) = 2.82d0
+                tank_mass_ratio(1,i) = 0.0148d0
+                tank_mass_ratio(2,i) = 0.0107d0
                 insulation_mass_ratio(1,i) = 0.d0
-                insulation_mass_ratio(2,i) = 0.d0
-                liquid_density(1,i) = 0.d0
-                liquid_density(2,i) = 0.d0
-            case(3) ! 3 - LIQUID METHANE  / LIQUID OXIGNE (CH4/LOX)
+                insulation_mass_ratio(2,i) = 0.123d0
+                liquid_density(1,i) = 820.d0
+                liquid_density(2,i) = 1140.d0
+            case(3) ! 3 - LIQUID METHANE  / LIQUID OXIGEN (CH4/LOX)
                 f_vector(i) = 0.d0
                 tank_mass_ratio(1,i) = 0.d0
                 tank_mass_ratio(2,i) = 0.d0

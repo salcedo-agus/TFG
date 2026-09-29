@@ -103,4 +103,12 @@ subroutine rocket_geometry_calculation(Rocket)
         Diameter_vector = User_defined_diameter
     end select
     Longitud_vector = Volume_vector * 4.d0 / (pi * Diameter_vector**2.d0)
+
+    Rocket%rlength = 0.d0
+    do i=1, Rocket%number_of_stages
+        Rocket%stage(i)%Length = Longitud_vector(i)
+        Rocket%stage(i)%Diameter = Diameter_vector(i)
+        Rocket%rlength = Rocket%rlength + Rocket%stage(i)%Length
+    end do
+        
 end subroutine rocket_geometry_calculation

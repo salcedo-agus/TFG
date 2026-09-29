@@ -34,7 +34,7 @@ module rocket_types
         real(8) m_engines     ! [kg] Engines mass
         real(8) m_avionics    ! [kg] Avionics mass
         real(8) bulk_density
-
+        real(8) A_unpr_str
         real(8) m_unpr_str    ! Mass of unpresurized structure
 
         type(Tank_t), dimension(2) :: Tank ! Proppelant tanks; 1 = fuel tank | 2 = oxidizer tank
@@ -62,10 +62,14 @@ module rocket_types
         real(8) rm_L  ! Payload mass of the Rocket
         real(8) rm_s  ! Structure mass of the Rocket
         real(8) rm_p  ! Propelant mass of the Rocket
+        real(8) rm_avionics
+        real(8) rm_wiring
         
         real(8) rk_m  ! Mass ratio
         real(8) rk_s  ! Structural ratio
         real(8) rk_L  ! Payload ratio
+
+        real(8) rlength
 
         real(8) rt_burn     ! Rocket burn time (ascent time)
         real(8) ISP_mean    ! Rocket mean ISP
