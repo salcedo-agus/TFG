@@ -6,7 +6,7 @@ subroutine sub_systems_calculation(Rocket)
     type(Rocket_t), intent(inout) :: Rocket
     real(8), parameter :: t_start_up = 1.d0         !t_start_up fijo en 1 segundo
     real(8), parameter :: f_residual = 0.0125d0     !f_residual fijo en 1.25%
-    real(8) E 
+    real(8) E, L, dome_height 
     integer i 
 
     call fuel_oxi_divider(Rocket)
@@ -64,6 +64,12 @@ subroutine sub_systems_calculation(Rocket)
             Rocket%stage(i)%tank(1)%Surface = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(1)%h_cyl  
        end if
        !AGREGAR MERS
+       !=========== unpr. structure mass ============
+       dome_height = Rocket%stage(i)%Diameter /(2.d0 * Rocket%stage(i)%dome_AR)
+       Rocket%stage(i)%Length=Rocket%stage(i)%tank(1)%h_cyl + Rocket%stage(i)%tank(2)%h_cyl + 4.d0*dome_height    
+       Rocket%stage(i)%A_unpr_str = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%Length
+       Rocket%stage(i)%m_unpr_str = 13.3d0 * Rocket%stage(i)%A_unpr_str
+       !=============================================
     end do
 
 end subroutine sub_systems_calculation

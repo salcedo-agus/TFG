@@ -35,7 +35,8 @@ module rocket_types
         real(8) m_avionics    ! [kg] Avionics mass
         real(8) bulk_density
 
-        real(8) m_unpr_str    ! Mass of unpresurized structure
+        real(8) A_unpr_str    ! [m^2] Surface area of unpresurized structure 
+        real(8) m_unpr_str    ! [kg] Mass of unpresurized structure
 
         type(Tank_t), dimension(2) :: Tank ! Proppelant tanks; 1 = fuel tank | 2 = oxidizer tank
 
