@@ -66,6 +66,21 @@ subroutine sub_systems_calculation(Rocket)
 
        Rocket%stage(i)%m_wiring = 1.43d0 * Rocket%stage(i)%Length
         !AGREGAR MERS
+
+       if (Rocket%stage(i)%tank(2)%v_total < pi*Rocket%stage(i)%Diameter**3 &
+            /(6.d0*Rocket%stage(i)%tank(2)%dome_AR)) then
+          ! Spherical Tank 
+            Rocket%stage(i)%tank(2)%h_cyl = 0.d0  
+            E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(2)%dome_AR**2)
+            Rocket%stage(i)%tank(2)%Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
+                (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(2)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
+       else
+          ! Cylindrical Tank
+            Rocket%stage(i)%tank(2)%h_cyl = 4.d0/(pi*Rocket%stage(i)%Diameter**2)*&
+                (Rocket%stage(i)%tank(2)%v_total - pi*Rocket%stage(i)%Diameter**3/(6.d0*Rocket%stage(i)%tank(2)%dome_AR))
+            Rocket%stage(i)%tank(1)%Surface = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(1)%h_cyl  
+       end if
+       !AGREGAR MERS
     end do
 
 end subroutine sub_systems_calculation
@@ -84,6 +99,10 @@ subroutine fuel_oxi_divider(Rocket)
     real(8), dimension(2,3) :: tank_mass_ratio       ![kg/kg] Tank mass per propelant mass
     real(8), dimension(2,3) :: insulation_mass_ratio ![kg/m^2] Insulation mass per tank surface area
     real(8), dimension(2,3) :: liquid_density        ![kg/m^3]
+
+    propellant_and_oxidizer_vector(1) = first_stage_propellant_and_oxidizer
+    propellant_and_oxidizer_vector(2) = second_stage_propellant_and_oxidizer
+    propellant_and_oxidizer_vector(3) = third_stage_propellant_and_oxidizer
 
     do i=1, 3
         select case(propellant_and_oxidizer_vector(i))
