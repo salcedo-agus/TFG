@@ -29,6 +29,8 @@ module rocket_types
         real(8) m_p           ! [kg] Usable propelant mass of the stage
 
         real(8) f_fuel_oxi    ! Fuel/Oxidizer mix ratio
+        real(8) rho_f
+        real(8) rho_ox
         real(8) m_p_total     ! [kg] Includes propelant masses not available for propulsion
         real(8) m_p_start_up  ! [kg] Propelant mass used for engine Start-Up
         real(8) m_p_aditional ! [kg] Residual propelant mass, left in the tanks at engine cut-off 
