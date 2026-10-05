@@ -19,6 +19,7 @@ INTERFACE_DIR      := interface
 GUI_DIR            := gui
 PRE_STAGING_DIR    := pre-staging-calcs
 PRE_SIMULATION_DIR := pre-simulation-calcs
+SUB_SYSTEMS_DIR    := sub-systems-calcs
 
 # -- Object files (compiled individually in dependency order) -----------------
 OBJS := \
@@ -31,7 +32,8 @@ OBJS := \
     $(BUILD_DIR)/C_Interface.o    \
     $(BUILD_DIR)/Orbit_calc.o     \
     $(BUILD_DIR)/Thrust_calc.o    \
-    $(BUILD_DIR)/Geometry_calc.o    
+    $(BUILD_DIR)/Geometry_calc.o  \
+    $(BUILD_DIR)/Sub_Systems_calc.o
     
 # -- Module search/output flags -----------------------------------------------
 MODFLAGS := -J$(BUILD_DIR) -I$(BUILD_DIR)
@@ -155,6 +157,11 @@ $(BUILD_DIR)/Geometry_calc.o: $(PRE_SIMULATION_DIR)/Geometry_calc.f90 \
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
 
 # 11. main — depends on Rocket_Types and Typical_Data
+$(BUILD_DIR)/Sub_Systems_calc.o: $(SUB_SYSTEMS_DIR)/Sub_Systems_calc.f90 \
+    $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
+	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
+
+# 12. main — depends on Rocket_Types and Typical_Data
 $(BUILD_DIR)/main.o: main.f90 \
     $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@

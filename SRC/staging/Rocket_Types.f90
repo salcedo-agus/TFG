@@ -16,6 +16,8 @@ module rocket_types
         real(8) m_shell       ! [kg] Tank mass
         real(8) k_insulation  ! [kg/m^2] Meassures the amount of insulaton mass per tank surface aera
         real(8) m_insulation  ! [kg] Insulation mass for cryogenic liquids
+
+        logical Spherical     ! Indicates if a tank is spherical
     end type Tank_t
 
     type Stage_t

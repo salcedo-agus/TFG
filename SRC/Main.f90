@@ -30,4 +30,19 @@ program TFG
         print*, "Diameter:          ", Rocket%stage(i)%Diameter
         print*, "Length:            ", Rocket%stage(i)%Length
     end do
+
+    do i=1, Rocket%number_of_stages
+        print*, "=========SUB-SYSTEMS======================="
+        print*, "Stage N", i 
+        print*, "Unpr. str. mass:              ", Rocket%stage(i)%m_unpr_str
+        print*, "Start-up propellant mass:     ", Rocket%stage(i)%m_p_start_up
+        print*, "Aditional propellant mass:    ", Rocket%stage(i)%m_p_aditional
+        print*, "Wiring mass:                  ", Rocket%stage(i)%m_wiring
+        print*, "Avionics mass:                ", Rocket%stage(i)%m_avionics
+        print*, "Engine mass:                  ", "~"
+        print*, "Fuel tank mass:               ", Rocket%stage(i)%tank(1)%m_shell
+        print*, "Fuel tank insulation mass:    ", Rocket%stage(i)%tank(1)%m_insulation
+        print*, "Oxidizer tank mass:           ", Rocket%stage(i)%tank(2)%m_shell
+        print*, "Oxidizer tank insulation mass:", Rocket%stage(i)%tank(2)%m_insulation
+    end do 
 end program

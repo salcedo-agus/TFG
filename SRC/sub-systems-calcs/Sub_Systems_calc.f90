@@ -6,7 +6,7 @@ subroutine sub_systems_calculation(Rocket)
     type(Rocket_t), intent(inout) :: Rocket
     real(8), parameter :: t_start_up = 1.d0         !t_start_up fijo en 1 segundo
     real(8), parameter :: f_residual = 0.0125d0     !f_residual fijo en 1.25%
-    real(8) E, L, dome_height 
+    real(8) E, dome_height 
     integer i 
 
     call fuel_oxi_divider(Rocket)
@@ -16,6 +16,11 @@ subroutine sub_systems_calculation(Rocket)
     else 
         Rocket%rm_avionics = 350.d0
     end if 
+
+    do i=1, Rocket%number_of_stages !HARD-CODED DOME AR 
+        Rocket%stage(i)%tank(1)%dome_AR = sqrt(2.d0)
+        Rocket%stage(i)%tank(2)%dome_AR = sqrt(2.d0)
+    end do
 
     do i=1, Rocket%number_of_stages
         Rocket%stage(i)%m_p_start_up = rocket%stage(i)%m_dot * t_start_up
@@ -55,9 +60,23 @@ subroutine sub_systems_calculation(Rocket)
                 (Rocket%stage(i)%tank(1)%v_total - pi*Rocket%stage(i)%Diameter**3/(6.d0*Rocket%stage(i)%tank(1)%dome_AR))
             Rocket%stage(i)%tank(1)%Surface = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(1)%h_cyl  
        end if
-       Rocket%stage(i)%tank(1)%m_unpr_str = 13.3d0 * Rocket%stage(i)%tank(1)%Surface
-       Rocket%stage(i)%tank(2)%m_unpr_str = 13.3d0 * Rocket%stage(i)%tank(2)%Surface
-       
+
+       if (Rocket%stage(i)%tank(2)%v_total < pi*Rocket%stage(i)%Diameter**3 &
+            /(6.d0*Rocket%stage(i)%tank(2)%dome_AR)) then
+          ! Spherical Tank 
+            Rocket%stage(i)%tank(2)%spherical = .true. 
+            Rocket%stage(i)%tank(2)%h_cyl = 0.d0  
+            E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(2)%dome_AR**2)
+            Rocket%stage(i)%tank(2)%Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
+                (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(2)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
+       else
+          ! Cylindrical Tank
+            Rocket%stage(i)%tank(2)%spherical = .false. 
+            Rocket%stage(i)%tank(2)%h_cyl = 4.d0/(pi*Rocket%stage(i)%Diameter**2)*&
+                (Rocket%stage(i)%tank(2)%v_total - pi*Rocket%stage(i)%Diameter**3/(6.d0*Rocket%stage(i)%tank(2)%dome_AR))
+            Rocket%stage(i)%tank(2)%Surface = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(2)%h_cyl  
+       end if
+
        if (i == Rocket%number_of_stages) then 
         Rocket%stage(i)%m_avionics = 0.8d0 * Rocket%rm_avionics
        else 
@@ -65,27 +84,24 @@ subroutine sub_systems_calculation(Rocket)
        end if
 
        Rocket%stage(i)%m_wiring = 1.43d0 * Rocket%stage(i)%Length
-        !AGREGAR MERS
-
-       if (Rocket%stage(i)%tank(2)%v_total < pi*Rocket%stage(i)%Diameter**3 &
-            /(6.d0*Rocket%stage(i)%tank(2)%dome_AR)) then
-          ! Spherical Tank 
-            Rocket%stage(i)%tank(2)%h_cyl = 0.d0  
-            E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(2)%dome_AR**2)
-            Rocket%stage(i)%tank(2)%Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
-                (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(2)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
-       else
-          ! Cylindrical Tank
-            Rocket%stage(i)%tank(2)%h_cyl = 4.d0/(pi*Rocket%stage(i)%Diameter**2)*&
-                (Rocket%stage(i)%tank(2)%v_total - pi*Rocket%stage(i)%Diameter**3/(6.d0*Rocket%stage(i)%tank(2)%dome_AR))
-            Rocket%stage(i)%tank(1)%Surface = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(1)%h_cyl  
-       end if
-       !AGREGAR MERS
+       
        !=========== unpr. structure mass ============
-       dome_height = Rocket%stage(i)%Diameter /(2.d0 * Rocket%stage(i)%dome_AR)
+       dome_height = Rocket%stage(i)%Diameter /(2.d0 * Rocket%stage(i)%tank(1)%dome_AR)
        Rocket%stage(i)%Length=Rocket%stage(i)%tank(1)%h_cyl + Rocket%stage(i)%tank(2)%h_cyl + 4.d0*dome_height    
        Rocket%stage(i)%A_unpr_str = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%Length
        Rocket%stage(i)%m_unpr_str = 13.3d0 * Rocket%stage(i)%A_unpr_str
+       !=============================================
+       
+       Rocket%stage(i)%m_wiring = 1.43d0 * Rocket%stage(i)%Length
+
+       !======== tank shell mass ====================
+       Rocket%stage(i)%tank(1)%m_shell = Rocket%stage(i)%tank(1)%k_shell*Rocket%stage(i)%tank(1)%m_liq
+       Rocket%stage(i)%tank(2)%m_shell = Rocket%stage(i)%tank(2)%k_shell*Rocket%stage(i)%tank(2)%m_liq
+       !=============================================
+
+       !======== tank insulation mass ===============
+       Rocket%stage(i)%tank(1)%m_insulation = Rocket%stage(i)%tank(1)%k_insulation * Rocket%stage(i)%tank(1)%Surface
+       Rocket%stage(i)%tank(2)%m_insulation = Rocket%stage(i)%tank(2)%k_insulation * Rocket%stage(i)%tank(2)%Surface
        !=============================================
     end do
 
