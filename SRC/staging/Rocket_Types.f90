@@ -16,6 +16,7 @@ module rocket_types
         real(8) m_shell       ! [kg] Tank mass
         real(8) k_insulation  ! [kg/m^2] Meassures the amount of insulaton mass per tank surface aera
         real(8) m_insulation  ! [kg] Insulation mass for cryogenic liquids
+        real(8) m_unpr_str    ! Mass of unpresurized structure
     end type Tank_t
 
     type Stage_t
@@ -27,6 +28,8 @@ module rocket_types
         real(8) m_p           ! [kg] Usable propelant mass of the stage
 
         real(8) f_fuel_oxi    ! Fuel/Oxidizer mix ratio
+        real(8) rho_f
+        real(8) rho_ox
         real(8) m_p_total     ! [kg] Includes propelant masses not available for propulsion
         real(8) m_p_start_up  ! [kg] Propelant mass used for engine Start-Up
         real(8) m_p_aditional ! [kg] Residual propelant mass, left in the tanks at engine cut-off 
@@ -34,8 +37,7 @@ module rocket_types
         real(8) m_engines     ! [kg] Engines mass
         real(8) m_avionics    ! [kg] Avionics mass
         real(8) bulk_density
-        real(8) A_unpr_str
-        real(8) m_unpr_str    ! Mass of unpresurized structure
+        real(8) A_unpr_str        
 
         type(Tank_t), dimension(2) :: Tank ! Proppelant tanks; 1 = fuel tank | 2 = oxidizer tank
 
