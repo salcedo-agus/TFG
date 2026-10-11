@@ -6,7 +6,7 @@ function g(L, Rocket)
     use rocket_types 
     implicit none
     type(Rocket_t), intent(in) :: Rocket
-    real(8), intent(in) :: L 
+    real(8) :: L 
     real(8) sum
     real(8) g 
     !real(8) c1, c2, c3

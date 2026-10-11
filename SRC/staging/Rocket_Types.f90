@@ -5,17 +5,19 @@ module rocket_types
         real(8) rho_liq ! [kg/m^3] Fuel or oxidizer density
         real(8) v_liq   ! [m^3] Fuel or oxidizer volume
         
+        integer Geometry      ! Indicates geometry of the tank 
         real(8) v_ullage      ! [m^3] Ulage volume needed for pressurizing the tank
         real(8) v_contraction ! [m^3] Contraction volume for cryogenic liquids
         real(8) v_total       ! [m^3] Total necessary tank volume
         real(8) dome_AR       ! Dome aspect ratio
         real(8) h_cyl         ! [m] Cylinder height
         real(8) Surface       ! [m^2] Tank surface area
+        real(8) Circular_section_radius
 
         real(8) k_shell       ! [kg/m^3] Meassures the amount of insulaton mass per tank volume
         real(8) m_shell       ! [kg] Tank mass
         real(8) k_insulation  ! [kg/m^2] Meassures the amount of insulaton mass per tank surface aera
-        real(8) m_insulation  ! [kg] Insulation mass for cryogenic liquids
+        real(8) m_insulation  ! [kg] Insulation mass for cryogenic liquids 
 
         logical Spherical     ! Indicates if a tank is spherical
     end type Tank_t

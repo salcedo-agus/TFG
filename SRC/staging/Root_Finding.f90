@@ -4,7 +4,7 @@ module Root_Finding_Methods
         function func_interface(x, Rocket)
             use rocket_types
             implicit none
-            real(8), intent(in) :: x
+            real(8) X
             type(Rocket_t), intent(in) :: Rocket
             real(8) func_interface 
         end function func_interface
@@ -89,23 +89,32 @@ subroutine Bolzano_Bisection(f, Rocket, Left_Bracket, Right_Bracket, tol, root, 
     use rocket_types
     procedure(func_interface), pointer, intent(in) :: f
     type(Rocket_t) Rocket
+    real(8) res
+    real(8) X0
+    real(8) X
+    real(8) X1
+    !real(8) h
+    !real(8) g
+    integer i
 
-
+    X0 = 1.d0
+    X = 1.5d0
     !Newton-Raphson method
-    !do while (res > 1.e-3 .and. i < 100)
-    !    Ln = L
-    !    L  = L - g(L, Rocket)*2*h/(g(L+h, Rocket) - g(L-h, Rocket)) 
-    !    i = i + 1
-    !    res = abs(L - Ln)
+    do while (res > 1.e-3 .and. i < 100)    !X0 = X(K-1), X = X(K), X1 = X(K+1)
+        X1  = X - f(X, Rocket)*(X-X0)/(f(X, Rocket) - f(X0, Rocket)) 
+        i = i + 1
+        res = abs(X1-X0)
     !    print*, "====================================="
     !    print*, "iter:  ", i
     !    print*, "Ln=    ", Ln 
     !    print*, "g(L)=  ", g(Ln, Rocket)
     !    print*, "g(L+h)=", g(Ln+h, Rocket) 
     !    print*, "g(L-h)=", g(Ln-h, Rocket)
-    !    print*, "L=     ", L
+    !    print*, "Circular_section_Radius=     ", L
     !    print*, "res=   ", res
     !    print*, "====================================="
-    !end do
+        X0 = X
+        X = X1
+    end do
   end subroutine Newton_Raphson
 end module Root_Finding_Methods
