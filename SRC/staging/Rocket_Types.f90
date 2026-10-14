@@ -6,6 +6,7 @@ module rocket_types
         real(8) v_liq   ! [m^3] Fuel or oxidizer volume
         
         real(8) v_ullage      ! [m^3] Ulage volume needed for pressurizing the tank
+        real(8) k_contraction ! Meassures the contraction of a cryogenic tank
         real(8) v_contraction ! [m^3] Contraction volume for cryogenic liquids
         real(8) v_total       ! [m^3] Total necessary tank volume
         real(8) dome_AR       ! Dome aspect ratio
@@ -31,12 +32,13 @@ module rocket_types
         real(8) f_fuel_oxi    ! Fuel/Oxidizer mix ratio
         real(8) rho_f
         real(8) rho_ox
-        real(8) m_p_total     ! [kg] Includes propelant masses not available for propulsion
-        real(8) m_p_start_up  ! [kg] Propelant mass used for engine Start-Up
-        real(8) m_p_aditional ! [kg] Residual propelant mass, left in the tanks at engine cut-off 
-        real(8) m_wiring      ! [kg] Wiring mass
-        real(8) m_engines     ! [kg] Engines mass
-        real(8) m_avionics    ! [kg] Avionics mass
+        real(8) m_p_total           ! [kg] Includes propelant masses not available for propulsion
+        real(8) m_p_start_up        ! [kg] Propelant mass used for engine Start-Up
+        real(8) m_p_aditional       ! [kg] Residual propelant mass, left in the tanks at engine cut-off 
+        real(8) m_wiring            ! [kg] Wiring mass
+        real(8) m_engines           ! [kg] Engines mass
+        real(8) m_avionics          ! [kg] Avionics mass
+        real(8) m_thrust_structure  ! [kg] Thrust structure mass
         real(8) bulk_density
 
         real(8) A_unpr_str    ! [m^2] Surface area of unpresurized structure 

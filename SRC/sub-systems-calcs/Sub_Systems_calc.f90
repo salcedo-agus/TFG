@@ -4,9 +4,10 @@ subroutine sub_systems_calculation(Rocket)
     use constants
     implicit none
     type(Rocket_t), intent(inout) :: Rocket
-    real(8), parameter :: t_start_up = 1.d0         !t_start_up fijo en 1 segundo
-    real(8), parameter :: f_residual = 0.0125d0     !f_residual fijo en 1.25%
-    real(8) E, dome_height 
+    real(8), parameter :: t_start_up  = 1.d0      ! t_start_up fijo en 1 segundo
+    real(8), parameter :: f_residual  = 0.0125d0  ! f_residual fijo en 1.25%
+    real(8), parameter :: f_ullage    = 0.07d0    ! f_ullage fijo en 7%    
+    real(8) E, dome_height, ds_Surface
     integer i 
 
     call fuel_oxi_divider(Rocket)
@@ -37,10 +38,10 @@ subroutine sub_systems_calculation(Rocket)
         Rocket%stage(i)%tank(1)%v_liq = Rocket%stage(i)%tank(1)%m_liq / Rocket%stage(i)%tank(1)%rho_liq
         Rocket%stage(i)%tank(2)%v_liq = Rocket%stage(i)%tank(2)%m_liq / Rocket%stage(i)%tank(2)%rho_liq
 
-       Rocket%stage(i)%tank(1)%v_ullage = 0.d0
-       Rocket%stage(i)%tank(2)%v_ullage = 0.d0
-       Rocket%stage(i)%tank(1)%v_contraction = 0.d0 
-       Rocket%stage(i)%tank(2)%v_contraction = 0.d0
+       Rocket%stage(i)%tank(1)%v_ullage = f_ullage * Rocket%stage(i)%tank(1)%v_liq
+       Rocket%stage(i)%tank(2)%v_ullage = f_ullage * Rocket%stage(i)%tank(2)%v_liq
+       Rocket%stage(i)%tank(1)%v_contraction = Rocket%stage(i)%tank(1)%k_contraction * Rocket%stage(i)%tank(1)%v_liq
+       Rocket%stage(i)%tank(2)%v_contraction = Rocket%stage(i)%tank(2)%k_contraction * Rocket%stage(i)%tank(2)%v_liq
 
        Rocket%stage(i)%tank(1)%v_total = Rocket%stage(i)%tank(1)%v_liq + Rocket%stage(i)%tank(1)%v_ullage&
             + Rocket%stage(i)%tank(1)%v_contraction
@@ -52,13 +53,17 @@ subroutine sub_systems_calculation(Rocket)
           ! Spherical Tank 
             Rocket%stage(i)%tank(1)%h_cyl = 0.d0  
             E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(1)%dome_AR**2)
-            Rocket%stage(i)%tank(1)%Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
+            ds_Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
                 (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(1)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
+            Rocket%stage(i)%tank(1)%Surface = ds_Surface
        else
           ! Cylindrical Tank
             Rocket%stage(i)%tank(1)%h_cyl = 4.d0/(pi*Rocket%stage(i)%Diameter**2)*&
                 (Rocket%stage(i)%tank(1)%v_total - pi*Rocket%stage(i)%Diameter**3/(6.d0*Rocket%stage(i)%tank(1)%dome_AR))
-            Rocket%stage(i)%tank(1)%Surface = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(1)%h_cyl  
+            E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(1)%dome_AR**2)
+            ds_Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
+                (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(1)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
+            Rocket%stage(i)%tank(1)%Surface = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(1)%h_cyl + ds_Surface
        end if
 
        if (Rocket%stage(i)%tank(2)%v_total < pi*Rocket%stage(i)%Diameter**3 &
@@ -67,14 +72,18 @@ subroutine sub_systems_calculation(Rocket)
             Rocket%stage(i)%tank(2)%spherical = .true. 
             Rocket%stage(i)%tank(2)%h_cyl = 0.d0  
             E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(2)%dome_AR**2)
-            Rocket%stage(i)%tank(2)%Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
+            ds_Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
                 (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(2)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
+            Rocket%stage(i)%tank(2)%Surface = ds_Surface
        else
           ! Cylindrical Tank
             Rocket%stage(i)%tank(2)%spherical = .false. 
             Rocket%stage(i)%tank(2)%h_cyl = 4.d0/(pi*Rocket%stage(i)%Diameter**2)*&
                 (Rocket%stage(i)%tank(2)%v_total - pi*Rocket%stage(i)%Diameter**3/(6.d0*Rocket%stage(i)%tank(2)%dome_AR))
-            Rocket%stage(i)%tank(2)%Surface = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(2)%h_cyl  
+            E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(2)%dome_AR**2)
+            ds_Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
+                (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(2)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
+            Rocket%stage(i)%tank(2)%Surface = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(2)%h_cyl + ds_Surface
        end if
 
        if (i == Rocket%number_of_stages) then 
@@ -91,8 +100,6 @@ subroutine sub_systems_calculation(Rocket)
        Rocket%stage(i)%A_unpr_str = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%Length
        Rocket%stage(i)%m_unpr_str = 13.3d0 * Rocket%stage(i)%A_unpr_str
        !=============================================
-       
-       Rocket%stage(i)%m_wiring = 1.43d0 * Rocket%stage(i)%Length
 
        !======== tank shell mass ====================
        Rocket%stage(i)%tank(1)%m_shell = Rocket%stage(i)%tank(1)%k_shell*Rocket%stage(i)%tank(1)%m_liq
@@ -103,6 +110,9 @@ subroutine sub_systems_calculation(Rocket)
        Rocket%stage(i)%tank(1)%m_insulation = Rocket%stage(i)%tank(1)%k_insulation * Rocket%stage(i)%tank(1)%Surface
        Rocket%stage(i)%tank(2)%m_insulation = Rocket%stage(i)%tank(2)%k_insulation * Rocket%stage(i)%tank(2)%Surface
        !=============================================
+
+       Rocket%stage(i)%m_engines = 0.d0
+       Rocket%stage(i)%m_thrust_structure = 0.d0
     end do
 
 end subroutine sub_systems_calculation
@@ -118,9 +128,10 @@ subroutine fuel_oxi_divider(Rocket)
     real(8), dimension(3) :: f_vector                ! fuel/oxidizer mixture ratio
     ! In the following variables : tank_mass_ratio(1,*) = for fuel tank | tank_mass_ratio(2,*) = for oxidizer tank
     !                              The second index indicates stage
-    real(8), dimension(2,3) :: tank_mass_ratio       ![kg/kg] Tank mass per propelant mass
-    real(8), dimension(2,3) :: insulation_mass_ratio ![kg/m^2] Insulation mass per tank surface area
-    real(8), dimension(2,3) :: liquid_density        ![kg/m^3]
+    real(8), dimension(2,3) :: tank_mass_ratio        ![kg/kg]   Tank mass per propelant mass
+    real(8), dimension(2,3) :: insulation_mass_ratio  ![kg/m^2]  Insulation mass per tank surface area
+    real(8), dimension(2,3) :: liquid_density         ![kg/m^3]
+    real(8), dimension(2,3) :: tank_contraction_ratio ![m^3/m^3] Contraction produced due to low temperature 
 
     propellant_and_oxidizer_vector(1) = first_stage_propellant_and_oxidizer
     propellant_and_oxidizer_vector(2) = second_stage_propellant_and_oxidizer
@@ -136,6 +147,8 @@ subroutine fuel_oxi_divider(Rocket)
                 insulation_mass_ratio(2,i) = 1.123d0
                 liquid_density(1,i) = 71.d0
                 liquid_density(2,i) = 1140.d0
+                tank_contraction_ratio(1,i) = 0.0192d0
+                tank_contraction_ratio(2,i) = 0.0143d0
             case(2) ! 2 - LIQUID KEROSENE / LIQUID OXIGEN (RP1/LOX)
                 f_vector(i) = 2.82d0
                 tank_mass_ratio(1,i) = 0.0148d0
@@ -144,6 +157,8 @@ subroutine fuel_oxi_divider(Rocket)
                 insulation_mass_ratio(2,i) = 0.123d0
                 liquid_density(1,i) = 820.d0
                 liquid_density(2,i) = 1140.d0
+                tank_contraction_ratio(1,i) = 0.d0
+                tank_contraction_ratio(2,i) = 0.0143d0
             case(3) ! 3 - LIQUID METHANE  / LIQUID OXIGEN (CH4/LOX)
                 f_vector(i) = 0.d0
                 tank_mass_ratio(1,i) = 0.d0
@@ -152,6 +167,8 @@ subroutine fuel_oxi_divider(Rocket)
                 insulation_mass_ratio(2,i) = 0.d0
                 liquid_density(1,i) = 0.d0
                 liquid_density(2,i) = 0.d0
+                tank_contraction_ratio(1,i) = 0.0128d0
+                tank_contraction_ratio(2,i) = 0.0143d0
             case(4) ! 4 - UDMH/LOX
                 f_vector(i) = 0.d0
                 tank_mass_ratio(1,i) = 0.d0
@@ -160,6 +177,8 @@ subroutine fuel_oxi_divider(Rocket)
                 insulation_mass_ratio(2,i) = 0.d0
                 liquid_density(1,i) = 0.d0
                 liquid_density(2,i) = 0.d0
+                tank_contraction_ratio(1,i) = 0.d0
+                tank_contraction_ratio(2,i) = 0.0143d0
             case(5) ! 5 - UDMH/AK271 
                 f_vector(i) = 0.d0
                 tank_mass_ratio(1,i) = 0.d0
@@ -168,6 +187,8 @@ subroutine fuel_oxi_divider(Rocket)
                 insulation_mass_ratio(2,i) = 0.d0
                 liquid_density(1,i) = 0.d0
                 liquid_density(2,i) = 0.d0
+                tank_contraction_ratio(1,i) = 0.d0
+                tank_contraction_ratio(2,i) = 0.d0
             case(6) ! 6 - UDMH/N2O4
                 f_vector(i) = 0.d0
                 tank_mass_ratio(1,i) = 0.d0
@@ -176,6 +197,8 @@ subroutine fuel_oxi_divider(Rocket)
                 insulation_mass_ratio(2,i) = 0.d0
                 liquid_density(1,i) = 0.d0
                 liquid_density(2,i) = 0.d0
+                tank_contraction_ratio(1,i) = 0.d0
+                tank_contraction_ratio(2,i) = 0.d0
             case(7) ! 7 - AEROZINE50/N2O4 
                 f_vector(i) = 0.d0
                 tank_mass_ratio(1,i) = 0.d0
@@ -184,6 +207,8 @@ subroutine fuel_oxi_divider(Rocket)
                 insulation_mass_ratio(2,i) = 0.d0
                 liquid_density(1,i) = 0.d0
                 liquid_density(2,i) = 0.d0
+                tank_contraction_ratio(1,i) = 0.d0
+                tank_contraction_ratio(2,i) = 0.d0
             case(8) ! 8 - MH/NITRIC ACID(WFNA)
                 f_vector(i) = 0.d0
                 tank_mass_ratio(1,i) = 0.d0
@@ -192,6 +217,8 @@ subroutine fuel_oxi_divider(Rocket)
                 insulation_mass_ratio(2,i) = 0.d0
                 liquid_density(1,i) = 0.d0
                 liquid_density(2,i) = 0.d0
+                tank_contraction_ratio(1,i) = 0.d0
+                tank_contraction_ratio(2,i) = 0.d0
         end select 
     end do
 
@@ -203,5 +230,7 @@ subroutine fuel_oxi_divider(Rocket)
         Rocket%stage(i)%tank(2)%k_insulation = insulation_mass_ratio(2,i)
         Rocket%stage(i)%tank(1)%rho_liq = liquid_density(1,i) 
         Rocket%stage(i)%tank(2)%rho_liq = liquid_density(2,i) 
+        Rocket%stage(i)%tank(1)%k_contraction = tank_contraction_ratio(1,i)
+        Rocket%stage(i)%tank(2)%k_contraction = tank_contraction_ratio(2,i)
     end do
 end subroutine fuel_oxi_divider
