@@ -7,8 +7,8 @@ subroutine sub_systems_calculation(Rocket)
     real(8), parameter :: t_start_up  = 1.d0      ! t_start_up fijo en 1 segundo
     real(8), parameter :: f_residual  = 0.0125d0  ! f_residual fijo en 1.25%
     real(8), parameter :: f_ullage    = 0.07d0    ! f_ullage fijo en 7%    
-    real(8) E, dome_height, ds_Surface
-    integer i 
+    real(8) E, dome_height, ds_Surface, section_radius
+    integer i, tank_index
 
     call fuel_oxi_divider(Rocket)
 
@@ -47,44 +47,44 @@ subroutine sub_systems_calculation(Rocket)
             + Rocket%stage(i)%tank(1)%v_contraction
        Rocket%stage(i)%tank(2)%v_total = Rocket%stage(i)%tank(2)%v_liq + Rocket%stage(i)%tank(2)%v_ullage&
             + Rocket%stage(i)%tank(2)%v_contraction 
-       
-       if (Rocket%stage(i)%tank(1)%v_total < pi*Rocket%stage(i)%Diameter**3 &
-            /(6.d0*Rocket%stage(i)%tank(1)%dome_AR)) then
-          ! Spherical Tank 
-            Rocket%stage(i)%tank(1)%h_cyl = 0.d0  
-            E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(1)%dome_AR**2)
-            ds_Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
-                (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(1)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
-            Rocket%stage(i)%tank(1)%Surface = ds_Surface
-       else
-          ! Cylindrical Tank
-            Rocket%stage(i)%tank(1)%h_cyl = 4.d0/(pi*Rocket%stage(i)%Diameter**2)*&
-                (Rocket%stage(i)%tank(1)%v_total - pi*Rocket%stage(i)%Diameter**3/(6.d0*Rocket%stage(i)%tank(1)%dome_AR))
-            E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(1)%dome_AR**2)
-            ds_Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
-                (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(1)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
-            Rocket%stage(i)%tank(1)%Surface = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(1)%h_cyl + ds_Surface
-       end if
+    end do
 
-       if (Rocket%stage(i)%tank(2)%v_total < pi*Rocket%stage(i)%Diameter**3 &
-            /(6.d0*Rocket%stage(i)%tank(2)%dome_AR)) then
-          ! Spherical Tank 
-            Rocket%stage(i)%tank(2)%spherical = .true. 
-            Rocket%stage(i)%tank(2)%h_cyl = 0.d0  
-            E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(2)%dome_AR**2)
-            ds_Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
-                (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(2)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
-            Rocket%stage(i)%tank(2)%Surface = ds_Surface
-       else
-          ! Cylindrical Tank
-            Rocket%stage(i)%tank(2)%spherical = .false. 
-            Rocket%stage(i)%tank(2)%h_cyl = 4.d0/(pi*Rocket%stage(i)%Diameter**2)*&
-                (Rocket%stage(i)%tank(2)%v_total - pi*Rocket%stage(i)%Diameter**3/(6.d0*Rocket%stage(i)%tank(2)%dome_AR))
-            E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(2)%dome_AR**2)
-            ds_Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
-                (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(2)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
-            Rocket%stage(i)%tank(2)%Surface = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(2)%h_cyl + ds_Surface
-       end if
+    call calculate_toroidal_section_radii(Rocket)
+
+    do i=1, Rocket%number_of_stages
+       do tank_index = 1, 2
+          if (Rocket%stage(i)%tank(tank_index)%v_total <= &
+              Rocket%stage(i)%tank(tank_index)%Max_Toroidal_Volume) then
+            print*, 'tanque toroidal'
+              section_radius = Rocket%stage(i)%tank(tank_index)%Circular_section_radius
+              Rocket%stage(i)%tank(tank_index)%spherical = .false.
+              Rocket%stage(i)%tank(tank_index)%h_cyl = 2.d0 * section_radius
+              Rocket%stage(i)%tank(tank_index)%Surface = 2.d0*pi**2.d0 * &
+                  (Rocket%stage(i)%Diameter - 2.d0*section_radius)*section_radius
+          else if (Rocket%stage(i)%tank(tank_index)%v_total < pi*Rocket%stage(i)%Diameter**3 &
+              /(6.d0*Rocket%stage(i)%tank(tank_index)%dome_AR)) then
+                print*, 'tanque esferico'
+              ! Spherical Tank
+              Rocket%stage(i)%tank(tank_index)%spherical = .true.
+              Rocket%stage(i)%tank(tank_index)%h_cyl = 0.d0
+              E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(tank_index)%dome_AR**2)
+              ds_Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
+                  (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(tank_index)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
+              Rocket%stage(i)%tank(tank_index)%Surface = ds_Surface
+          else
+              ! Cylindrical Tank
+            print*, 'tanque cilindrico'
+              Rocket%stage(i)%tank(tank_index)%spherical = .false.
+              Rocket%stage(i)%tank(tank_index)%h_cyl = 4.d0/(pi*Rocket%stage(i)%Diameter**2)*&
+                  (Rocket%stage(i)%tank(tank_index)%v_total - &
+                  pi*Rocket%stage(i)%Diameter**3/(6.d0*Rocket%stage(i)%tank(tank_index)%dome_AR))
+              E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(tank_index)%dome_AR**2)
+              ds_Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
+                  (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(tank_index)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
+              Rocket%stage(i)%tank(tank_index)%Surface = &
+                  pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(tank_index)%h_cyl + ds_Surface
+          end if
+       end do
 
        if (i == Rocket%number_of_stages) then 
         Rocket%stage(i)%m_avionics = 0.8d0 * Rocket%rm_avionics
@@ -116,6 +116,64 @@ subroutine sub_systems_calculation(Rocket)
     end do
 
 end subroutine sub_systems_calculation
+
+subroutine calculate_toroidal_section_radii(Rocket)
+    use, intrinsic :: ieee_arithmetic, only: ieee_is_finite
+    use rocket_types
+    use constants, only: pi
+    use Root_Finding_Methods, only: Newton_Raphson
+    implicit none
+    type(Rocket_t), intent(inout) :: Rocket
+    real(8), parameter :: relative_tolerance = 1.d-10
+    real(8) diameter, volume, max_volume, section_radius, tolerance, residual
+    integer i, tank_index, iterations
+
+    do i = 1, Rocket%number_of_stages
+        diameter = Rocket%stage(i)%Diameter
+        if (.not. ieee_is_finite(diameter) .or. diameter <= 0.d0) then
+            error stop "Toroidal tank: stage diameter must be finite and positive"
+        end if
+
+        ! A ring torus requires r <= D/4, where its volume is maximal.
+        max_volume = pi**2.d0 * diameter**3.d0 / 32.d0
+        do tank_index = 1, 2
+            volume = Rocket%stage(i)%tank(tank_index)%v_total
+            if (.not. ieee_is_finite(volume) .or. volume < 0.d0) then
+                error stop "Toroidal tank: volume must be finite and nonnegative"
+            end if
+
+            Rocket%stage(i)%tank(tank_index)%Max_Toroidal_Volume = max_volume
+            if (volume == 0.d0) then
+                Rocket%stage(i)%tank(tank_index)%Circular_section_radius = 0.d0
+                cycle
+            end if
+            if (volume > max_volume) then
+                Rocket%stage(i)%tank(tank_index)%Circular_section_radius = 0.d0
+                cycle
+            end if
+
+            tolerance = relative_tolerance * max(1.d0, diameter)
+            call Newton_Raphson(toroidal_volume_residual, Rocket, section_radius, iterations, tolerance, &
+                0.d0, diameter/4.d0)
+            residual = abs(toroidal_volume_residual(section_radius, Rocket))
+            if (residual > relative_tolerance * max(1.d0, volume)) then
+                error stop "Toroidal tank: secant method did not satisfy the volume equation"
+            end if
+            Rocket%stage(i)%tank(tank_index)%Circular_section_radius = section_radius
+        end do
+    end do
+contains
+    function toroidal_volume_residual(r, Rocket_context) result(value)
+        use rocket_types, only: Rocket_t
+        implicit none
+        real(8), intent(in) :: r
+        type(Rocket_t), intent(in) :: Rocket_context
+        real(8) value
+
+        value = pi**2.d0 * r**2.d0 * (Rocket_context%stage(i)%Diameter - 2.d0*r) &
+            - Rocket_context%stage(i)%tank(tank_index)%v_total
+    end function toroidal_volume_residual
+end subroutine calculate_toroidal_section_radii
 
 subroutine fuel_oxi_divider(Rocket)
     use typical_data

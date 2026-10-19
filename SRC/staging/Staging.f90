@@ -6,7 +6,7 @@ function g(L, Rocket)
     use rocket_types 
     implicit none
     type(Rocket_t), intent(in) :: Rocket
-    real(8) :: L 
+    real(8), intent(in) :: L
     real(8) sum
     real(8) g 
     !real(8) c1, c2, c3
@@ -47,7 +47,6 @@ subroutine STAGING(Rocket)
     use rocket_functions
     implicit none
     type(Rocket_t), intent(inout) :: Rocket 
-    procedure(func_interface), pointer :: function_pointer
     real(8) a, b, tol             ! Bisection variables 
     real(8) L
     real(8) check                 ! used for minimum check
@@ -62,12 +61,11 @@ subroutine STAGING(Rocket)
 
     !===== L is solved using eq 19 =======================================
   ! L = 0.1d0
-    function_pointer => g
     tol = 1e-5
-    a = Bolzano_Interval_Start(function_pointer, Rocket)
+    a = Bolzano_Interval_Start(g, Rocket)
     b = 1.d0 
     
-    call Bolzano_Bisection(function_pointer, Rocket, a, b, tol, L, iterations)
+    call Bolzano_Bisection(g, Rocket, a, b, tol, L, iterations)
     !call Newton_Raphson(f, Rocket)
     !=====================================================================
    

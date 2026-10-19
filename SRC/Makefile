@@ -116,9 +116,9 @@ $(BUILD_DIR)/Typical_Data.o: $(INOUT_DIR)/Typical_Data.f90 \
     $(BUILD_DIR)/Rocket_Types.o
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
 
-# 3. Root_Finding.f90 — depends on Rocket_Types, Typical_Data and Staging
+# 3. Root_Finding.f90 — depends on Rocket_Types
 $(BUILD_DIR)/Root_Finding.o: $(STAGING_DIR)/Root_Finding.f90 \
-    $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o $(BUILD_DIR)/Staging.o
+    $(BUILD_DIR)/Rocket_Types.o
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
 
 # 4. Staging — depends on Typical_Data, Rocket_Types and Root_Finding
@@ -158,7 +158,7 @@ $(BUILD_DIR)/Geometry_calc.o: $(PRE_SIMULATION_DIR)/Geometry_calc.f90 \
 
 # 11. main — depends on Rocket_Types and Typical_Data
 $(BUILD_DIR)/Sub_Systems_calc.o: $(SUB_SYSTEMS_DIR)/Sub_Systems_calc.f90 \
-    $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o
+    $(BUILD_DIR)/Typical_Data.o $(BUILD_DIR)/Rocket_Types.o $(BUILD_DIR)/Root_Finding.o
 	$(FC) $(FFLAGS) $(MODFLAGS) -c $< -o $@
 
 # 12. main — depends on Rocket_Types and Typical_Data

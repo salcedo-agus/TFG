@@ -13,6 +13,7 @@ module rocket_types
         real(8) dome_AR       ! Dome aspect ratio
         real(8) h_cyl         ! [m] Cylinder height
         real(8) Surface       ! [m^2] Tank surface area
+        real(8) Max_Toroidal_Volume
         real(8) Circular_section_radius
 
         real(8) k_shell       ! [kg/m^3] Meassures the amount of insulaton mass per tank volume
