@@ -61,6 +61,7 @@ subroutine sub_systems_calculation(Rocket)
               Rocket%stage(i)%tank(tank_index)%h_cyl = 2.d0 * section_radius
               Rocket%stage(i)%tank(tank_index)%Surface = 2.d0*pi**2.d0 * &
                   (Rocket%stage(i)%Diameter - 2.d0*section_radius)*section_radius
+                Rocket%stage(i)%tank(tank_index)%Tank_Volume =  Rocket%stage(i)%tank(tank_index)%v_total
           else if (Rocket%stage(i)%tank(tank_index)%v_total < pi*Rocket%stage(i)%Diameter**3 &
               /(6.d0*Rocket%stage(i)%tank(tank_index)%dome_AR)) then
                 print*, 'tanque esferico'
@@ -71,6 +72,7 @@ subroutine sub_systems_calculation(Rocket)
               ds_Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
                   (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(tank_index)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
               Rocket%stage(i)%tank(tank_index)%Surface = ds_Surface
+              Rocket%stage(i)%tank(tank_index)%Tank_Volume = pi*Rocket%stage(i)%Diameter**3.d0/6.d0
           else
               ! Cylindrical Tank
             print*, 'tanque cilindrico'
@@ -83,6 +85,7 @@ subroutine sub_systems_calculation(Rocket)
                   (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(tank_index)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
               Rocket%stage(i)%tank(tank_index)%Surface = &
                   pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(tank_index)%h_cyl + ds_Surface
+                Rocket%stage(i)%tank(tank_index)%Tank_Volume =  Rocket%stage(i)%tank(tank_index)%v_total
           end if
        end do
 
@@ -102,8 +105,8 @@ subroutine sub_systems_calculation(Rocket)
        !=============================================
 
        !======== tank shell mass ====================
-       Rocket%stage(i)%tank(1)%m_shell = Rocket%stage(i)%tank(1)%k_shell*Rocket%stage(i)%tank(1)%m_liq
-       Rocket%stage(i)%tank(2)%m_shell = Rocket%stage(i)%tank(2)%k_shell*Rocket%stage(i)%tank(2)%m_liq
+       Rocket%stage(i)%tank(1)%m_shell = Rocket%stage(i)%tank(1)%k_shell*Rocket%stage(i)%tank(1)%Tank_Volume
+       Rocket%stage(i)%tank(2)%m_shell = Rocket%stage(i)%tank(2)%k_shell*Rocket%stage(i)%tank(2)%Tank_Volume
        !=============================================
 
        !======== tank insulation mass ===============
@@ -199,8 +202,8 @@ subroutine fuel_oxi_divider(Rocket)
         select case(propellant_and_oxidizer_vector(i))
             case(1) ! 1 - LIQUID HIDROGEN / LIQUID OXIGEN (LH2/LOX)
                 f_vector(i) = 4.96d0
-                tank_mass_ratio(1,i) = 0.128d0
-                tank_mass_ratio(2,i) = 0.0107d0
+                tank_mass_ratio(1,i) = 9.09d0
+                tank_mass_ratio(2,i) = 12.16d0
                 insulation_mass_ratio(1,i) = 2.88d0
                 insulation_mass_ratio(2,i) = 1.123d0
                 liquid_density(1,i) = 71.d0
@@ -209,8 +212,8 @@ subroutine fuel_oxi_divider(Rocket)
                 tank_contraction_ratio(2,i) = 0.0143d0
             case(2) ! 2 - LIQUID KEROSENE / LIQUID OXIGEN (RP1/LOX)
                 f_vector(i) = 2.82d0
-                tank_mass_ratio(1,i) = 0.0148d0
-                tank_mass_ratio(2,i) = 0.0107d0
+                tank_mass_ratio(1,i) = 12.16d0
+                tank_mass_ratio(2,i) = 12.16d0
                 insulation_mass_ratio(1,i) = 0.d0
                 insulation_mass_ratio(2,i) = 0.123d0
                 liquid_density(1,i) = 820.d0
