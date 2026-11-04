@@ -6,7 +6,7 @@ number_of_stages          = 2
 ; --- PROPELLANT AND OXIDIZER SETUP ----
 first_stage_propellant_and_oxidizer    = 2
 second_stage_propellant_and_oxidizer   = 2
-third_stage_propellant_and_oxidizer    = 3
+third_stage_propellant_and_oxidizer    = 1
 
 ; 1 - LIQUID HIDROGEN / LIQUID OXIGEN (LH2/LOX)
 ; 2 - LIQUID KEROSENE / LIQUID OXIGEN (RP1/LOX)
@@ -30,9 +30,9 @@ third_stage_combustion_cycle           = 0
 ; 5 - PRESSURE  
 
 ; --- DIAMETER SETUP -----------
-Diameter_setup = 1
+Diameter_setup = 3
 ; 1 - Statistically determined
 ; 2 - Constant 
 ; 3 - Fairing requirement
 
-User_defined_diameter = 2.d0
+User_defined_diameter = 3.d0
