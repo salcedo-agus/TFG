@@ -125,7 +125,7 @@ subroutine rocket_geometry_calculation(Rocket)
             end do
         end if
     case(2) ! 2 - Constant 
-        Diameter_vector = maxval(Diameter_vector)
+        Diameter_vector = maxval(Diameter_vector(1:number_of_stages))
     case(3) ! 3 - Fairing requirement   
         Diameter_vector = User_defined_diameter
     end select
