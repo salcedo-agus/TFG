@@ -8,6 +8,7 @@ subroutine sub_systems_calculation(Rocket)
     real(8), parameter :: f_residual  = 0.0125d0  ! f_residual fijo en 1.25%
     real(8), parameter :: f_ullage    = 0.07d0    ! f_ullage fijo en 7%    
     real(8) E, dome_height, ds_Surface
+    real(8) engine_mass_log, thrust_log           ! used for calculating engine mass 
     integer i 
 
     call fuel_oxi_divider(Rocket)
@@ -111,8 +112,15 @@ subroutine sub_systems_calculation(Rocket)
        Rocket%stage(i)%tank(2)%m_insulation = Rocket%stage(i)%tank(2)%k_insulation * Rocket%stage(i)%tank(2)%Surface
        !=============================================
 
-       Rocket%stage(i)%m_engines = 0.d0
-       Rocket%stage(i)%m_thrust_structure = 0.d0
+       !========== engine mass ======================
+       thrust_log = log10(Rocket%stage(i)%T)
+       engine_mass_log = 0.0779d0 * thrust_log**2 + 0.4211d0 * thrust_log + 1.1519d0
+       Rocket%stage(i)%m_engines = log10(engine_mass_log)
+       !=============================================
+
+       !======== thrust structure mass ==============
+       Rocket%stage(i)%m_thrust_structure = 2.55e-4 * Rocket%stage(i)%T
+       !=============================================
     end do
 
 end subroutine sub_systems_calculation
