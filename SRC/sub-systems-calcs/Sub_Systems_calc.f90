@@ -201,7 +201,7 @@ subroutine fuel_oxi_divider(Rocket)
     do i=1, 3
         select case(propellant_and_oxidizer_vector(i))
             case(1) ! 1 - LIQUID HIDROGEN / LIQUID OXIGEN (LH2/LOX)
-                f_vector(i) = 4.96d0
+                f_vector(i) = 1.d0/4.96d0
                 tank_mass_ratio(1,i) = 9.09d0
                 tank_mass_ratio(2,i) = 12.16d0
                 insulation_mass_ratio(1,i) = 2.88d0
@@ -211,7 +211,7 @@ subroutine fuel_oxi_divider(Rocket)
                 tank_contraction_ratio(1,i) = 0.0192d0
                 tank_contraction_ratio(2,i) = 0.0143d0
             case(2) ! 2 - LIQUID KEROSENE / LIQUID OXIGEN (RP1/LOX)
-                f_vector(i) = 2.82d0
+                f_vector(i) = 1.d0/2.82d0
                 tank_mass_ratio(1,i) = 12.16d0
                 tank_mass_ratio(2,i) = 12.16d0
                 insulation_mass_ratio(1,i) = 0.d0
