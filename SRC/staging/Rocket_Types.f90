@@ -5,7 +5,7 @@ module rocket_types
         real(8) rho_liq ! [kg/m^3] Fuel or oxidizer density
         real(8) v_liq   ! [m^3] Fuel or oxidizer volume
         
-        integer Geometry      ! Indicates geometry of the tank 
+        integer Geometry      ! Indicates geometry of the tank 1=Cylindrical | 2=Spherical | 3=Toridal
         real(8) v_ullage      ! [m^3] Ulage volume needed for pressurizing the tank
         real(8) k_contraction ! Meassures the contraction of a cryogenic tank
         real(8) v_contraction ! [m^3] Contraction volume for cryogenic liquids
@@ -43,6 +43,10 @@ module rocket_types
         real(8) m_engines           ! [kg] Engines mass
         real(8) m_avionics          ! [kg] Avionics mass
         real(8) m_thrust_structure  ! [kg] Thrust structure mass
+        real(8) m_inter_stage_str   ! [kg] Inter stage structure mass
+        real(8) A_inter_stage_str   ! [m^2] Inter stage structure surface area
+        real(8) L_inter_stage_str   ! [m] Inter stage structure length
+        ! Rocket%stage(1)%m_inter_stage_str = mass of the structure between stage 1 and 2
         real(8) bulk_density
 
         real(8) A_unpr_str    ! [m^2] Surface area of unpresurized structure 
@@ -89,4 +93,11 @@ module rocket_types
         real(8) nu_e_mean   ! Rocket mean exhaust velocity
 
     end type Rocket_t  
+
+    type Element_t
+        real(8) LP_position ! [m]  Vertical position of the lowest point of the element
+        real(8) CM          ! [m]  Centre Mass position
+        real(8) mass        ! [kg] Mass
+        logical point_mass  ! True = the mass is a point, not distributed
+    end type
 end module 

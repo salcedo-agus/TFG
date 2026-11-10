@@ -56,36 +56,39 @@ subroutine sub_systems_calculation(Rocket)
           if (Rocket%stage(i)%tank(tank_index)%v_total <= &
               Rocket%stage(i)%tank(tank_index)%Max_Toroidal_Volume) then
             print*, 'tanque toroidal'
-              section_radius = Rocket%stage(i)%tank(tank_index)%Circular_section_radius
-              Rocket%stage(i)%tank(tank_index)%spherical = .false.
-              Rocket%stage(i)%tank(tank_index)%h_cyl = 2.d0 * section_radius
-              Rocket%stage(i)%tank(tank_index)%Surface = 2.d0*pi**2.d0 * &
-                  (Rocket%stage(i)%Diameter - 2.d0*section_radius)*section_radius
-                Rocket%stage(i)%tank(tank_index)%Tank_Volume =  Rocket%stage(i)%tank(tank_index)%v_total
+            Rocket%stage(i)%tank(tank_index)%Geometry = 3
+            section_radius = Rocket%stage(i)%tank(tank_index)%Circular_section_radius
+            Rocket%stage(i)%tank(tank_index)%spherical = .false.
+            Rocket%stage(i)%tank(tank_index)%h_cyl = 2.d0 * section_radius
+            Rocket%stage(i)%tank(tank_index)%Surface = 2.d0*pi**2.d0 * &
+                (Rocket%stage(i)%Diameter - 2.d0*section_radius)*section_radius
+            Rocket%stage(i)%tank(tank_index)%Tank_Volume =  Rocket%stage(i)%tank(tank_index)%v_total
           else if (Rocket%stage(i)%tank(tank_index)%v_total < pi*Rocket%stage(i)%Diameter**3 &
               /(6.d0*Rocket%stage(i)%tank(tank_index)%dome_AR)) then
-                print*, 'tanque esferico'
-              ! Spherical Tank
-              Rocket%stage(i)%tank(tank_index)%spherical = .true.
-              Rocket%stage(i)%tank(tank_index)%h_cyl = 0.d0
-              E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(tank_index)%dome_AR**2)
-              ds_Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
-                  (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(tank_index)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
-              Rocket%stage(i)%tank(tank_index)%Surface = ds_Surface
-              Rocket%stage(i)%tank(tank_index)%Tank_Volume = pi*Rocket%stage(i)%Diameter**3.d0/6.d0
+            print*, 'tanque esferico'
+            Rocket%stage(i)%tank(tank_index)%Geometry = 2
+            ! Spherical Tank
+            Rocket%stage(i)%tank(tank_index)%spherical = .true.
+            Rocket%stage(i)%tank(tank_index)%h_cyl = 0.d0
+            E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(tank_index)%dome_AR**2)
+            ds_Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
+                (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(tank_index)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
+            Rocket%stage(i)%tank(tank_index)%Surface = ds_Surface
+            Rocket%stage(i)%tank(tank_index)%Tank_Volume = pi*Rocket%stage(i)%Diameter**3.d0/6.d0
           else
               ! Cylindrical Tank
             print*, 'tanque cilindrico'
-              Rocket%stage(i)%tank(tank_index)%spherical = .false.
-              Rocket%stage(i)%tank(tank_index)%h_cyl = 4.d0/(pi*Rocket%stage(i)%Diameter**2)*&
-                  (Rocket%stage(i)%tank(tank_index)%v_total - &
-                  pi*Rocket%stage(i)%Diameter**3/(6.d0*Rocket%stage(i)%tank(tank_index)%dome_AR))
-              E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(tank_index)%dome_AR**2)
-              ds_Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
-                  (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(tank_index)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
-              Rocket%stage(i)%tank(tank_index)%Surface = &
-                  pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(tank_index)%h_cyl + ds_Surface
-                Rocket%stage(i)%tank(tank_index)%Tank_Volume =  Rocket%stage(i)%tank(tank_index)%v_total
+            Rocket%stage(i)%tank(tank_index)%Geometry = 1
+            Rocket%stage(i)%tank(tank_index)%spherical = .false.
+            Rocket%stage(i)%tank(tank_index)%h_cyl = 4.d0/(pi*Rocket%stage(i)%Diameter**2)*&
+                (Rocket%stage(i)%tank(tank_index)%v_total - &
+                pi*Rocket%stage(i)%Diameter**3/(6.d0*Rocket%stage(i)%tank(tank_index)%dome_AR))
+            E = sqrt(1.d0 - 1.d0/Rocket%stage(i)%tank(tank_index)%dome_AR**2)
+            ds_Surface = pi/4.d0*Rocket%stage(i)%Diameter**2*&
+                (1.d0+1.d0/(2*E*Rocket%stage(i)%tank(tank_index)%dome_AR**2)*log(1.d0+E/(1.d0-E)))
+            Rocket%stage(i)%tank(tank_index)%Surface = &
+                pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%tank(tank_index)%h_cyl + ds_Surface
+            Rocket%stage(i)%tank(tank_index)%Tank_Volume =  Rocket%stage(i)%tank(tank_index)%v_total
           end if
        end do
 

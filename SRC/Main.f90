@@ -17,6 +17,9 @@ program TFG
     call rocket_geometry_calculation(Rocket)
     call sub_systems_calculation(Rocket) 
 
+    !#### CONTROL ###############################
+    call firs_stack_center_mass_calculation(Rocket)
+    
     do i=1, Rocket%number_of_stages
         print*, "==========================================="
         print*, "Stage N", i 
