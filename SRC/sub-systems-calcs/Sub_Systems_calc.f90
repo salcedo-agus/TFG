@@ -8,6 +8,7 @@ subroutine sub_systems_calculation(Rocket)
     real(8), parameter :: f_residual  = 0.0125d0  ! f_residual fijo en 1.25%
     real(8), parameter :: f_ullage    = 0.07d0    ! f_ullage fijo en 7%    
     real(8) E, dome_height, ds_Surface, section_radius
+    real(8) engine_mass_log, thrust_log           ! used for calculating engine mass 
     integer i, tank_index
 
     call fuel_oxi_divider(Rocket)
@@ -117,8 +118,15 @@ subroutine sub_systems_calculation(Rocket)
        Rocket%stage(i)%tank(2)%m_insulation = Rocket%stage(i)%tank(2)%k_insulation * Rocket%stage(i)%tank(2)%Surface
        !=============================================
 
-       Rocket%stage(i)%m_engines = 0.d0
-       Rocket%stage(i)%m_thrust_structure = 0.d0
+       !========== engine mass ======================
+       thrust_log = log10(Rocket%stage(i)%T)
+       engine_mass_log = 0.0779d0 * thrust_log**2 + 0.4211d0 * thrust_log + 1.1519d0
+       Rocket%stage(i)%m_engines = log10(engine_mass_log)
+       !=============================================
+
+       !======== thrust structure mass ==============
+       Rocket%stage(i)%m_thrust_structure = 2.55e-4 * Rocket%stage(i)%T
+       !=============================================
     end do
 
 end subroutine sub_systems_calculation
@@ -204,7 +212,7 @@ subroutine fuel_oxi_divider(Rocket)
     do i=1, 3
         select case(propellant_and_oxidizer_vector(i))
             case(1) ! 1 - LIQUID HIDROGEN / LIQUID OXIGEN (LH2/LOX)
-                f_vector(i) = 4.96d0
+                f_vector(i) = 1.d0/4.96d0
                 tank_mass_ratio(1,i) = 9.09d0
                 tank_mass_ratio(2,i) = 12.16d0
                 insulation_mass_ratio(1,i) = 2.88d0
@@ -214,7 +222,7 @@ subroutine fuel_oxi_divider(Rocket)
                 tank_contraction_ratio(1,i) = 0.0192d0
                 tank_contraction_ratio(2,i) = 0.0143d0
             case(2) ! 2 - LIQUID KEROSENE / LIQUID OXIGEN (RP1/LOX)
-                f_vector(i) = 2.82d0
+                f_vector(i) = 1.d0/2.82d0
                 tank_mass_ratio(1,i) = 12.16d0
                 tank_mass_ratio(2,i) = 12.16d0
                 insulation_mass_ratio(1,i) = 0.d0
