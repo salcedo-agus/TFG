@@ -137,7 +137,7 @@ subroutine sub_systems_calculation(Rocket)
             Rocket%stage(i)%m_inter_stage_str = 0.d0 
        else 
             Rocket%stage(i)%L_inter_stage_str = Rocket%stage(i)%Diameter
-            if (Rocket%stage(i)%Diameter == Rocket%stage(i+1)) then
+            if (Rocket%stage(i)%Diameter == Rocket%stage(i+1)%Diameter) then
                 Rocket%stage(i)%A_inter_stage_str = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%L_inter_stage_str
             else 
                 surface_area_constant = sqrt(Rocket%stage(i)%L_inter_stage_str**2+&
