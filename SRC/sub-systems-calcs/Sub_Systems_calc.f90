@@ -9,6 +9,7 @@ subroutine sub_systems_calculation(Rocket)
     real(8), parameter :: f_ullage    = 0.07d0    ! f_ullage fijo en 7%    
     real(8) E, dome_height, ds_Surface, section_radius
     real(8) engine_mass_log, thrust_log           ! used for calculating engine mass 
+    real(8) surface_area_constant                 ! used for calculating the surface area of the interstage structure of two stages with different diameter
     integer i, tank_index
 
     call fuel_oxi_divider(Rocket)
@@ -127,6 +128,25 @@ subroutine sub_systems_calculation(Rocket)
        !======== thrust structure mass ==============
        Rocket%stage(i)%m_thrust_structure = 2.55e-4 * Rocket%stage(i)%T
        !=============================================
+
+       !======== inter stage structure ==============
+       if (i == Rocket%number_of_stages) then
+            ! The upper stage does not need inter stage structure
+            Rocket%stage(i)%L_inter_stage_str = 0.d0
+            Rocket%stage(i)%A_inter_stage_str = 0.d0
+            Rocket%stage(i)%m_inter_stage_str = 0.d0 
+       else 
+            Rocket%stage(i)%L_inter_stage_str = Rocket%stage(i)%Diameter
+            if (Rocket%stage(i)%Diameter == Rocket%stage(i+1)) then
+                Rocket%stage(i)%A_inter_stage_str = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%L_inter_stage_str
+            else 
+                surface_area_constant = sqrt(Rocket%stage(i)%L_inter_stage_str**2+&
+                    (Rocket%stage(i)%Diameter-Rocket%stage(i+1)%Diameter)**2/4.d0)
+                Rocket%stage(i)%A_inter_stage_str = pi/2.d0 * (Rocket%stage(i)%Diameter+Rocket%stage(i+1)%Diameter)
+            end if
+            Rocket%stage(i)%m_inter_stage_str =  13.3d0 * Rocket%stage(i)%A_inter_stage_str   
+       end if
+       !============================================= 
     end do
 
 end subroutine sub_systems_calculation
