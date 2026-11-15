@@ -7,7 +7,7 @@ subroutine sub_systems_calculation(Rocket)
     real(8), parameter :: t_start_up  = 1.d0      ! t_start_up fijo en 1 segundo
     real(8), parameter :: f_residual  = 0.0125d0  ! f_residual fijo en 1.25%
     real(8), parameter :: f_ullage    = 0.07d0    ! f_ullage fijo en 7%    
-    real(8) E, dome_height, ds_Surface, section_radius
+    real(8) E, ds_Surface, section_radius
     real(8) engine_mass_log, thrust_log           ! used for calculating engine mass 
     real(8) surface_area_constant                 ! used for calculating the surface area of the interstage structure of two stages with different diameter
     integer i, tank_index
@@ -93,7 +93,11 @@ subroutine sub_systems_calculation(Rocket)
             Rocket%stage(i)%tank(tank_index)%Tank_Volume =  Rocket%stage(i)%tank(tank_index)%v_total
           end if
        end do
+    end do
 
+    call calculate_external_structure_lengths(Rocket)
+
+    do i=1, Rocket%number_of_stages
        if (i == Rocket%number_of_stages) then 
         Rocket%stage(i)%m_avionics = 0.8d0 * Rocket%rm_avionics
        else 
@@ -103,8 +107,7 @@ subroutine sub_systems_calculation(Rocket)
        Rocket%stage(i)%m_wiring = 1.43d0 * Rocket%stage(i)%Length
        
        !=========== unpr. structure mass ============
-       dome_height = Rocket%stage(i)%Diameter /(2.d0 * Rocket%stage(i)%tank(1)%dome_AR)
-       Rocket%stage(i)%Length=Rocket%stage(i)%tank(1)%h_cyl + Rocket%stage(i)%tank(2)%h_cyl + 4.d0*dome_height    
+       Rocket%stage(i)%Length = Rocket%stage(i)%tank_stack_length
        Rocket%stage(i)%A_unpr_str = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%Length
        Rocket%stage(i)%m_unpr_str = 13.3d0 * Rocket%stage(i)%A_unpr_str
        !=============================================
@@ -150,6 +153,48 @@ subroutine sub_systems_calculation(Rocket)
     end do
 
 end subroutine sub_systems_calculation
+
+subroutine calculate_external_structure_lengths(Rocket)
+    use rocket_types
+    implicit none
+    type(Rocket_t), intent(inout) :: Rocket
+    real(8) dome_height
+    integer i
+
+    do i = 1, Rocket%number_of_stages
+        dome_height = Rocket%stage(i)%Diameter / &
+            (2.d0 * Rocket%stage(i)%tank(1)%dome_AR)
+        Rocket%stage(i)%tank_stack_length = Rocket%stage(i)%tank(1)%h_cyl + &
+            Rocket%stage(i)%tank(2)%h_cyl + 4.d0*dome_height
+
+        Rocket%stage(i)%h_intertank = 0.25d0*Rocket%stage(i)%Diameter + &
+            2.d0*dome_height
+        Rocket%stage(i)%h_thrust_structure = 0.5d0*Rocket%stage(i)%Diameter
+        Rocket%stage(i)%h_interstage = 0.d0
+        Rocket%stage(i)%h_forward_skirt = 0.d0
+        Rocket%stage(i)%h_payload_fairing = 0.d0
+
+        if (i == 1) then
+            Rocket%stage(i)%h_aft_skirt = Rocket%stage(i)%Diameter
+        else
+            Rocket%stage(i)%h_aft_skirt = Rocket%stage(i)%Diameter/3.d0 + dome_height
+        end if
+
+        if (i < Rocket%number_of_stages) then
+            ! The interstage is sized from the lower stage; hemispherical domes
+            ! use the 5/4 D recommendation, while HE domes use D.
+            if (abs(Rocket%stage(i)%tank(1)%dome_AR - 1.d0) < 1.d-10) then
+                Rocket%stage(i)%h_interstage = 1.25d0*Rocket%stage(i)%Diameter
+            else
+                Rocket%stage(i)%h_interstage = Rocket%stage(i)%Diameter
+            end if
+        else
+            Rocket%stage(i)%h_forward_skirt = Rocket%stage(i)%Diameter/3.d0 + dome_height
+            Rocket%stage(i)%h_payload_fairing = 2.d0*Rocket%stage(i)%Diameter
+        end if
+
+    end do
+end subroutine calculate_external_structure_lengths
 
 subroutine calculate_toroidal_section_radii(Rocket)
     use, intrinsic :: ieee_arithmetic, only: ieee_is_finite
