@@ -1,4 +1,4 @@
-subroutine firs_stack_center_mass_calculation(Rocket)
+subroutine first_stack_center_mass_calculation(Rocket)
     use rocket_types
     implicit none
     type(Rocket_t) Rocket
@@ -16,7 +16,9 @@ subroutine firs_stack_center_mass_calculation(Rocket)
     
     type(Element_t) Payload ! Rocket payload
     
-    real(8) X   ! [m] aux. variable for defining position
+    real(8) X                  ! [m] aux. variable for defining position
+    real(8) LP_to_CM_distance  ! [m] Element CM position with LP_position as Datum
+    real(8) Frustum_den, Frustum_num ! [m] Thin Cone Frustume auxiliary variables 
     real(8) dome_height, tank_height
 
     ! This loop defines the elements as point or distributed masses
@@ -50,7 +52,7 @@ subroutine firs_stack_center_mass_calculation(Rocket)
     Payload%mass = Rocket%rm_L
 
     ! This loop defines the position of the lowest point of each sub_systems element
-    X = 0.d0 ! Start at the base of the rocket
+    X = 0.d0 ! Start at the base of the rocket (DATUM)
     do i=1, Rocket%number_of_stages
         Engine(i)%LP_position     = X
         Thrust_str(i)%LP_position = X
@@ -78,5 +80,49 @@ subroutine firs_stack_center_mass_calculation(Rocket)
         Inter_stage_str(i)%LP_position = X
 
         X = X + Rocket%stage(i)%L_inter_stage_str ! Move to start of next stage
+    end do
+
+    ! This loop defines the Center Mass of each sub_systems element
+    do i=1, Rocket%number_of_stages
+
+        do tank_index = 1, 2
+            if (Rocket%stage(i)%tank(tank_index)%Geometry == 1) then       ! Cylindrical Tank
+                dome_height = Rocket%stage(i)%Diameter /(2.d0 * Rocket%stage(i)%tank(tank_index)%dome_AR)
+                LP_to_CM_distance = dome_height + Rocket%stage(i)%tank(tank_index)%h_cyl/2.d0
+            else if (Rocket%stage(i)%tank(tank_index)%Geometry == 2) then  ! Spherical Tank
+                dome_height = Rocket%stage(i)%Diameter /(2.d0 * Rocket%stage(i)%tank(tank_index)%dome_AR)
+                LP_to_CM_distance = dome_height
+            else if (Rocket%stage(i)%tank(tank_index)%Geometry == 3) then  ! Toroidal Tank 
+                LP_to_CM_distance = Rocket%stage(i)%tank(tank_index)%Circular_section_radius
+            end if 
+            tank(i,tank_index)%CM = LP_to_CM_distance + tank(i,tank_index)%LP_Position
+        end do
+
+        !******* PROVISIONAL ********
+        Fuel(i)%CM     = tank(i,1)%CM
+        Oxidizer(i)%CM = tank(i,2)%CM
+        !****************************
+
+        Wiring(i)%CM = Wiring(i)%LP_Position + Rocket%stage(i)%Length/2.d0
+        Unpr_str(i)%CM = Unpr_str(i)%LP_Position + Rocket%stage(i)%Length/2.d0  
+
+        Avionics(i)%CM = Avionics(i)%LP_Position 
+
+        Engine(i)%CM = Engine(i)%LP_Position
+        Thrust_str(i)%CM = Thrust_str(i)%LP_Position
+
+        if (.not. (i == Rocket%number_of_stages)) then
+            if (Rocket%stage(i)%Diameter == Rocket%stage(i+1)%Diameter) then
+                LP_to_CM_distance = Rocket%stage(i)%L_inter_stage_str/2.d0
+            else if () then
+                Frustum_den = (Rocket%stage(i+1)%Diameter + Rocket%stage(i)%Diameter)/2.d0  
+                Frustum_num =  Rocket%stage(i+1)%Diameter + Rocket%stage(i)%Diameter/2.d0
+                LP_to_CM_distance = Rocket%stage(i)%L_inter_stage_str/3.d0 * Frustum_num/Frustum_den 
+            end if 
+            Inter_stage_str(i)%CM = Inter_stage_str(i)%LP_Position 
+        else 
+            Inter_stage_str(i)%CM = Inter_stage_str(i)%LP_Position ! As failsafe, the CM location of stages without 
+            !                                                        interstage str is set at the top of the stage
+        end if 
     end do
 end subroutine
