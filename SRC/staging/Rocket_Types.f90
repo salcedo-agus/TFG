@@ -43,9 +43,21 @@ module rocket_types
         real(8) m_engines           ! [kg] Engines mass
         real(8) m_avionics          ! [kg] Avionics mass
         real(8) m_thrust_structure  ! [kg] Thrust structure mass
+        real(8) A_thrust_structure  ! [m^2] Thrust structure area
+        real(8) L_thrust_structure  ! [m] Thrust structure length
+        real(8) m_forward_skirt     ! [kg] Forward skirt mass
+        real(8) A_forward_skirt     ! [m^2] Thrust structure area
+        real(8) L_forward_skirt     ! [m] Forward skirt length
+        real(8) m_aft_skirt     ! [kg] aft skirt mass
+        real(8) A_aft_skirt     ! [m^2] aft structure area
+        real(8) L_aft_skirt     ! [m] aft skirt length
+        real(8) m_inter_tank_str    ! [kg] Intertank structure mass
+        real(8) A_inter_tank_str    ! [m^2] Intertank structure area
+        real(8) L_inter_tank_str    ! [m] Intertank structure length
         real(8) m_inter_stage_str   ! [kg] Inter stage structure mass
         real(8) A_inter_stage_str   ! [m^2] Inter stage structure surface area
         real(8) L_inter_stage_str   ! [m] Inter stage structure length
+        
         ! Rocket%stage(1)%m_inter_stage_str = mass of the structure between stage 1 and 2
         real(8) bulk_density
 
