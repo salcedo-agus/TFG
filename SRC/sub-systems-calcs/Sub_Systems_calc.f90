@@ -133,6 +133,18 @@ subroutine sub_systems_calculation(Rocket)
        Rocket%stage(i)%m_thrust_structure = 2.55e-4 * Rocket%stage(i)%T
        !=============================================
 
+       ! Aft skirt calculations
+        if (i==1) then
+            ! 1st stage aft skirt length (includes thrust structure length)
+            Rocket%stage(i)%L_aft_skirt = Rocket%stage(i)%Diameter - dome_height
+        else 
+            Rocket%stage(i)%L_aft_skirt = Rocket%stage(i)%Diameter / 3.d0
+        end if
+        
+        Rocket%stage(i)%A_aft_skirt = pi * Rocket%stage(i)%Diameter * Rocket%stage(i)%L_aft_skirt
+        Rocket%stage(i)%m_aft_skirt = 13.3d0 * Rocket%stage(i)%A_aft_skirt
+        
+
        !======== inter stage structure ==============
        if (i == Rocket%number_of_stages) then
             ! The upper stage does not need inter stage structure
@@ -143,10 +155,6 @@ subroutine sub_systems_calculation(Rocket)
             Rocket%stage(i)%L_forward_skirt = Rocket%stage(i)%Diameter / 3.d0
             Rocket%stage(i)%A_forward_skirt = pi * Rocket%stage(i)%Diameter * Rocket%stage(i)%L_forward_skirt
             Rocket%stage(i)%m_forward_skirt = 13.3d0 * Rocket%stage(i)%A_forward_skirt
-            ! Aft skirt calculations
-            Rocket%stage(i)%L_aft_skirt = Rocket%stage(i)%Diameter / 3.d0
-            Rocket%stage(i)%A_aft_skirt = pi * Rocket%stage(i)%Diameter * Rocket%stage(i)%L_aft_skirt
-            Rocket%stage(i)%m_aft_skirt = 13.3d0 * Rocket%stage(i)%A_aft_skirt
        else 
             Rocket%stage(i)%L_inter_stage_str = Rocket%stage(i)%Diameter
             if (Rocket%stage(i)%Diameter == Rocket%stage(i+1)%Diameter) then
@@ -156,12 +164,12 @@ subroutine sub_systems_calculation(Rocket)
                 ! Conical interstage structure
                 surface_area_constant = sqrt(Rocket%stage(i)%L_inter_stage_str**2+&
                     (Rocket%stage(i)%Diameter-Rocket%stage(i+1)%Diameter)**2/4.d0)
-                Rocket%stage(i)%A_inter_stage_str = pi/2.d0 * (Rocket%stage(i)%Diameter+Rocket%stage(i+1)%Diameter)
+                Rocket%stage(i)%A_inter_stage_str = pi/2.d0 * (Rocket%stage(i)%Diameter+Rocket%stage(i+1)%Diameter) &
+                * surface_area_constant
             end if
             Rocket%stage(i)%m_inter_stage_str =  13.3d0 * Rocket%stage(i)%A_inter_stage_str   
        end if
-            ! 1st stage aft skirt length (includes thrust structure length)
-            Rocket%stage(1)%L_aft_skirt = Rocket%stage(1)%Diameter
+            
             ! Intertank structure calculations
             Rocket%stage(i)%L_inter_tank_str = Rocket%stage(i)%Diameter / 4.d0
             Rocket%stage(i)%A_inter_tank_str = pi * Rocket%stage(i)%Diameter * Rocket%stage(i)%L_inter_tank_str
