@@ -135,7 +135,8 @@ subroutine rocket_geometry_calculation(Rocket)
     do i=1, Rocket%number_of_stages
         Rocket%stage(i)%Length = Longitud_vector(i)
         Rocket%stage(i)%Diameter = Diameter_vector(i)
-        Rocket%rlength = Rocket%rlength + Rocket%stage(i)%Length
+       ! Rocket%rlength = Rocket%rlength + Rocket%stage(i)%Length
     end do
+   ! print*, "geometry_calc_long: ", Rocket%rlength
         
 end subroutine rocket_geometry_calculation

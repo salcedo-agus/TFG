@@ -98,6 +98,8 @@ module rocket_types
 
         real(8) rlength
 
+        real(8) L_fairing
+
         real(8) rt_burn     ! Rocket burn time (ascent time)
         real(8) ISP_mean    ! Rocket mean ISP
         real(8) delta_v     ! [km/s]

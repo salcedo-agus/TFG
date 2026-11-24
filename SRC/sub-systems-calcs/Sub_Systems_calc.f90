@@ -95,8 +95,6 @@ subroutine sub_systems_calculation(Rocket)
        end do
     end do
 
-    call calculate_external_structure_lengths(Rocket)
-
     do i=1, Rocket%number_of_stages
        if (i == Rocket%number_of_stages) then 
         Rocket%stage(i)%m_avionics = 0.8d0 * Rocket%rm_avionics
@@ -111,6 +109,8 @@ subroutine sub_systems_calculation(Rocket)
        Rocket%stage(i)%Length=Rocket%stage(i)%tank(1)%h_cyl + Rocket%stage(i)%tank(2)%h_cyl + 4.d0*dome_height    
        Rocket%stage(i)%A_unpr_str = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%Length
        Rocket%stage(i)%m_unpr_str = 13.3d0 * Rocket%stage(i)%A_unpr_str
+       Rocket%rlength = Rocket%rlength + Rocket%stage(i)%Length
+       print*, "Etapa", i, "Longitud: ", Rocket%stage(i)%Length
        !=============================================
 
        !======== tank shell mass ====================
@@ -143,8 +143,8 @@ subroutine sub_systems_calculation(Rocket)
         
         Rocket%stage(i)%A_aft_skirt = pi * Rocket%stage(i)%Diameter * Rocket%stage(i)%L_aft_skirt
         Rocket%stage(i)%m_aft_skirt = 13.3d0 * Rocket%stage(i)%A_aft_skirt
-        
-
+        Rocket%rlength = Rocket%rlength + Rocket%stage(i)%L_aft_skirt
+        print*, "Etapa", i, "Longitud aft_skirt: ", Rocket%stage(i)%L_aft_skirt
        !======== inter stage structure ==============
        if (i == Rocket%number_of_stages) then
             ! The upper stage does not need inter stage structure
@@ -155,6 +155,8 @@ subroutine sub_systems_calculation(Rocket)
             Rocket%stage(i)%L_forward_skirt = Rocket%stage(i)%Diameter / 3.d0
             Rocket%stage(i)%A_forward_skirt = pi * Rocket%stage(i)%Diameter * Rocket%stage(i)%L_forward_skirt
             Rocket%stage(i)%m_forward_skirt = 13.3d0 * Rocket%stage(i)%A_forward_skirt
+            Rocket%rlength = Rocket%rlength + Rocket%stage(i)%L_forward_skirt
+            print*, "Etapa", i, "Longitud fwd_skirt: ", Rocket%stage(i)%L_forward_skirt
        else 
             Rocket%stage(i)%L_inter_stage_str = Rocket%stage(i)%Diameter
             if (Rocket%stage(i)%Diameter == Rocket%stage(i+1)%Diameter) then
@@ -167,15 +169,26 @@ subroutine sub_systems_calculation(Rocket)
                 Rocket%stage(i)%A_inter_stage_str = pi/2.d0 * (Rocket%stage(i)%Diameter+Rocket%stage(i+1)%Diameter) &
                 * surface_area_constant
             end if
-            Rocket%stage(i)%m_inter_stage_str =  13.3d0 * Rocket%stage(i)%A_inter_stage_str   
+            Rocket%stage(i)%m_inter_stage_str =  13.3d0 * Rocket%stage(i)%A_inter_stage_str  
+            Rocket%rlength = Rocket%rlength + Rocket%stage(i)%L_inter_stage_str
+            print*, "Etapa", i, "Longitud inter_stage_str: ", Rocket%stage(i)%L_inter_stage_str
        end if
             
             ! Intertank structure calculations
             Rocket%stage(i)%L_inter_tank_str = Rocket%stage(i)%Diameter / 4.d0
             Rocket%stage(i)%A_inter_tank_str = pi * Rocket%stage(i)%Diameter * Rocket%stage(i)%L_inter_tank_str
             Rocket%stage(i)%m_inter_tank_str = 13.3d0 * Rocket%stage(i)%A_inter_tank_str
+            Rocket%rlength = Rocket%rlength + Rocket%stage(i)%L_inter_tank_str
+            print*, "Etapa", i, "Longitud inter_tank_str: ", Rocket%stage(i)%L_inter_tank_str
+
        !============================================= 
+      
+
     end do
+
+    ! Fairing Length
+    Rocket%L_fairing = 2.d0 * Rocket%stage(number_of_stages)%Diameter
+    Rocket%rlength = Rocket%rlength + Rocket%L_fairing
 
 end subroutine sub_systems_calculation
 

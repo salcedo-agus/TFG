@@ -18,7 +18,7 @@ program TFG
     call sub_systems_calculation(Rocket) 
 
     !#### CONTROL ###############################
-    call first_stack_center_mass_calculation(Rocket)
+    !call first_stack_center_mass_calculation(Rocket)
     
     do i=1, Rocket%number_of_stages
         print*, "==========================================="
@@ -59,5 +59,6 @@ program TFG
         write(12,*) "Oxidizer tank surface:        ", Rocket%stage(i)%tank(2)%Surface
         write(12,*) "Oxidizer tank mass:           ", Rocket%stage(i)%tank(2)%m_shell
         write(12,*) "Oxidizer tank insulation mass:", Rocket%stage(i)%tank(2)%m_insulation
+        write(12,*) "Rocket length: ", Rocket%rlength
     end do 
 end program
