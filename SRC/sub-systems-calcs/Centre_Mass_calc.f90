@@ -8,7 +8,7 @@ subroutine first_stack_center_mass_calculation(Rocket)
     type(Element_t), dimension(Rocket%number_of_stages,2) :: Tank             ! Oxidizer and fuel tanks include insulation
                                                             ! 1 = fuel tank | 2 = Oxidizer tank 
     type(Element_t), dimension(Rocket%number_of_stages)   :: Avionics
-    type(Element_t), dimension(Rocket%number_of_stages)   :: Inter_stage_str
+    type(Element_t), dimension(Rocket%number_of_stages-1)   :: Inter_stage_str
     type(Element_t), dimension(Rocket%number_of_stages)   :: Unpr_str
     type(Element_t), dimension(Rocket%number_of_stages)   :: Wiring
     type(Element_t), dimension(Rocket%number_of_stages)   :: Fuel 
@@ -64,12 +64,12 @@ subroutine first_stack_center_mass_calculation(Rocket)
             Tank(i,tank_index)%LP_position = X 
             if (Rocket%stage(i)%tank(tank_index)%Geometry == 1) then       ! Cylindrical Tank
                 dome_height = Rocket%stage(i)%Diameter /(2.d0 * Rocket%stage(i)%tank(tank_index)%dome_AR)
-                tank_height = 2*dome_height + Rocket%stage(i)%tank(tank_index)%h_cyl
+                tank_height = 2.d0*dome_height + Rocket%stage(i)%tank(tank_index)%h_cyl
             else if (Rocket%stage(i)%tank(tank_index)%Geometry == 2) then  ! Spherical Tank
                 dome_height = Rocket%stage(i)%Diameter /(2.d0 * Rocket%stage(i)%tank(tank_index)%dome_AR)
-                tank_height = 2*dome_height
+                tank_height = 2.d0*dome_height
             else if (Rocket%stage(i)%tank(tank_index)%Geometry == 3) then  ! Toroidal Tank 
-                tank_height = 2*Rocket%stage(i)%tank(tank_index)%Circular_section_radius
+                tank_height = 2.d0*Rocket%stage(i)%tank(tank_index)%Circular_section_radius
             end if
             X = X + tank_height ! Move to the top of the tank
         end do

@@ -106,7 +106,13 @@ subroutine sub_systems_calculation(Rocket)
        
        !=========== unpr. structure mass ============
        dome_height = Rocket%stage(i)%Diameter /(2.d0 * Rocket%stage(i)%tank(1)%dome_AR)
-       Rocket%stage(i)%Length=Rocket%stage(i)%tank(1)%h_cyl + Rocket%stage(i)%tank(2)%h_cyl + 4.d0*dome_height    
+       Rocket%stage(i)%Length = Rocket%stage(i)%tank(1)%h_cyl + Rocket%stage(i)%tank(2)%h_cyl
+       do tank_index = 1, 2
+          if (Rocket%stage(i)%tank(tank_index)%Geometry == 1 .or. &
+              Rocket%stage(i)%tank(tank_index)%Geometry == 2) then
+              Rocket%stage(i)%Length = Rocket%stage(i)%Length + 2.d0*dome_height
+          end if
+       end do
        Rocket%stage(i)%A_unpr_str = pi*Rocket%stage(i)%Diameter*Rocket%stage(i)%Length
        Rocket%stage(i)%m_unpr_str = 13.3d0 * Rocket%stage(i)%A_unpr_str
        Rocket%rlength = Rocket%rlength + Rocket%stage(i)%Length
@@ -136,7 +142,11 @@ subroutine sub_systems_calculation(Rocket)
        ! Aft skirt calculations
         if (i==1) then
             ! 1st stage aft skirt length (includes thrust structure length)
-            Rocket%stage(i)%L_aft_skirt = Rocket%stage(i)%Diameter - dome_height
+            Rocket%stage(i)%L_aft_skirt = Rocket%stage(i)%Diameter
+            if (Rocket%stage(i)%Tank(1)%Geometry == 1 .or. &
+              Rocket%stage(i)%tank(1)%Geometry == 2) then
+              Rocket%stage(i)%L_aft_skirt = Rocket%stage(i)%L_aft_skirt - dome_height
+            end if  
         else 
             Rocket%stage(i)%L_aft_skirt = Rocket%stage(i)%Diameter / 3.d0
         end if
