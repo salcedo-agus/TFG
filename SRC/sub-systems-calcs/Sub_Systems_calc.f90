@@ -162,11 +162,11 @@ subroutine sub_systems_calculation(Rocket)
             Rocket%stage(i)%A_inter_stage_str = 0.d0
             Rocket%stage(i)%m_inter_stage_str = 0.d0 
             ! Forward skirt calculations
-            Rocket%stage(i)%L_forward_skirt = Rocket%stage(i)%Diameter / 3.d0
-            Rocket%stage(i)%A_forward_skirt = pi * Rocket%stage(i)%Diameter * Rocket%stage(i)%L_forward_skirt
-            Rocket%stage(i)%m_forward_skirt = 13.3d0 * Rocket%stage(i)%A_forward_skirt
-            Rocket%rlength = Rocket%rlength + Rocket%stage(i)%L_forward_skirt
-            print*, "Etapa", i, "Longitud fwd_skirt: ", Rocket%stage(i)%L_forward_skirt
+            Rocket%L_forward_skirt = Rocket%stage(i)%Diameter / 3.d0
+            Rocket%A_forward_skirt = pi * Rocket%stage(i)%Diameter * Rocket%L_forward_skirt
+            Rocket%m_forward_skirt = 13.3d0 * Rocket%A_forward_skirt
+            Rocket%rlength = Rocket%rlength + Rocket%L_forward_skirt
+            print*, "Etapa", i, "Longitud fwd_skirt: ", Rocket%L_forward_skirt
        else 
             Rocket%stage(i)%L_inter_stage_str = Rocket%stage(i)%Diameter
             if (Rocket%stage(i)%Diameter == Rocket%stage(i+1)%Diameter) then

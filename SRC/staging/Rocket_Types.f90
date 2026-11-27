@@ -45,9 +45,6 @@ module rocket_types
         real(8) m_thrust_structure  ! [kg] Thrust structure mass
         real(8) A_thrust_structure  ! [m^2] Thrust structure area
         real(8) L_thrust_structure  ! [m] Thrust structure length
-        real(8) m_forward_skirt     ! [kg] Forward skirt mass
-        real(8) A_forward_skirt     ! [m^2] Thrust structure area
-        real(8) L_forward_skirt     ! [m] Forward skirt length
         real(8) m_aft_skirt     ! [kg] aft skirt mass
         real(8) A_aft_skirt     ! [m^2] aft structure area
         real(8) L_aft_skirt     ! [m] aft skirt length
@@ -105,6 +102,10 @@ module rocket_types
         real(8) delta_v     ! [km/s]
         real(8) DV_loss     ! [km/s]
         real(8) nu_e_mean   ! Rocket mean exhaust velocity
+
+        real(8) m_forward_skirt     ! [kg] Forward skirt mass
+        real(8) A_forward_skirt     ! [m^2] Thrust structure area
+        real(8) L_forward_skirt     ! [m] Forward skirt length
 
     end type Rocket_t  
 

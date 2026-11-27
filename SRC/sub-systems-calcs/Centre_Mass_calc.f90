@@ -5,15 +5,18 @@ subroutine first_stack_center_mass_calculation(Rocket)
     integer i, tank_index
     type(Element_t), dimension(Rocket%number_of_stages)   :: Engine           ! the dimension indicates the stage for each element 
     type(Element_t), dimension(Rocket%number_of_stages)   :: Thrust_str
+    type(Element_t), dimension(Rocket%number_of_stages)   :: inter_tank_str
     type(Element_t), dimension(Rocket%number_of_stages,2) :: Tank             ! Oxidizer and fuel tanks include insulation
+    type(Element_t), dimension(Rocket%number_of_stages)   :: aft_skirt        
                                                             ! 1 = fuel tank | 2 = Oxidizer tank 
     type(Element_t), dimension(Rocket%number_of_stages)   :: Avionics
-    type(Element_t), dimension(Rocket%number_of_stages-1)   :: Inter_stage_str
+    type(Element_t), dimension(Rocket%number_of_stages)   :: Inter_stage_str
     type(Element_t), dimension(Rocket%number_of_stages)   :: Unpr_str
     type(Element_t), dimension(Rocket%number_of_stages)   :: Wiring
     type(Element_t), dimension(Rocket%number_of_stages)   :: Fuel 
     type(Element_t), dimension(Rocket%number_of_stages)   :: Oxidizer 
     
+    type(Element_t) forward_skirt     ! Only upper stage
     type(Element_t) Payload ! Rocket payload
     
     real(8) X                  ! [m] aux. variable for defining position
@@ -24,7 +27,7 @@ subroutine first_stack_center_mass_calculation(Rocket)
     ! This loop defines the elements as point or distributed masses
     do i=1, Rocket%number_of_stages
         Engine(i)%point_mass          = .True.
-        Thrust_str(i)%point_mass      = .True.
+        Thrust_str(i)%point_mass      = .False.
         Tank(i,1)%point_mass          = .False.
         Tank(i,2)%point_mass          = .False.
         Avionics(i)%point_mass        = .True.
@@ -33,7 +36,10 @@ subroutine first_stack_center_mass_calculation(Rocket)
         Wiring(i)%point_mass          = .False.
         Fuel(i)%point_mass            = .False.
         Oxidizer(i)%point_mass        = .False.
+        aft_skirt(i)%point_mass       = .False.  
+        inter_tank_str(i)%point_mass  = .False.
     end do
+    forward_skirt%point_mass = .False.
     Payload%point_mass = .False.
 
     ! This loop defines the mass of each element
@@ -48,17 +54,22 @@ subroutine first_stack_center_mass_calculation(Rocket)
         Wiring(i)%mass          = Rocket%stage(i)%m_wiring
         Fuel(i)%mass            = Rocket%stage(i)%tank(1)%m_liq
         Oxidizer(i)%mass        = Rocket%stage(i)%tank(2)%m_liq
+        aft_skirt(i)%mass       = Rocket%stage(i)%m_aft_skirt
+        inter_tank_str(i)%mass  = Rocket%stage(i)%m_inter_tank_str
     end do
+    forward_skirt%mass = Rocket%m_forward_skirt
     Payload%mass = Rocket%rm_L
 
     ! This loop defines the position of the lowest point of each sub_systems element
     X = 0.d0 ! Start at the base of the rocket (DATUM)
     do i=1, Rocket%number_of_stages
-        Engine(i)%LP_position     = X
-        Thrust_str(i)%LP_position = X
-        Wiring(i)%LP_position     = X
-        Unpr_str(i)%LP_Position   = X
+        Engine(i)%LP_position      = X
+        Thrust_str(i)%LP_position  = X
+        Wiring(i)%LP_position      = X
+        Unpr_str(i)%LP_Position    = X
+        aft_skirt(i)%LP_position   = X
 
+        X = X + Rocket%stage(i)%L_aft_skirt     ! aft_skirt_str must be considered
 
         do tank_index = 1, 2
             Tank(i,tank_index)%LP_position = X 
@@ -71,7 +82,13 @@ subroutine first_stack_center_mass_calculation(Rocket)
             else if (Rocket%stage(i)%tank(tank_index)%Geometry == 3) then  ! Toroidal Tank 
                 tank_height = 2.d0*Rocket%stage(i)%tank(tank_index)%Circular_section_radius
             end if
-            X = X + tank_height ! Move to the top of the tank
+            if (tank_index == 1) then
+                X = X + tank_height
+                inter_tank_str(i)%LP_position = X
+                X = X + Rocket%stage(i)%L_inter_tank_str ! Move to the bottom of the next tank
+            else 
+                X = X + tank_height
+            end if
         end do
         Fuel(i)%LP_position     = Tank(i,1)%LP_position 
         Oxidizer(i)%LP_position = Tank(i,2)%LP_position
@@ -81,6 +98,15 @@ subroutine first_stack_center_mass_calculation(Rocket)
 
         X = X + Rocket%stage(i)%L_inter_stage_str ! Move to start of next stage
     end do
+
+    forward_skirt%LP_position = X
+    LP_to_CM_distance = Rocket%L_forward_skirt / 2.d0
+    forward_skirt%CM = forward_skirt%LP_position + LP_to_CM_distance
+    ! Lowest point of the fairing is the last one to be defined
+    X = X + Rocket%L_forward_skirt
+    Payload%LP_position = X 
+    LP_to_CM_distance = Rocket%stage(Rocket%number_of_stages)%Diameter / 3.d0
+    Payload%CM = Payload%LP_position + LP_to_CM_distance
 
     ! This loop defines the Center Mass of each sub_systems element
     do i=1, Rocket%number_of_stages
@@ -102,24 +128,40 @@ subroutine first_stack_center_mass_calculation(Rocket)
         Fuel(i)%CM     = tank(i,1)%CM
         Oxidizer(i)%CM = tank(i,2)%CM
         !****************************
+        LP_to_CM_distance = Rocket%stage(i)%Length/2.d0
+        Wiring(i)%CM = Wiring(i)%LP_Position + LP_to_CM_distance
+        Unpr_str(i)%CM = Unpr_str(i)%LP_Position + LP_to_CM_distance  
 
-        Wiring(i)%CM = Wiring(i)%LP_Position + Rocket%stage(i)%Length/2.d0
-        Unpr_str(i)%CM = Unpr_str(i)%LP_Position + Rocket%stage(i)%Length/2.d0  
-
-        Avionics(i)%CM = Avionics(i)%LP_Position 
+        LP_to_CM_distance = Rocket%stage(i)%L_inter_tank_str / 2.d0
+        inter_tank_str(i)%CM = inter_tank_str(i)%LP_position + LP_to_CM_distance
+        if (.not. (i == Rocket%number_of_stages)) then
+            LP_to_CM_distance = Rocket%stage(i)%Diameter / 3.d0
+        else
+            LP_to_CM_distance = Rocket%stage(i)%Diameter * 2.d0 / 3.d0
+        end if
+        Avionics(i)%CM = Avionics(i)%LP_Position + LP_to_CM_distance
 
         Engine(i)%CM = Engine(i)%LP_Position
-        Thrust_str(i)%CM = Thrust_str(i)%LP_Position
+
+        if (i == 1) then
+            LP_to_CM_distance = Rocket%stage(i)%Diameter / 4.d0
+            Thrust_str(i)%CM = Thrust_str(i)%LP_Position + LP_to_CM_distance
+        else 
+            Thrust_str(i)%CM = Thrust_str(i)%LP_Position
+        end if
+
+        LP_to_CM_distance = Rocket%stage(i)%L_aft_skirt / 2.d0
+        aft_skirt(i)%CM = aft_skirt(i)%LP_position + LP_to_CM_distance
 
         if (.not. (i == Rocket%number_of_stages)) then
-            if (Rocket%stage(i)%Diameter == Rocket%stage(i+1)%Diameter) then
-                LP_to_CM_distance = Rocket%stage(i)%L_inter_stage_str/2.d0
-            else if () then
-                Frustum_den = (Rocket%stage(i+1)%Diameter + Rocket%stage(i)%Diameter)/2.d0  
-                Frustum_num =  Rocket%stage(i+1)%Diameter + Rocket%stage(i)%Diameter/2.d0
+            if (abs(Rocket%stage(i)%Diameter - Rocket%stage(i+1)%Diameter) / Rocket%stage(i)%Diameter < 0.05) then
+                LP_to_CM_distance = Rocket%stage(i)%L_inter_stage_str / 2.d0
+            else
+                Frustum_den = (Rocket%stage(i+1)%Diameter + Rocket%stage(i)%Diameter) / 2.d0  
+                Frustum_num =  Rocket%stage(i+1)%Diameter + Rocket%stage(i)%Diameter / 2.d0
                 LP_to_CM_distance = Rocket%stage(i)%L_inter_stage_str/3.d0 * Frustum_num/Frustum_den 
             end if 
-            Inter_stage_str(i)%CM = Inter_stage_str(i)%LP_Position 
+            Inter_stage_str(i)%CM = Inter_stage_str(i)%LP_Position + LP_to_CM_distance
         else 
             Inter_stage_str(i)%CM = Inter_stage_str(i)%LP_Position ! As failsafe, the CM location of stages without 
             !                                                        interstage str is set at the top of the stage
